@@ -1,0 +1,44 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">Register New Society Member</h3>
+            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+          </div>
+          <div class="dialog-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" class="form-control" [(ngModel)]="name" placeholder="e.g. Arvind Mehta" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Assigned Flat/Unit *</label>
+                <input type="text" class="form-control" [(ngModel)]="unit" placeholder="e.g. B-304" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Role</label>
+                <select class="form-control" [(ngModel)]="role">
+                  <option value="Owner">Flat Owner</option>
+                  <option value="Tenant">Registered Tenant</option>
+                  <option value="Committee Member">Committee Member</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number *</label>
+                <input type="tel" class="form-control" [(ngModel)]="phone" placeholder="+91 98XXX XXXXX" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <input type="email" class="form-control" [(ngModel)]="email" placeholder="member@example.com" />
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn-primary" (click)="submitMember()">Add Member</button>
+          </div>
+        </div>
+      </div>
+    }

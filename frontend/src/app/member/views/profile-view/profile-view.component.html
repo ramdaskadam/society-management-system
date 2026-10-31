@@ -1,0 +1,38 @@
+<div class="page-header">
+      <div class="page-title-group">
+        <h1>Resident Profile & Household</h1>
+        <p>Personal profile, emergency contacts, registered vehicles, and flat ownership</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px;">
+      <div class="dash-card" style="text-align: center; align-items: center;">
+        <img [src]="user.avatar" [alt]="user.name" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #10b981; margin-bottom: 14px;" />
+        <h2 style="font-size: 1.2rem; font-weight: 700;">{{ user.name }}</h2>
+        <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">Owner • Flat {{ user.unit }}</div>
+        <div style="margin-top: 14px; font-size: 0.8rem; color: #10b981; background: #ecfdf5; padding: 4px 12px; border-radius: 9999px; font-weight: 600;">
+          Verified Society Member
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h3 class="dash-card-title" style="margin-bottom: 18px;">Household Information</h3>
+        <div class="unit-spec-list" style="grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.875rem;">
+          <div>Primary Email: <strong>{{ user.email }}</strong></div>
+          <div>Mobile Phone: <strong>{{ user.phone }}</strong></div>
+          <div>Unit / Flat: <strong>{{ user.unit }} (Wing {{ user.wing }}, Floor {{ user.floor }})</strong></div>
+          <div>Apartment Carpet: <strong>{{ user.area }} ({{ user.type }})</strong></div>
+          <div>Total Family Occupants: <strong>{{ user.occupants }} persons</strong></div>
+          <div>Intercom Code: <strong>#101</strong></div>
+        </div>
+
+        <h3 class="dash-card-title" style="margin-top: 24px; margin-bottom: 12px;">Registered Parking & Vehicles</h3>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          @for (v of user.vehicles || []; track v) {
+            <div style="background: #f1f5f9; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.8125rem;">
+              🚗 {{ v }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,42 @@
+<div class="page-header">
+      <div class="page-title-group">
+        <h1>Document Repository</h1>
+        <p>Society registration papers, audited balance sheets, safety NOCs, and bylaws</p>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="table-responsive">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Document Title</th>
+              <th>Category</th>
+              <th>File Size</th>
+              <th>Upload Date</th>
+              <th>Access Level</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of state.documents(); track d.id) {
+              <tr>
+                <td style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  {{ d.title }}
+                </td>
+                <td><span class="badge badge-info">{{ d.category }}</span></td>
+                <td>{{ d.size }}</td>
+                <td>{{ d.date }}</td>
+                <td>{{ d.access }}</td>
+                <td>
+                  <button class="table-btn-view" (click)="download(d.title)">
+                    Download
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>

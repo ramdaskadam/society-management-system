@@ -1,0 +1,43 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">Reserve Society Amenity</h3>
+            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+          </div>
+          <div class="dialog-body">
+            <div class="form-group">
+              <label class="form-label">Select Amenity *</label>
+              <select class="form-control" [(ngModel)]="amenity">
+                <option value="Community Hall">Community Hall (150 capacity - ₹2,500/slot)</option>
+                <option value="Club House">Club House (50 capacity - ₹1,000/slot)</option>
+                <option value="Badminton Court">Badminton Court (4 players - Free)</option>
+                <option value="Gymnasium & Yoga Studio">Gymnasium & Yoga Studio (Free)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Date *</label>
+                <input type="date" class="form-control" [(ngModel)]="date" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Time Slot *</label>
+                <select class="form-control" [(ngModel)]="slot">
+                  <option value="09:00 AM - 01:00 PM">Morning (09:00 AM - 01:00 PM)</option>
+                  <option value="02:00 PM - 06:00 PM">Afternoon (02:00 PM - 06:00 PM)</option>
+                  <option value="06:00 PM - 10:00 PM">Evening (06:00 PM - 10:00 PM)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Purpose / Event Name *</label>
+              <input type="text" class="form-control" [(ngModel)]="purpose" placeholder="e.g. Birthday Celebration / Family Dinner" />
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn-primary" (click)="submitBooking()">Submit Reservation</button>
+          </div>
+        </div>
+      </div>
+    }

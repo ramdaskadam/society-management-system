@@ -1,0 +1,49 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">Add Unit to Society Registry</h3>
+            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+          </div>
+          <div class="dialog-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Unit Number *</label>
+                <input type="text" class="form-control" [(ngModel)]="unitNo" placeholder="e.g. D-204" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Wing</label>
+                <select class="form-control" [(ngModel)]="wing">
+                  <option value="A">Wing A</option>
+                  <option value="B">Wing B</option>
+                  <option value="C">Wing C</option>
+                  <option value="D">Wing D</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Apartment Type</label>
+                <select class="form-control" [(ngModel)]="type">
+                  <option value="2 BHK">2 BHK</option>
+                  <option value="3 BHK">3 BHK</option>
+                  <option value="4 BHK">4 BHK Penthouse</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Area (sq.ft) *</label>
+                <input type="number" class="form-control" [(ngModel)]="area" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner Name *</label>
+              <input type="text" class="form-control" [(ngModel)]="owner" placeholder="Owner full name" />
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn-primary" (click)="submitUnit()">Save Unit</button>
+          </div>
+        </div>
+      </div>
+    }

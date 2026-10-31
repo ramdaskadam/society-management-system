@@ -1,0 +1,29 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">In-App Notifications</h3>
+            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+          </div>
+          <div class="dialog-body">
+            @for (n of notifications; track n.id) {
+              <div style="padding: 12px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 10px; align-items: flex-start;"
+                [style.background]="n.read ? 'transparent' : '#f0fdf4'"
+                style="border-radius: 8px; margin-bottom: 6px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;"
+                  [style.background]="n.read ? '#cbd5e1' : '#10b981'"></div>
+                <div>
+                  <div style="font-size: 0.84rem; font-weight: 700; color: #0f172a;">{{ n.title }}</div>
+                  <div style="font-size: 0.785rem; color: #475569; margin-top: 2px;">{{ n.text }}</div>
+                  <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px;">{{ n.time }}</div>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="markAllRead.emit()">Mark All as Read</button>
+            <button class="btn-primary" (click)="close.emit()">Close</button>
+          </div>
+        </div>
+      </div>
+    }

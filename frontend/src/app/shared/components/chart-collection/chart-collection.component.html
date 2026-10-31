@@ -1,0 +1,50 @@
+<div class="dash-card">
+  <div class="dash-card-header">
+    <div>
+      <h3 class="dash-card-title">Maintenance Collection Overview</h3>
+      <p class="dash-card-subtitle">Monthly collected vs pending balances</p>
+    </div>
+    <select class="card-select-filter">
+      <option>This Month</option>
+      <option>Last 6 Months</option>
+      <option>Financial Year 2024</option>
+    </select>
+  </div>
+
+  <div class="chart-legend">
+    <div class="legend-item">
+      <span class="legend-dot green"></span>
+      <span>Collected (₹)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot red"></span>
+      <span>Pending (₹)</span>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <svg viewBox="0 0 600 220" style="width: 100%; height: 100%; overflow: visible;">
+      @for (y of yGuidelines; track y.label) {
+        <line x1="40" [attr.y1]="y.yPos" x2="580" [attr.y2]="y.yPos" stroke="#f1f5f9" stroke-dasharray="3,3" stroke-width="1" />
+        <text x="32" [attr.y]="y.yPos + 4" fill="#94a3b8" font-size="10" text-anchor="end" font-family="var(--font-main)">{{ y.label }}</text>
+      }
+
+      @for (bar of bars; track bar.month) {
+        <rect [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height" rx="3" fill="#ef4444" opacity="0.85">
+          <title>{{ bar.month }} Pending: ₹{{ bar.pending.toLocaleString('en-IN') }}</title>
+        </rect>
+        <text [attr.x]="bar.x + bar.width / 2" y="210" fill="#64748b" font-size="11" font-weight="600" text-anchor="middle" font-family="var(--font-main)">
+          {{ bar.month }}
+        </text>
+      }
+
+      <path [attr.d]="linePath" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+      @for (p of points; track p.month) {
+        <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4.5" fill="#10b981" stroke="#ffffff" stroke-width="2">
+          <title>{{ p.month }} Collected: ₹{{ p.val.toLocaleString('en-IN') }}</title>
+        </circle>
+      }
+    </svg>
+  </div>
+</div>

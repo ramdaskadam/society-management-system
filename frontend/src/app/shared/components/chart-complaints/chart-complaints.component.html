@@ -1,0 +1,72 @@
+<div class="dash-card">
+  <div class="dash-card-header">
+    <div>
+      <h3 class="dash-card-title">Complaints Summary</h3>
+      <p class="dash-card-subtitle">Resolution SLA & status distribution</p>
+    </div>
+  </div>
+
+  <div class="donut-chart-wrapper">
+    <div class="donut-svg-box">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="68" fill="transparent" stroke="#f1f5f9" stroke-width="24" />
+        
+        @for (seg of segments; track seg.label) {
+          <circle
+            cx="80"
+            cy="80"
+            r="68"
+            fill="transparent"
+            [attr.stroke]="seg.color"
+            stroke-width="24"
+            [attr.stroke-dasharray]="seg.strokeDash"
+            [attr.stroke-dashoffset]="seg.offset"
+            transform="rotate(-90 80 80)"
+          >
+            <title>{{ seg.label }}: {{ seg.count }} ({{ seg.percent }}%)</title>
+          </circle>
+        }
+      </svg>
+
+      <div class="donut-center-text">
+        <span class="donut-center-label">Total</span>
+        <span class="donut-center-value">{{ stats.total }}</span>
+      </div>
+    </div>
+
+    <div class="donut-legend-list">
+      <div class="donut-legend-row">
+        <span class="donut-legend-label">
+          <span class="donut-legend-circle" style="background: #ef4444;"></span>
+          Open
+        </span>
+        <span class="donut-legend-count">{{ stats.open }} ({{ getPercent(stats.open) }}%)</span>
+      </div>
+      <div class="donut-legend-row">
+        <span class="donut-legend-label">
+          <span class="donut-legend-circle" style="background: #f59e0b;"></span>
+          In Progress
+        </span>
+        <span class="donut-legend-count">{{ stats.inProgress }} ({{ getPercent(stats.inProgress) }}%)</span>
+      </div>
+      <div class="donut-legend-row">
+        <span class="donut-legend-label">
+          <span class="donut-legend-circle" style="background: #10b981;"></span>
+          Resolved
+        </span>
+        <span class="donut-legend-count">{{ stats.resolved }} ({{ getPercent(stats.resolved) }}%)</span>
+      </div>
+      <div class="donut-legend-row">
+        <span class="donut-legend-label">
+          <span class="donut-legend-circle" style="background: #3b82f6;"></span>
+          Closed
+        </span>
+        <span class="donut-legend-count">{{ stats.closed }} ({{ getPercent(stats.closed) }}%)</span>
+      </div>
+    </div>
+  </div>
+
+  <a href="javascript:void(0)" class="card-footer-link" (click)="viewAll.emit()">
+    View all complaints <span>→</span>
+  </a>
+</div>

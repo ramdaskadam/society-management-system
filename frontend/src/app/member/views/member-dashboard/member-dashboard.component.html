@@ -1,0 +1,233 @@
+<div class="page-header">
+      <div class="page-title-group">
+        <h1>Welcome, {{ user.name }} 👋</h1>
+        <p>Flat {{ user.unit }} • Wing {{ user.wing }} • {{ society.name }} CHS</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn-primary" style="background: #059669;" (click)="openRaiseComplaint()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Raise Complaint
+        </button>
+      </div>
+    </div>
+
+    <!-- TOP 4 FEATURE CARDS -->
+    <div class="member-top-row">
+      <!-- Maintenance Dues Card -->
+      <div class="member-feature-card">
+        <div class="member-card-content">
+          <div class="member-card-title">Maintenance Dues</div>
+          <div class="member-dues-amount" [style.color]="duesAmount > 0 ? '#ef4444' : '#10b981'">
+            ₹ {{ duesAmount.toLocaleString('en-IN') }}
+          </div>
+          <div class="member-dues-date">
+            @if (duesAmount > 0) {
+              Due Date: <span>31 May 2024</span>
+            } @else {
+              <span style="color: #10b981;">All Dues Cleared ✓</span>
+            }
+          </div>
+          @if (duesAmount > 0) {
+            <button class="btn-pay-now" (click)="openPayNow()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              Pay Now
+            </button>
+          } @else {
+            <button class="btn-pay-now" style="background: #3b82f6;" (click)="viewLastReceipt()">
+              View Receipt
+            </button>
+          }
+        </div>
+        <img class="member-card-img" src="/assets/wallet.jpg" alt="Maintenance Wallet" />
+      </div>
+
+      <!-- Unit Details Card -->
+      <div class="member-feature-card">
+        <div class="member-card-content">
+          <div class="member-card-title">Unit Details</div>
+          <div style="font-size: 1.45rem; font-weight: 800; color: var(--text-main);">{{ user.unit }}</div>
+          <div class="unit-spec-list">
+            <div class="unit-spec-item">Type: <strong>{{ user.type }}</strong></div>
+            <div class="unit-spec-item">Area: <strong>{{ user.area }}</strong></div>
+            <div class="unit-spec-item">Floor: <strong>1st Floor</strong></div>
+            <div class="unit-spec-item">Status: <strong>Owner</strong></div>
+          </div>
+        </div>
+        <img class="member-card-img" src="/assets/building.jpg" alt="Unit 3D Model" />
+      </div>
+
+      <!-- Recent Notice Card -->
+      <div class="member-feature-card">
+        <div class="member-card-content">
+          <div class="member-card-title">Recent Notice</div>
+          <div class="notice-preview-title">{{ recentNotice?.title || 'Annual General Meeting' }}</div>
+          <div class="notice-preview-desc">
+            {{ recentNotice?.meetingDate }} • {{ recentNotice?.location }}
+          </div>
+          <a href="javascript:void(0)" class="card-footer-link" style="margin-top: 10px;" (click)="navigateTo('notices')">
+            View all notices <span>→</span>
+          </a>
+        </div>
+        <img class="member-card-img" src="/assets/megaphone.jpg" alt="Notice Megaphone" />
+      </div>
+
+      <!-- My Complaints Card -->
+      <div class="member-feature-card">
+        <div class="member-card-content">
+          <div class="member-card-title">My Complaints</div>
+          <div class="complaint-counter-row">
+            <div class="complaint-stat-item">
+              <span class="complaint-stat-num open">{{ openComplaintsCount }}</span>
+              <span class="complaint-stat-lbl">Open</span>
+            </div>
+            <div class="complaint-stat-item">
+              <span class="complaint-stat-num resolved">{{ resolvedComplaintsCount }}</span>
+              <span class="complaint-stat-lbl">Resolved</span>
+            </div>
+          </div>
+          <a href="javascript:void(0)" class="card-footer-link" (click)="navigateTo('complaints')">
+            View all complaints <span>→</span>
+          </a>
+        </div>
+        <img class="member-card-img" src="/assets/clipboard.jpg" alt="Complaints Clipboard" />
+      </div>
+    </div>
+
+    <!-- MEMBER BOTTOM 3-COLUMN GRID -->
+    <div class="member-bottom-grid">
+      <!-- Recent Invoices Table -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div>
+            <h3 class="dash-card-title">Recent Invoices</h3>
+            <p class="dash-card-subtitle">Monthly bills issued to A-101</p>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Month</th>
+                <th>Due Date</th>
+                <th>Amount (₹)</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inv of myInvoices; track inv.id) {
+                <tr>
+                  <td style="font-weight: 600;">{{ inv.id }}</td>
+                  <td>{{ inv.month }}</td>
+                  <td>{{ inv.dueDate }}</td>
+                  <td style="font-weight: 700;">{{ inv.amount.toLocaleString('en-IN') }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="inv.status === 'Paid' ? 'badge-paid' : 'badge-unpaid'">
+                      {{ inv.status }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (inv.status === 'Unpaid') {
+                      <button class="table-btn-pay" (click)="openPayNowFor(inv)">Pay Now</button>
+                    } @else {
+                      <a href="javascript:void(0)" class="table-btn-view" (click)="viewReceiptFor(inv)">View</a>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <a href="javascript:void(0)" class="card-footer-link" (click)="navigateTo('payments')">
+          View all invoices <span>→</span>
+        </a>
+      </div>
+
+      <!-- Payment History Table -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div>
+            <h3 class="dash-card-title">Payment History</h3>
+            <p class="dash-card-subtitle">Transactions & confirmed receipts</p>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Invoice #</th>
+                <th>Mode</th>
+                <th>Amount (₹)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of myPayments; track p.txnId) {
+                <tr>
+                  <td>{{ p.date }}</td>
+                  <td style="font-weight: 600;">{{ p.invoiceNo }}</td>
+                  <td>{{ p.mode }}</td>
+                  <td style="font-weight: 700;">{{ p.amount.toLocaleString('en-IN') }}</td>
+                  <td>
+                    <span style="color: #10b981; font-weight: 600;">✓ {{ p.status }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <a href="javascript:void(0)" class="card-footer-link" (click)="navigateTo('payments')">
+          View all payments <span>→</span>
+        </a>
+      </div>
+
+      <!-- Amenity Bookings Card -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div>
+            <h3 class="dash-card-title">Amenity Bookings</h3>
+            <p class="dash-card-subtitle">Your reserved society amenities</p>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th>Amenity</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of myBookings; track b.id) {
+                <tr>
+                  <td style="font-weight: 600;">{{ b.amenity }}</td>
+                  <td>{{ b.date }}</td>
+                  <td style="font-size: 0.75rem;">{{ b.time }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="b.status === 'Confirmed' ? 'badge-confirmed' : 'badge-completed'">
+                      {{ b.status }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 14px;">
+          <a href="javascript:void(0)" class="card-footer-link" (click)="openBookAmenity()">
+            Book Amenity <span>→</span>
+          </a>
+          <img src="/assets/calendar.jpg" alt="Calendar Booking" style="width: 50px; height: 50px; object-fit: contain;" />
+        </div>
+      </div>
+    </div>

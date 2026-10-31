@@ -1,0 +1,49 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">Submit Service Request / Complaint</h3>
+            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+          </div>
+          <div class="dialog-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Category *</label>
+                <select class="form-control" [(ngModel)]="category">
+                  <option value="Plumbing">Plumbing</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="Elevator">Elevator / Lift</option>
+                  <option value="Security">Security & Gate</option>
+                  <option value="Housekeeping">Housekeeping & Cleaning</option>
+                  <option value="Parking">Parking</option>
+                  <option value="Other">Other Issues</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Priority</label>
+                <select class="form-control" [(ngModel)]="priority">
+                  <option value="Medium">Medium Priority</option>
+                  <option value="High">High (Urgent)</option>
+                  <option value="Low">Low Priority</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subject / Issue Summary *</label>
+              <input type="text" class="form-control" [(ngModel)]="subject" placeholder="Brief summary of the issue" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Detailed Description *</label>
+              <textarea class="form-control" rows="4" [(ngModel)]="description" placeholder="Describe location, timing, severity..."></textarea>
+            </div>
+            <div style="background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.775rem; color: #64748b;">
+              Unit <strong>A-101</strong> will be automatically linked. The estate management team responds within 24 hours.
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn-primary" (click)="submitComplaint()">Submit Ticket</button>
+          </div>
+        </div>
+      </div>
+    }

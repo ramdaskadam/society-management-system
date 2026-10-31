@@ -1,0 +1,147 @@
+<!-- Top Role Switcher Floating Banner -->
+<app-role-banner
+  [currentRole]="state.currentUserRole()"
+  [societyName]="state.society().name"
+  (roleChange)="onRoleChange($event)"
+  (resetDemo)="onResetDemo()"
+/>
+
+<div class="app-container">
+  <!-- Sidebar Navigation Component -->
+  <app-sidebar-nav
+    [role]="state.currentUserRole()"
+    [currentView]="state.currentView()"
+    [openComplaintsCount]="openComplaintsCount"
+    [user]="state.activeUser()"
+    [societyName]="state.society().name"
+    (navSelect)="onNavSelect($event)"
+  />
+
+  <!-- Main Content Area -->
+  <main class="main-wrapper">
+    <!-- Topbar Component -->
+    <app-topbar
+      [user]="state.activeUser()"
+      [role]="state.currentUserRole()"
+      [unreadNotificationsCount]="state.unreadNotificationsCount()"
+      (openNotifications)="showNotificationsModal = true"
+      (search)="onGlobalSearch($event)"
+    />
+
+    <!-- Active View Component -->
+    <section class="content-area">
+      @switch (state.currentView()) {
+        @case ('dashboard') {
+          @if (state.currentUserRole() === 'admin') {
+            <app-admin-dashboard />
+          } @else {
+            <app-member-dashboard />
+          }
+        }
+        @case ('members') {
+          <app-members-view />
+        }
+        @case ('units') {
+          <app-units-view />
+        }
+        @case ('my-unit') {
+          <app-units-view />
+        }
+        @case ('maintenance') {
+          <app-invoices-view />
+        }
+        @case ('payments') {
+          <app-invoices-view />
+        }
+        @case ('complaints') {
+          <app-complaints-view />
+        }
+        @case ('notices') {
+          <app-notices-view />
+        }
+        @case ('amenities') {
+          <app-amenities-view />
+        }
+        @case ('documents') {
+          <app-documents-view />
+        }
+        @case ('reports') {
+          <app-reports-view />
+        }
+        @case ('profile') {
+          <app-profile-view />
+        }
+        @case ('settings') {
+          <app-settings-view />
+        }
+        @case ('help') {
+          <app-settings-view />
+        }
+      }
+    </section>
+  </main>
+</div>
+
+<!-- ── Shared Dialogs ──────────────────────────────────────────── -->
+<app-receipt-dialog
+  [isOpen]="showReceiptModal"
+  [invoice]="activeReceiptInvoice"
+  [society]="state.society()"
+  (close)="showReceiptModal = false"
+/>
+
+<app-notifications-dialog
+  [isOpen]="showNotificationsModal"
+  [notifications]="state.notifications()"
+  (close)="showNotificationsModal = false"
+  (markAllRead)="state.markNotificationsAsRead()"
+/>
+
+<!-- ── Admin Dialogs ──────────────────────────────────────────── -->
+<app-create-notice-dialog
+  [isOpen]="showNoticeModal"
+  (close)="showNoticeModal = false"
+  (submit)="onPublishNotice($event)"
+/>
+
+<app-add-member-dialog
+  [isOpen]="showAddMemberModal"
+  (close)="showAddMemberModal = false"
+  (submit)="onAddMember($event)"
+/>
+
+<app-add-unit-dialog
+  [isOpen]="showAddUnitModal"
+  (close)="showAddUnitModal = false"
+  (submit)="onAddUnit($event)"
+/>
+
+<app-bulk-invoice-dialog
+  [isOpen]="showBulkInvoiceModal"
+  (close)="showBulkInvoiceModal = false"
+  (confirm)="onBulkInvoiceConfirm()"
+/>
+
+<!-- ── Member Dialogs ──────────────────────────────────────────── -->
+<app-pay-now-dialog
+  [isOpen]="showPayModal"
+  [invoice]="activePayInvoice"
+  (close)="showPayModal = false"
+  (paid)="onPaymentConfirmed($event)"
+/>
+
+<app-raise-complaint-dialog
+  [isOpen]="showComplaintModal"
+  (close)="showComplaintModal = false"
+  (submit)="onRaiseComplaint($event)"
+/>
+
+<app-book-amenity-dialog
+  [isOpen]="showBookingModal"
+  [selectedAmenity]="selectedAmenityForBooking"
+  (close)="showBookingModal = false"
+  (submit)="onBookAmenity($event)"
+/>
+
+<!-- Toast Notifications Component -->
+<app-toast-container [toasts]="state.toasts()" />

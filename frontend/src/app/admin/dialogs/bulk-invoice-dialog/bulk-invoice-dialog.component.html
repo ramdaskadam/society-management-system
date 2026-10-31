@@ -1,0 +1,36 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">Generate Monthly Maintenance Invoices</h3>
+            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+          </div>
+          <div class="dialog-body">
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">
+              Issue automated maintenance billing for all 128 registered society units.
+            </p>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Billing Cycle</label>
+                <input type="text" class="form-control" value="June 2024" readonly />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Due Date</label>
+                <input type="date" class="form-control" value="2024-06-30" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Standard Base Rate (per sq.ft)</label>
+              <input type="text" class="form-control" value="₹ 3.50 / sq.ft" readonly />
+            </div>
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 0.8rem; color: #1e40af;">
+              Estimated total billing: <strong>₹ 8,92,400</strong> across 128 units. Invoices will be instantly published to all member portals with email alerts.
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn-primary" (click)="confirm.emit()">Issue 128 Invoices</button>
+          </div>
+        </div>
+      </div>
+    }

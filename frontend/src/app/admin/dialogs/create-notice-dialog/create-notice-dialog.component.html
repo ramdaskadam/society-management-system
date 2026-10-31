@@ -1,0 +1,48 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">Publish Society Notice</h3>
+            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+          </div>
+          <div class="dialog-body">
+            <div class="form-group">
+              <label class="form-label">Notice Title *</label>
+              <input type="text" class="form-control" [(ngModel)]="title" placeholder="e.g. Annual Lift AMC Inspection & Power Shutdown" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-control" [(ngModel)]="category">
+                  <option value="General Announcement">General Announcement</option>
+                  <option value="Maintenance">Maintenance & Repairs</option>
+                  <option value="Official Meeting">Official Meeting / AGM</option>
+                  <option value="Amenities">Amenities & Facilities</option>
+                  <option value="Security">Security & Rules</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Event Date / Window</label>
+                <input type="text" class="form-control" [(ngModel)]="meetingDate" placeholder="e.g. 05 June 2024 at 10:00 AM" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location / Target Wings</label>
+              <input type="text" class="form-control" [(ngModel)]="location" placeholder="e.g. Clubhouse or All Wings" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notice Summary & Details *</label>
+              <textarea class="form-control" rows="4" [(ngModel)]="summary" placeholder="Detailed message for members..."></textarea>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="notice-pin-ng" [(ngModel)]="pinned" />
+              <label for="notice-pin-ng" style="font-size: 0.8125rem; font-weight: 500; cursor: pointer;">Pin this notice to top of Member Dashboard</label>
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="close.emit()">Cancel</button>
+            <button class="btn-primary" (click)="submitNotice()">Publish Notice</button>
+          </div>
+        </div>
+      </div>
+    }

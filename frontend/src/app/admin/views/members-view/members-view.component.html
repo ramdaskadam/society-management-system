@@ -1,0 +1,47 @@
+<div class="page-header">
+      <div class="page-title-group">
+        <h1>Members Directory</h1>
+        <p>Complete record of flat owners, registered tenants, and resident contacts</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn-primary" (click)="openAddMember()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add New Member
+        </button>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="table-responsive">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Member ID</th>
+              <th>Resident Name</th>
+              <th>Unit / Wing</th>
+              <th>Contact Phone</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Dues</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of state.members(); track m.id) {
+              <tr>
+                <td style="font-family: var(--font-mono); font-weight: 600;">{{ m.id }}</td>
+                <td style="font-weight: 600;">{{ m.name }}</td>
+                <td><span class="badge badge-info">{{ m.unit }} (Wing {{ m.wing }})</span></td>
+                <td>{{ m.phone }}</td>
+                <td>{{ m.email }}</td>
+                <td><strong>{{ m.role }}</strong></td>
+                <td style="font-weight: 700;" [style.color]="m.dues > 0 ? '#ef4444' : '#10b981'">
+                  ₹ {{ m.dues.toLocaleString('en-IN') }}
+                </td>
+                <td><span class="badge badge-active">{{ m.status }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>

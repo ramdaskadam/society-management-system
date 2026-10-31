@@ -1,0 +1,83 @@
+@if (isOpen) {
+      <div class="modal-backdrop">
+        <div class="app-dialog modal-card">
+          <div class="dialog-header">
+            <h3 class="dialog-title">Pay Maintenance Dues</h3>
+            <button class="dialog-close-btn" (click)="close.emit()" aria-label="Close">✕</button>
+          </div>
+          <div class="dialog-body">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.85rem; color: #64748b;">Unit No: <strong>A-101 (Rahul Sharma)</strong></span>
+                <span style="font-size: 0.85rem; color: #64748b;">Invoice: <strong>{{ invoice?.id || 'INV-2024-005' }}</strong></span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="font-size: 0.85rem; color: #64748b;">Billing Month: May 2024</span>
+                <span style="font-size: 1.6rem; font-weight: 800; color: #10b981;">₹ {{ (invoice?.amount || 7500).toLocaleString('en-IN') }}</span>
+              </div>
+              <div style="margin-top: 10px; font-size: 0.775rem; color: #94a3b8; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+                Includes Maintenance (₹5,000) + Sinking Fund (₹1,000) + Water (₹800) + Parking (₹700)
+              </div>
+            </div>
+
+            <label class="form-label">Select Payment Method</label>
+            <div class="payment-methods-grid">
+              <div class="pm-option" [class.selected]="selectedMethod === 'UPI'" (click)="selectedMethod = 'UPI'">
+                <div style="font-size: 1.4rem;">📱</div>
+                <div class="pm-title">UPI / QR</div>
+                <div class="pm-desc">GPay, PhonePe, Paytm</div>
+              </div>
+              <div class="pm-option" [class.selected]="selectedMethod === 'Card'" (click)="selectedMethod = 'Card'">
+                <div style="font-size: 1.4rem;">💳</div>
+                <div class="pm-title">Credit / Debit</div>
+                <div class="pm-desc">Visa, Mastercard, RuPay</div>
+              </div>
+              <div class="pm-option" [class.selected]="selectedMethod === 'Net Banking'" (click)="selectedMethod = 'Net Banking'">
+                <div style="font-size: 1.4rem;">🏦</div>
+                <div class="pm-title">Net Banking</div>
+                <div class="pm-desc">All Major Banks</div>
+              </div>
+            </div>
+
+            @if (selectedMethod === 'UPI') {
+              <div class="form-group">
+                <label class="form-label">Virtual Payment Address (VPA / UPI ID)</label>
+                <input type="text" class="form-control" [(ngModel)]="upiId" placeholder="yourname@bank" />
+              </div>
+            }
+
+            @if (selectedMethod === 'Card') {
+              <div class="form-group">
+                <label class="form-label">Card Number</label>
+                <input type="text" class="form-control" placeholder="4532 •••• •••• 9921" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Expiry Date</label>
+                  <input type="text" class="form-control" placeholder="MM/YY" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <input type="password" maxlength="3" class="form-control" placeholder="•••" />
+                </div>
+              </div>
+            }
+
+            <div style="font-size: 0.75rem; color: #64748b; display: flex; align-items: center; gap: 6px; margin-top: 12px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              256-bit SSL encrypted. Instant receipt generation compliant with society bye-laws.
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button class="btn-secondary" (click)="close.emit()" [disabled]="isProcessing">Cancel</button>
+            <button class="btn-primary" style="background: #10b981;" (click)="confirmPayment()" [disabled]="isProcessing">
+              @if (isProcessing) {
+                <span>Processing Payment... ⌛</span>
+              } @else {
+                <span>Confirm & Pay ₹ {{ (invoice?.amount || 7500).toLocaleString('en-IN') }}</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }

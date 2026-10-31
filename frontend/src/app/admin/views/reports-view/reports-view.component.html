@@ -1,0 +1,96 @@
+<div class="page-header">
+      <div class="page-title-group">
+        <h1>Reports & Financial Analytics</h1>
+        <p>Maintenance collections, dues aging, complaint SLAs, and CSV exports</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn-primary" (click)="state.exportCsv('collections')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Collections (CSV)
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: 24px;">
+      <div class="stat-card theme-green">
+        <div class="stat-info">
+          <span class="stat-label">Total Billed (May 2024)</span>
+          <span class="stat-value">₹ 10,81,080</span>
+          <span class="stat-trend positive">128 Flats Billed</span>
+        </div>
+      </div>
+      <div class="stat-card theme-purple">
+        <div class="stat-info">
+          <span class="stat-label">Total Realized Collection</span>
+          <span class="stat-value">₹ {{ state.metrics().totalCollection.toLocaleString('en-IN') }}</span>
+          <span class="stat-trend positive">78.2% Collection Efficiency</span>
+        </div>
+      </div>
+      <div class="stat-card theme-orange">
+        <div class="stat-info">
+          <span class="stat-label">Total Dues Pending</span>
+          <span class="stat-value">₹ {{ state.metrics().pendingDues.toLocaleString('en-IN') }}</span>
+          <span class="stat-trend negative">21.8% Outstanding</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-header">
+        <h3 class="dash-card-title">Defaulter & Aging Dues Report</h3>
+        <button class="btn-secondary" (click)="state.exportCsv('dues')">Export Defaulters</button>
+      </div>
+      <div class="table-responsive">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Unit</th>
+              <th>Owner Name</th>
+              <th>0-30 Days Dues</th>
+              <th>31-60 Days Dues</th>
+              <th>60+ Days Overdue</th>
+              <th>Total Outstanding</th>
+              <th>Interest (18% p.a.)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: 700;">B-202</td>
+              <td>Suresh Patel</td>
+              <td>₹ 5,000</td>
+              <td>₹ 4,500</td>
+              <td style="color: #ef4444; font-weight: 700;">₹ 3,000</td>
+              <td style="font-weight: 800; color: #ef4444;">₹ 12,500</td>
+              <td>₹ 562.50</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 700;">A-101</td>
+              <td>Rahul Sharma</td>
+              <td>₹ {{ state.memberA101Dues().toLocaleString('en-IN') }}</td>
+              <td>₹ 0</td>
+              <td>₹ 0</td>
+              <td style="font-weight: 800; color: #ef4444;">₹ {{ state.memberA101Dues().toLocaleString('en-IN') }}</td>
+              <td>₹ 0</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 700;">C-402</td>
+              <td>Deepika Nair</td>
+              <td>₹ 6,000</td>
+              <td>₹ 0</td>
+              <td>₹ 0</td>
+              <td style="font-weight: 800; color: #ef4444;">₹ 6,000</td>
+              <td>₹ 0</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 700;">A-201</td>
+              <td>Vikram Malhotra</td>
+              <td>₹ 5,000</td>
+              <td>₹ 0</td>
+              <td>₹ 0</td>
+              <td style="font-weight: 800; color: #ef4444;">₹ 5,000</td>
+              <td>₹ 0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
