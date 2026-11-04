@@ -1,0 +1,76 @@
+{
+  "banner": {
+    "adminPortal": "Admin Portal",
+    "memberPortal": "Member Portal (Flat A-101)",
+    "loggedInAs": "Logged in as:",
+    "resetDemo": "Reset Demo"
+  },
+  "sidebar": {
+    "subtitle": "Society Management",
+    "administration": "Administration",
+    "residentPortal": "Resident Portal",
+    "flat": "Flat"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "myDashboard": "My Dashboard",
+    "profile": "My Profile",
+    "members": "Members",
+    "units": "Units",
+    "myUnit": "My Unit",
+    "maintenance": "Maintenance",
+    "payments": "Payments",
+    "invoicesPayments": "Invoices & Payments",
+    "complaints": "Complaints",
+    "visitors": "Visitors & Gate",
+    "parking": "Parking & EV",
+    "polls": "Polls & Voting",
+    "notices": "Notices",
+    "amenities": "Amenities",
+    "documents": "Documents",
+    "reports": "Reports",
+    "settings": "Settings",
+    "help": "Help & Support"
+  },
+  "topbar": {
+    "searchPlaceholder": "Search members, units, visitors, polls, notices...",
+    "notifications": "View Notifications",
+    "language": "Language"
+  },
+  "adminDash": {
+    "title": "Dashboard",
+    "subtitle": "Overview of society operations and activities",
+    "publishNotice": "Publish Notice",
+    "totalMembers": "Total Members",
+    "totalUnits": "Total Units",
+    "totalCollection": "Total Collection",
+    "pendingDues": "Pending Dues",
+    "openComplaints": "Open Complaints"
+  },
+  "memberDash": {
+    "welcome": "Welcome, {{name}} 👋",
+    "raiseComplaint": "Raise Complaint",
+    "maintenanceDues": "Maintenance Dues",
+    "dueDate": "Due Date:",
+    "allDuesCleared": "All Dues Cleared ✓",
+    "payNow": "Pay Now",
+    "viewReceipt": "View Receipt",
+    "unitDetails": "Unit Details",
+    "recentNotice": "Recent Notice",
+    "viewAllNotices": "View all notices",
+    "myComplaints": "My Complaints",
+    "open": "Open",
+    "resolved": "Resolved",
+    "viewAllComplaints": "View all complaints",
+    "recentInvoices": "Recent Invoices",
+    "monthlyBillsSub": "Monthly bills issued to {{unit}}",
+    "viewAllInvoices": "View all invoices",
+    "paymentHistory": "Payment History",
+    "paymentHistorySub": "Transactions & confirmed receipts",
+    "viewAllPayments": "View all payments",
+    "amenityBookings": "Amenity Bookings",
+    "amenityBookingsSub": "Your reserved society amenities",
+    "bookAmenity": "Book Amenity"
+  }
+}
+

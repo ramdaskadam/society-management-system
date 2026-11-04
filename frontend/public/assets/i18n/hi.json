@@ -1,0 +1,76 @@
+{
+  "banner": {
+    "adminPortal": "व्यवस्थापक पोर्टल (Admin)",
+    "memberPortal": "निवासी पोर्टल (फ़्लैट A-101)",
+    "loggedInAs": "लॉग इन उपयोगकर्ता:",
+    "resetDemo": "डेमो रीसेट करें"
+  },
+  "sidebar": {
+    "subtitle": "सोसायटी प्रबंधन प्रणाली",
+    "administration": "प्रशासन (Administration)",
+    "residentPortal": "निवासी पोर्टल",
+    "flat": "फ़्लैट"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "myDashboard": "मेरा डैशबोर्ड",
+    "profile": "मेरी प्रोफ़ाइल",
+    "members": "सदस्य निर्देशिका",
+    "units": "फ़्लैट / इकाइयाँ",
+    "myUnit": "मेरा फ़्लैट",
+    "maintenance": "रखरखाव बिल",
+    "payments": "भुगतान",
+    "invoicesPayments": "बिल और भुगतान",
+    "complaints": "शिकायतें",
+    "visitors": "आगंतुक और गेट सुरक्षा",
+    "parking": "पार्किंग और EV",
+    "polls": "मतदान और प्रस्ताव",
+    "notices": "सूचना पट्ट",
+    "amenities": "सुविधाएँ (Amenities)",
+    "documents": "दस्तावेज़",
+    "reports": "वित्तीय रिपोर्ट",
+    "settings": "सेटिंग्स और ऑडिट",
+    "help": "सहायता और आपातकालीन"
+  },
+  "topbar": {
+    "searchPlaceholder": "सदस्य, फ़्लैट, आगंतुक, मतदान, सूचनाएं खोजें...",
+    "notifications": "सूचनाएं देखें",
+    "language": "भाषा"
+  },
+  "adminDash": {
+    "title": "सोसायटी डैशबोर्ड",
+    "subtitle": "सोसायटी संचालन और वित्तीय गतिविधियों का विवरण",
+    "publishNotice": "नई सूचना प्रकाशित करें",
+    "totalMembers": "कुल सदस्य",
+    "totalUnits": "कुल फ़्लैट",
+    "totalCollection": "कुल संकलन (Collection)",
+    "pendingDues": "बकाया राशि",
+    "openComplaints": "खुली शिकायतें"
+  },
+  "memberDash": {
+    "welcome": "स्वागत है, {{name}} 👋",
+    "raiseComplaint": "शिकायत दर्ज करें",
+    "maintenanceDues": "रखरखाव बकाया",
+    "dueDate": "अंतिम तिथि:",
+    "allDuesCleared": "सभी बकाया चुकता ✓",
+    "payNow": "अभी भुगतान करें",
+    "viewReceipt": "रसीद देखें",
+    "unitDetails": "फ़्लैट विवरण",
+    "recentNotice": "नवीनतम सूचना",
+    "viewAllNotices": "सभी सूचनाएं देखें",
+    "myComplaints": "मेरी शिकायतें",
+    "open": "खुली",
+    "resolved": "समाधान",
+    "viewAllComplaints": "सभी शिकायतें देखें",
+    "recentInvoices": "हाल के रखरखाव बिल",
+    "monthlyBillsSub": "{{unit}} के मासिक बिल",
+    "viewAllInvoices": "सभी बिल देखें",
+    "paymentHistory": "भुगतान इतिहास",
+    "paymentHistorySub": "पुष्ट लेनदेन और रसीदें",
+    "viewAllPayments": "सभी भुगतान देखें",
+    "amenityBookings": "सुविधा बुकिंग",
+    "amenityBookingsSub": "आपकी आरक्षित सोसायटी सुविधाएँ",
+    "bookAmenity": "सुविधा बुक करें"
+  }
+}
+

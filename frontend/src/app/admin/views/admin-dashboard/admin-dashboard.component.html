@@ -1,75 +1,75 @@
 <div class="page-header">
-      <div class="page-title-group">
-        <h1>Dashboard</h1>
-        <p>Overview of society operations and activities</p>
-      </div>
-      <div class="page-header-actions">
-        <button class="btn-primary" (click)="openNoticeDialog()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Publish Notice
-        </button>
-      </div>
-    </div>
+  <div class="page-title-group">
+    <h1>{{ 'adminDash.title' | t }}</h1>
+    <p>{{ 'adminDash.subtitle' | t }}</p>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn-primary" (click)="openNoticeDialog()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      {{ 'adminDash.publishNotice' | t }}
+    </button>
+  </div>
+</div>
 
-    <!-- 5 STAT CARDS -->
-    <div class="stats-grid">
-      <app-stat-card
-        label="Total Members"
-        [value]="state.metrics().totalMembers.toString()"
-        [trend]="state.metrics().membersGrowth"
-        trendType="positive"
-        theme="blue"
-        icon="users"
-      />
-      <app-stat-card
-        label="Total Units"
-        [value]="state.metrics().totalUnits.toString()"
-        [trend]="state.metrics().unitsOccupancy"
-        trendType="neutral"
-        theme="green"
-        icon="building"
-      />
-      <app-stat-card
-        label="Total Collection"
-        [value]="'₹ ' + state.metrics().totalCollection.toLocaleString('en-IN')"
-        [trend]="state.metrics().collectionGrowth"
-        trendType="positive"
-        theme="purple"
-        icon="rupee"
-      />
-      <app-stat-card
-        label="Pending Dues"
-        [value]="'₹ ' + state.metrics().pendingDues.toLocaleString('en-IN')"
-        [trend]="state.metrics().duesTrend"
-        trendType="negative"
-        theme="orange"
-        icon="clock"
-      />
-      <app-stat-card
-        label="Open Complaints"
-        [value]="state.metrics().openComplaints.toString()"
-        [trend]="state.metrics().complaintsTrend"
-        trendType="positive"
-        theme="red"
-        icon="alert"
-      />
-    </div>
+<!-- 5 STAT CARDS -->
+<div class="stats-grid">
+  <app-stat-card
+    [label]="'adminDash.totalMembers' | t"
+    [value]="state.metrics().totalMembers.toString()"
+    [trend]="state.metrics().membersGrowth"
+    trendType="positive"
+    theme="blue"
+    icon="users"
+  />
+  <app-stat-card
+    [label]="'adminDash.totalUnits' | t"
+    [value]="state.metrics().totalUnits.toString()"
+    [trend]="state.metrics().unitsOccupancy"
+    trendType="neutral"
+    theme="green"
+    icon="building"
+  />
+  <app-stat-card
+    [label]="'adminDash.totalCollection' | t"
+    [value]="'₹ ' + state.metrics().totalCollection.toLocaleString('en-IN')"
+    [trend]="state.metrics().collectionGrowth"
+    trendType="positive"
+    theme="purple"
+    icon="rupee"
+  />
+  <app-stat-card
+    [label]="'adminDash.pendingDues' | t"
+    [value]="'₹ ' + state.metrics().pendingDues.toLocaleString('en-IN')"
+    [trend]="state.metrics().duesTrend"
+    trendType="negative"
+    theme="orange"
+    icon="clock"
+  />
+  <app-stat-card
+    [label]="'adminDash.openComplaints' | t"
+    [value]="state.metrics().openComplaints.toString()"
+    [trend]="state.metrics().complaintsTrend"
+    trendType="positive"
+    theme="red"
+    icon="alert"
+  />
+</div>
 
-    <!-- MIDDLE ROW: CHARTS -->
-    <div class="admin-middle-grid">
-      <app-chart-collection [data]="state.collectionOverview()" />
-      <app-chart-complaints [stats]="state.complaintStats()" (viewAll)="navigateTo('complaints')" />
-    </div>
+<!-- MIDDLE ROW: CHARTS -->
+<div class="admin-middle-grid">
+  <app-chart-collection [data]="state.collectionOverview()" />
+  <app-chart-complaints [stats]="state.complaintStats()" (viewAll)="navigateTo('complaints')" />
+</div>
 
-    <!-- LOWER ROW: RECENT ACTIVITIES & QUICK ACTIONS -->
-    <div class="admin-lower-grid">
-      <app-recent-activities [activities]="state.recentActivities()" (viewAll)="navigateTo('payments')" />
-      <app-quick-actions
-        (addMember)="openAddMember()"
-        (addUnit)="openAddUnit()"
-        (createNotice)="openNoticeDialog()"
-        (bulkInvoice)="openBulkInvoice()"
-        (generateReport)="exportReport()"
-        (importPayments)="importPayments()"
-      />
-    </div>
+<!-- LOWER ROW: RECENT ACTIVITIES & QUICK ACTIONS -->
+<div class="admin-lower-grid">
+  <app-recent-activities [activities]="state.recentActivities()" (viewAll)="navigateTo('payments')" />
+  <app-quick-actions
+    (addMember)="openAddMember()"
+    (addUnit)="openAddUnit()"
+    (createNotice)="openNoticeDialog()"
+    (bulkInvoice)="openBulkInvoice()"
+    (generateReport)="exportReport()"
+    (importPayments)="importPayments()"
+  />
+</div>

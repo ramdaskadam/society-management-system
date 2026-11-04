@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SocietyStateService } from '../../../services/society-state.service';
 
@@ -7,6 +7,7 @@ import { SocietyStateService } from '../../../services/society-state.service';
   styleUrls: ['./reports-view.component.css'],
   selector: 'app-reports-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule]
 })
 export class ReportsViewComponent {

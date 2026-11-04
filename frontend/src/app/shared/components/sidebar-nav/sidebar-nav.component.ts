@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User, UserRole } from '../../../models/society.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface NavItem {
   id: string;
-  label: string;
+  labelKey: string;
   icon: string;
   badge?: number | null;
 }
@@ -14,7 +15,7 @@ interface NavItem {
   styleUrls: ['./sidebar-nav.component.css'],
   selector: 'app-sidebar-nav',
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, TranslatePipe]
 })
 export class SidebarNavComponent {
   @Input() role: UserRole = 'admin';
@@ -27,36 +28,36 @@ export class SidebarNavComponent {
   get navItems(): NavItem[] {
     if (this.role === 'admin') {
       return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'grid', badge: null },
-        { id: 'members', label: 'Members', icon: 'users', badge: null },
-        { id: 'units', label: 'Units', icon: 'building', badge: null },
-        { id: 'maintenance', label: 'Maintenance', icon: 'tool', badge: null },
-        { id: 'payments', label: 'Payments', icon: 'credit-card', badge: null },
-        { id: 'complaints', label: 'Complaints', icon: 'alert', badge: this.openComplaintsCount || 12 },
-        { id: 'visitors', label: 'Visitors & Gate', icon: 'shield', badge: null },
-        { id: 'parking', label: 'Parking & EV', icon: 'car', badge: null },
-        { id: 'polls', label: 'Polls & Voting', icon: 'check-square', badge: null },
-        { id: 'notices', label: 'Notices', icon: 'megaphone', badge: null },
-        { id: 'amenities', label: 'Amenities', icon: 'calendar', badge: null },
-        { id: 'documents', label: 'Documents', icon: 'file', badge: null },
-        { id: 'reports', label: 'Reports', icon: 'bar-chart', badge: null },
-        { id: 'settings', label: 'Settings', icon: 'settings', badge: null }
+        { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'grid', badge: null },
+        { id: 'members', labelKey: 'nav.members', icon: 'users', badge: null },
+        { id: 'units', labelKey: 'nav.units', icon: 'building', badge: null },
+        { id: 'maintenance', labelKey: 'nav.maintenance', icon: 'tool', badge: null },
+        { id: 'payments', labelKey: 'nav.payments', icon: 'credit-card', badge: null },
+        { id: 'complaints', labelKey: 'nav.complaints', icon: 'alert', badge: this.openComplaintsCount || 12 },
+        { id: 'visitors', labelKey: 'nav.visitors', icon: 'shield', badge: null },
+        { id: 'parking', labelKey: 'nav.parking', icon: 'car', badge: null },
+        { id: 'polls', labelKey: 'nav.polls', icon: 'check-square', badge: null },
+        { id: 'notices', labelKey: 'nav.notices', icon: 'megaphone', badge: null },
+        { id: 'amenities', labelKey: 'nav.amenities', icon: 'calendar', badge: null },
+        { id: 'documents', labelKey: 'nav.documents', icon: 'file', badge: null },
+        { id: 'reports', labelKey: 'nav.reports', icon: 'bar-chart', badge: null },
+        { id: 'settings', labelKey: 'nav.settings', icon: 'settings', badge: null }
       ];
     } else {
       return [
-        { id: 'dashboard', label: 'My Dashboard', icon: 'home', badge: null },
-        { id: 'profile', label: 'My Profile', icon: 'user', badge: null },
-        { id: 'my-unit', label: 'My Unit', icon: 'building', badge: null },
-        { id: 'maintenance', label: 'Maintenance', icon: 'tool', badge: null },
-        { id: 'payments', label: 'Invoices & Payments', icon: 'credit-card', badge: null },
-        { id: 'complaints', label: 'Complaints', icon: 'alert', badge: this.openComplaintsCount || null },
-        { id: 'visitors', label: 'Visitors & Gate', icon: 'shield', badge: null },
-        { id: 'parking', label: 'Parking & EV', icon: 'car', badge: null },
-        { id: 'polls', label: 'Polls & Voting', icon: 'check-square', badge: null },
-        { id: 'amenities', label: 'Amenities', icon: 'calendar', badge: null },
-        { id: 'notices', label: 'Notices', icon: 'megaphone', badge: null },
-        { id: 'documents', label: 'Documents', icon: 'file', badge: null },
-        { id: 'help', label: 'Help & Support', icon: 'help-circle', badge: null }
+        { id: 'dashboard', labelKey: 'nav.myDashboard', icon: 'home', badge: null },
+        { id: 'profile', labelKey: 'nav.profile', icon: 'user', badge: null },
+        { id: 'my-unit', labelKey: 'nav.myUnit', icon: 'building', badge: null },
+        { id: 'maintenance', labelKey: 'nav.maintenance', icon: 'tool', badge: null },
+        { id: 'payments', labelKey: 'nav.invoicesPayments', icon: 'credit-card', badge: null },
+        { id: 'complaints', labelKey: 'nav.complaints', icon: 'alert', badge: this.openComplaintsCount || null },
+        { id: 'visitors', labelKey: 'nav.visitors', icon: 'shield', badge: null },
+        { id: 'parking', labelKey: 'nav.parking', icon: 'car', badge: null },
+        { id: 'polls', labelKey: 'nav.polls', icon: 'check-square', badge: null },
+        { id: 'amenities', labelKey: 'nav.amenities', icon: 'calendar', badge: null },
+        { id: 'notices', labelKey: 'nav.notices', icon: 'megaphone', badge: null },
+        { id: 'documents', labelKey: 'nav.documents', icon: 'file', badge: null },
+        { id: 'help', labelKey: 'nav.help', icon: 'help-circle', badge: null }
       ];
     }
   }

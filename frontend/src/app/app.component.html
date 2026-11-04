@@ -24,131 +24,75 @@
       [user]="state.activeUser()"
       [role]="state.currentUserRole()"
       [unreadNotificationsCount]="state.unreadNotificationsCount()"
-      (openNotifications)="showNotificationsModal = true"
+      (openNotifications)="dialogs.openNotificationsModal()"
       (search)="onGlobalSearch($event)"
     />
 
-    <!-- Active View Component -->
+    <!-- Lazy-Loaded Route Outlet -->
     <section class="content-area">
-      @switch (state.currentView()) {
-        @case ('dashboard') {
-          @if (state.currentUserRole() === 'admin') {
-            <app-admin-dashboard />
-          } @else {
-            <app-member-dashboard />
-          }
-        }
-        @case ('members') {
-          <app-members-view />
-        }
-        @case ('units') {
-          <app-units-view />
-        }
-        @case ('my-unit') {
-          <app-units-view />
-        }
-        @case ('maintenance') {
-          <app-invoices-view />
-        }
-        @case ('payments') {
-          <app-invoices-view />
-        }
-        @case ('complaints') {
-          <app-complaints-view />
-        }
-        @case ('visitors') {
-          <app-visitors-view />
-        }
-        @case ('polls') {
-          <app-polls-view />
-        }
-        @case ('parking') {
-          <app-parking-view />
-        }
-        @case ('notices') {
-          <app-notices-view />
-        }
-        @case ('amenities') {
-          <app-amenities-view />
-        }
-        @case ('documents') {
-          <app-documents-view />
-        }
-        @case ('reports') {
-          <app-reports-view />
-        }
-        @case ('profile') {
-          <app-profile-view />
-        }
-        @case ('settings') {
-          <app-settings-view />
-        }
-        @case ('help') {
-          <app-settings-view />
-        }
-      }
+      <router-outlet />
     </section>
   </main>
 </div>
 
 <!-- ── Shared Dialogs ──────────────────────────────────────────── -->
 <app-receipt-dialog
-  [isOpen]="showReceiptModal"
-  [invoice]="activeReceiptInvoice"
+  [isOpen]="dialogs.showReceiptModal()"
+  [invoice]="dialogs.activeReceiptInvoice()"
   [society]="state.society()"
-  (close)="showReceiptModal = false"
+  (close)="dialogs.closeReceiptModal()"
 />
 
 <app-notifications-dialog
-  [isOpen]="showNotificationsModal"
+  [isOpen]="dialogs.showNotificationsModal()"
   [notifications]="state.notifications()"
-  (close)="showNotificationsModal = false"
+  (close)="dialogs.closeNotificationsModal()"
   (markAllRead)="state.markNotificationsAsRead()"
 />
 
 <!-- ── Admin Dialogs ──────────────────────────────────────────── -->
 <app-create-notice-dialog
-  [isOpen]="showNoticeModal"
-  (close)="showNoticeModal = false"
+  [isOpen]="dialogs.showNoticeModal()"
+  (close)="dialogs.closeNoticeModal()"
   (submit)="onPublishNotice($event)"
 />
 
 <app-add-member-dialog
-  [isOpen]="showAddMemberModal"
-  (close)="showAddMemberModal = false"
+  [isOpen]="dialogs.showAddMemberModal()"
+  (close)="dialogs.closeAddMemberModal()"
   (submit)="onAddMember($event)"
 />
 
 <app-add-unit-dialog
-  [isOpen]="showAddUnitModal"
-  (close)="showAddUnitModal = false"
+  [isOpen]="dialogs.showAddUnitModal()"
+  (close)="dialogs.closeAddUnitModal()"
   (submit)="onAddUnit($event)"
 />
 
 <app-bulk-invoice-dialog
-  [isOpen]="showBulkInvoiceModal"
-  (close)="showBulkInvoiceModal = false"
+  [isOpen]="dialogs.showBulkInvoiceModal()"
+  (close)="dialogs.closeBulkInvoiceModal()"
   (confirm)="onBulkInvoiceConfirm()"
 />
 
 <!-- ── Member Dialogs ──────────────────────────────────────────── -->
 <app-pay-now-dialog
-  [isOpen]="showPayModal"
-  [invoice]="activePayInvoice"
-  (close)="showPayModal = false"
+  [isOpen]="dialogs.showPayModal()"
+  [invoice]="dialogs.activePayInvoice()"
+  (close)="dialogs.closePayModal()"
   (paid)="onPaymentConfirmed($event)"
 />
 
 <app-raise-complaint-dialog
-  [isOpen]="showComplaintModal"
-  (close)="showComplaintModal = false"
+  [isOpen]="dialogs.showComplaintModal()"
+  (close)="dialogs.closeComplaintModal()"
   (submit)="onRaiseComplaint($event)"
 />
 
 <app-book-amenity-dialog
-  [isOpen]="showBookingModal"
-  [selectedAmenity]="selectedAmenityForBooking"
-  (close)="showBookingModal = false"
+  [isOpen]="dialogs.showBookingModal()"
+  [selectedAmenity]="dialogs.selectedAmenityForBooking()"
+  (close)="dialogs.closeBookingModal()"
   (submit)="onBookAmenity($event)"
 />
 

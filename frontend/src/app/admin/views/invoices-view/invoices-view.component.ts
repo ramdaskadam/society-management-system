@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SocietyStateService } from '../../../services/society-state.service';
+import { DialogModalService } from '../../../core/services/dialog-modal.service';
 import { Invoice } from '../../../models/society.model';
 
 @Component({
@@ -8,20 +9,22 @@ import { Invoice } from '../../../models/society.model';
   styleUrls: ['./invoices-view.component.css'],
   selector: 'app-invoices-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule]
 })
 export class InvoicesViewComponent {
   readonly state = inject(SocietyStateService);
+  private readonly dialogs = inject(DialogModalService);
 
   openBulkInvoice(): void {
-    window.dispatchEvent(new CustomEvent('open-bulk-invoice-modal'));
+    this.dialogs.openBulkInvoiceModal();
   }
 
   viewReceipt(inv: Invoice): void {
-    window.dispatchEvent(new CustomEvent('open-receipt-modal', { detail: inv }));
+    this.dialogs.openReceiptModal(inv);
   }
 
   payInvoice(inv: Invoice): void {
-    window.dispatchEvent(new CustomEvent('open-pay-modal', { detail: inv }));
+    this.dialogs.openPayModal(inv);
   }
 }

@@ -1,0 +1,75 @@
+{
+  "banner": {
+    "adminPortal": "प्रशासक पोर्टल (Admin)",
+    "memberPortal": "रहिवासी पोर्टल (सदनिका A-101)",
+    "loggedInAs": "लॉग इन वापरकर्ता:",
+    "resetDemo": "डेमो रीसेट करा"
+  },
+  "sidebar": {
+    "subtitle": "सोसायटी व्यवस्थापन",
+    "administration": "सोसायटी प्रशासन",
+    "residentPortal": "रहिवासी पोर्टल",
+    "flat": "सदनिका"
+  },
+  "nav": {
+    "dashboard": "डॅशबोर्ड",
+    "myDashboard": "माझा डॅशबोर्ड",
+    "profile": "माझी प्रोफाइल",
+    "members": "सभासद यादी",
+    "units": "सदनिका (Units)",
+    "myUnit": "माझी सदनिका",
+    "maintenance": "देखभाल बिल",
+    "payments": "देयके व पावती",
+    "invoicesPayments": "बिले आणि देयके",
+    "complaints": "तक्रारी",
+    "visitors": "पाहुणे व गेट सुरक्षा",
+    "parking": "पार्किंग आणि EV",
+    "polls": "मतदान व ठराव",
+    "notices": "सूचना फलक",
+    "amenities": "सोयी-सुविधा",
+    "documents": "कागदपत्रे",
+    "reports": "आर्थिक अहवाल",
+    "settings": "सेटिंग्ज व ऑडिट",
+    "help": "मदत व आपत्कालीन संपर्क"
+  },
+  "topbar": {
+    "searchPlaceholder": "सभासद, सदनिका, पाहुणे, मतदान, सूचना शोधा...",
+    "notifications": "सूचना पहा",
+    "language": "भाषा"
+  },
+  "adminDash": {
+    "title": "सोसायटी डॅशबोर्ड",
+    "subtitle": "सोसायटी कामकाज आणि आर्थिक संकलनाचा आढावा",
+    "publishNotice": "नवीन सूचना प्रसिद्ध करा",
+    "totalMembers": "एकूण सभासद",
+    "totalUnits": "एकूण सदनिका",
+    "totalCollection": "एकूण संकलन",
+    "pendingDues": "थकबाकी रक्कम",
+    "openComplaints": "प्रलंबित तक्रारी"
+  },
+  "memberDash": {
+    "welcome": "स्वागत आहे, {{name}} 👋",
+    "raiseComplaint": "तक्रार नोंदवा",
+    "maintenanceDues": "देखभाल थकबाकी",
+    "dueDate": "अंतिम दिनांक:",
+    "allDuesCleared": "सर्व थकबाकी पूर्ण ✓",
+    "payNow": "आता भरा",
+    "viewReceipt": "पावती पहा",
+    "unitDetails": "सदनिका तपशील",
+    "recentNotice": "ताजी सूचना",
+    "viewAllNotices": "सर्व सूचना पहा",
+    "myComplaints": "माझ्या तक्रारी",
+    "open": "प्रलंबित",
+    "resolved": "निराकरण",
+    "viewAllComplaints": "सर्व तक्रारी पहा",
+    "recentInvoices": "अलीकडील बिले",
+    "monthlyBillsSub": "{{unit}} साठी मासिक बिले",
+    "viewAllInvoices": "सर्व बिले पहा",
+    "paymentHistory": "देयक इतिहास",
+    "paymentHistorySub": "तपासलेले व्यवहार आणि पावत्या",
+    "viewAllPayments": "सर्व देयके पहा",
+    "amenityBookings": "सुविधा आरक्षण",
+    "amenityBookingsSub": "तुमच्या आरक्षित सोसायटी सुविधा",
+    "bookAmenity": "सुविधा आरक्षित करा"
+  }
+}

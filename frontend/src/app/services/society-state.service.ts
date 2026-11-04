@@ -1,4 +1,6 @@
 import { Injectable, signal, computed, effect, inject } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import {
   Society,
   User,
@@ -24,6 +26,7 @@ import {
   AuditLogEntry
 } from '../models/society.model';
 import { SocietyApiService, SocietyBootstrapPayload } from '../core/services/society-api.service';
+import { ToastNotificationService } from '../core/services/toast-notification.service';
 
 // Typed baseline JSON seed imports from `src/assets/mock-data/*.json`
 import societySeed from '../../assets/mock-data/society.json';
@@ -40,12 +43,14 @@ const STORAGE_KEY = 'green_meadows_sms_angular_v2';
 })
 export class SocietyStateService {
   private readonly apiService = inject(SocietyApiService, { optional: true });
+  private readonly toastService = inject(ToastNotificationService);
+  private readonly router = inject(Router, { optional: true });
 
   // Observability & Loading Signals
   readonly isLoading = signal<boolean>(false);
   readonly dataSourceMode = signal<'mock-json-assets' | 'local-storage-cache'>('mock-json-assets');
 
-  // Domain State Signals (initialized from modular JSON assets, hydrated via HttpClient / localStorage)
+  // Domain State Signals
   readonly society = signal<Society>(societySeed.society as Society);
   readonly currentUserRole = signal<UserRole>('admin');
   readonly currentView = signal<string>('dashboard');
@@ -69,24 +74,58 @@ export class SocietyStateService {
   readonly polls = signal<SocietyPoll[]>(operationsSeed.polls as SocietyPoll[]);
   readonly parkingSlots = signal<ParkingSlot[]>(operationsSeed.parkingSlots as ParkingSlot[]);
   readonly auditLogs = signal<AuditLogEntry[]>(operationsSeed.auditLogs as AuditLogEntry[]);
-  readonly toasts = signal<ToastMessage[]>([]);
+
+  // Ephemeral UI Toasts (delegated to ToastNotificationService; excluded from localStorage)
+  readonly toasts = this.toastService.toasts;
 
   // Selected invoice for receipt modal
   readonly selectedReceiptInvoice = signal<Invoice | null>(null);
 
-  // Computed Selectors
+  // ── Dynamic Computed Selectors (No Hardcoded Unit IDs) ────────────────────────
   readonly activeUser = computed(() => {
     return this.currentUserRole() === 'admin' ? this.adminUser() : this.memberUser();
+  });
+
+  readonly currentResidentUnit = computed(() => {
+    return this.memberUser().unit || 'A-101';
   });
 
   readonly unreadNotificationsCount = computed(() => {
     return this.notifications().filter(n => !n.read).length;
   });
 
-  readonly memberA101Dues = computed(() => {
-    const inv = this.invoices().find(i => i.unitNo === 'A-101' && i.status === 'Unpaid');
+  readonly activeUnitInvoices = computed(() => {
+    const unit = this.currentResidentUnit();
+    return this.invoices().filter(i => i.unitNo === unit);
+  });
+
+  readonly activeUnitPayments = computed(() => {
+    const unit = this.currentResidentUnit();
+    return this.paymentHistory().filter(p => p.unitNo === unit);
+  });
+
+  readonly activeUnitComplaints = computed(() => {
+    const unit = this.currentResidentUnit();
+    return this.complaints().filter(c => c.unitNo === unit);
+  });
+
+  readonly activeUnitBookings = computed(() => {
+    const unit = this.currentResidentUnit();
+    return this.bookings().filter(b => b.unitNo === unit);
+  });
+
+  readonly activeUnitVisitors = computed(() => {
+    const unit = this.currentResidentUnit();
+    return this.visitors().filter(v => v.unitNo === unit);
+  });
+
+  readonly activeUnitDues = computed(() => {
+    const inv = this.activeUnitInvoices().find(i => i.status === 'Unpaid');
     return inv ? inv.amount : 0;
   });
+
+  /** Alias preserved for backward compatibility */
+  readonly memberA101Dues = this.activeUnitDues;
 
   constructor() {
     const hasLocalCache = this.loadFromStorage();
@@ -94,16 +133,22 @@ export class SocietyStateService {
       this.hydrateFromApi(false);
     }
 
-    // Auto-save effect whenever reactive state mutates
+    // Sync `currentView` signal with Angular Router URL changes (Back/Forward & deep links)
+    this.router?.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(event => {
+        const segment = event.urlAfterRedirects.replace(/^\//, '').split('/')[0] || 'dashboard';
+        if (this.currentView() !== segment) {
+          this.currentView.set(segment);
+        }
+      });
+
+    // Auto-save effect whenever domain state mutates (excludes ephemeral UI toasts)
     effect(() => {
       this.saveToStorage();
     });
   }
 
-  /**
-   * Fetches modular JSON mock data from `/assets/mock-data/*.json` (or `/api/v1/*` in prod)
-   * via `SocietyApiService` (`HttpClient`) as an enterprise placeholder for backend API calls.
-   */
   hydrateFromApi(notifyUser = false): void {
     if (!this.apiService) return;
     this.isLoading.set(true);
@@ -154,27 +199,22 @@ export class SocietyStateService {
 
   setRole(role: UserRole): void {
     this.currentUserRole.set(role);
-    this.currentView.set('dashboard');
+    this.setView('dashboard');
     document.body.setAttribute('data-role', role);
     this.showToast(`Switched to ${role === 'admin' ? 'Admin' : 'Member'} Portal`, 'info');
   }
 
   setView(view: string): void {
     this.currentView.set(view);
+    this.router?.navigate(['/' + view]);
   }
 
   showToast(message: string, type: ToastMessage['type'] = 'info'): void {
-    const id = `toast-${Date.now()}-${Math.random()}`;
-    const newToast: ToastMessage = { id, message, type };
-    this.toasts.update(list => [...list, newToast]);
-
-    setTimeout(() => {
-      this.removeToast(id);
-    }, 3500);
+    this.toastService.showToast(message, type);
   }
 
   removeToast(id: string): void {
-    this.toasts.update(list => list.filter(t => t.id !== id));
+    this.toastService.removeToast(id);
   }
 
   // ── Billing & Payment Flows ───────────────────────────────────────────────────
@@ -182,6 +222,7 @@ export class SocietyStateService {
     const inv = this.invoices().find(i => i.id === invoiceId);
     if (!inv) return;
 
+    const unitNo = inv.unitNo || this.currentResidentUnit();
     const amount = inv.amount;
     const txnId = `${paymentMethod.toUpperCase()}-${Math.floor(10000000000 + Math.random() * 90000000000)}`;
 
@@ -199,8 +240,8 @@ export class SocietyStateService {
       )
     );
 
-    this.members.update(list => list.map(m => (m.unit === 'A-101' ? { ...m, dues: 0 } : m)));
-    this.units.update(list => list.map(u => (u.unitNo === 'A-101' ? { ...u, dues: 0 } : u)));
+    this.members.update(list => list.map(m => (m.unit === unitNo ? { ...m, dues: 0 } : m)));
+    this.units.update(list => list.map(u => (u.unitNo === unitNo ? { ...u, dues: 0 } : u)));
 
     this.metrics.update(m => ({
       ...m,
@@ -211,7 +252,7 @@ export class SocietyStateService {
     const newPayment: Payment = {
       date: '31 May 2024',
       invoiceNo: invoiceId,
-      unitNo: 'A-101',
+      unitNo,
       mode: paymentMethod,
       amount,
       status: 'Success',
@@ -222,7 +263,7 @@ export class SocietyStateService {
     const newActivity: Activity = {
       id: `act-${Date.now()}`,
       type: 'payment',
-      title: 'Payment received from A-101',
+      title: `Payment received from ${unitNo}`,
       subtitle: `Maintenance Dues for May 2024 (${paymentMethod})`,
       amount: `₹${amount.toLocaleString('en-IN')}`,
       time: 'Just now',
@@ -240,14 +281,17 @@ export class SocietyStateService {
   // ── Complaints & SLA Management ───────────────────────────────────────────────
   raiseComplaint(data: { category: string; priority: Complaint['priority']; subject: string; description: string }): void {
     const tNo = `C-${this.complaints().length + 25}`;
+    const unitNo = this.currentResidentUnit();
+    const reportedBy = this.memberUser().name;
+
     const newComplaint: Complaint = {
       id: tNo,
       ticketNo: tNo,
       category: data.category,
       subject: data.subject,
       description: data.description,
-      unitNo: 'A-101',
-      reportedBy: 'Rahul Sharma',
+      unitNo,
+      reportedBy,
       reportedOn: 'Today',
       priority: data.priority,
       status: 'Open',
@@ -272,7 +316,7 @@ export class SocietyStateService {
       ...list
     ]);
 
-    this.logAudit('Complaints', `Ticket #${tNo} (${data.category}) raised for Unit A-101.`);
+    this.logAudit('Complaints', `Ticket #${tNo} (${data.category}) raised for Unit ${unitNo}.`);
     this.showToast(`Complaint #${tNo} raised successfully! Tracking on dashboard.`, 'success');
   }
 
@@ -336,14 +380,16 @@ export class SocietyStateService {
   }
 
   bookAmenity(data: { amenity: string; date: string; time: string; purpose: string }): void {
+    const unitNo = this.currentResidentUnit();
+    const bookedBy = this.memberUser().name;
     const charge = data.amenity.includes('Hall') ? '₹2,500' : data.amenity.includes('Club') ? '₹1,000' : 'Free';
     const newBooking: Booking = {
       id: `BK-${Math.floor(100 + Math.random() * 900)}`,
       amenity: data.amenity,
       date: data.date,
       time: data.time,
-      bookedBy: 'Rahul Sharma',
-      unitNo: 'A-101',
+      bookedBy,
+      unitNo,
       purpose: data.purpose,
       status: 'Confirmed',
       amount: charge
@@ -355,7 +401,7 @@ export class SocietyStateService {
         id: `act-${Date.now()}`,
         type: 'amenity',
         title: 'Amenity booked',
-        subtitle: `${data.amenity} by Rahul Sharma (A-101)`,
+        subtitle: `${data.amenity} by ${bookedBy} (${unitNo})`,
         time: 'Just now',
         timestamp: Date.now(),
         icon: 'calendar'
@@ -482,7 +528,7 @@ export class SocietyStateService {
       visitorName: data.visitorName,
       visitorType: data.visitorType,
       company: data.company || data.visitorType,
-      unitNo: data.unitNo || 'A-101',
+      unitNo: data.unitNo || this.currentResidentUnit(),
       hostName: this.activeUser().name,
       phone: data.phone,
       expectedTime: data.expectedTime || 'Today',
@@ -656,10 +702,6 @@ export class SocietyStateService {
     this.auditLogs.update(list => [entry, ...list]);
   }
 
-  /**
-   * Clears localStorage overrides and re-hydrates state from `/assets/mock-data/*.json`
-   * (with synchronous JSON seed fallback).
-   */
   resetToBaseline(): void {
     localStorage.removeItem(STORAGE_KEY);
     this.society.set(societySeed.society as Society);
@@ -683,7 +725,7 @@ export class SocietyStateService {
     this.polls.set(operationsSeed.polls as SocietyPoll[]);
     this.parkingSlots.set(operationsSeed.parkingSlots as ParkingSlot[]);
     this.auditLogs.set(operationsSeed.auditLogs as AuditLogEntry[]);
-    this.currentView.set('dashboard');
+    this.setView('dashboard');
     this.hydrateFromApi(true);
   }
 

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocietyStateService } from '../../../services/society-state.service';
@@ -7,6 +7,7 @@ import { VisitorPass } from '../../../models/society.model';
 @Component({
   selector: 'app-visitors-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './visitors-view.component.html',
   styleUrls: ['./visitors-view.component.css']
@@ -14,7 +15,7 @@ import { VisitorPass } from '../../../models/society.model';
 export class VisitorsViewComponent {
   readonly state = inject(SocietyStateService);
 
-  statusFilter: string = 'All';
+  statusFilter = 'All';
   showPreApproveForm = false;
   lastGeneratedPass: VisitorPass | null = null;
 
@@ -22,18 +23,18 @@ export class VisitorsViewComponent {
   visitorName = '';
   visitorType: VisitorPass['visitorType'] = 'Guest';
   company = '';
-  unitNo = 'A-101';
+  unitNo = this.state.currentResidentUnit();
   phone = '';
   expectedTime = 'Today, 08:00 PM';
   vehicleNo = '';
 
   get filteredVisitors(): VisitorPass[] {
-    const role = this.state.currentUserRole();
-    return this.state.visitors().filter(v => {
-      if (role === 'member' && v.unitNo !== 'A-101') return false;
-      if (this.statusFilter !== 'All' && v.status !== this.statusFilter) return false;
-      return true;
-    });
+    const base =
+      this.state.currentUserRole() === 'member'
+        ? this.state.activeUnitVisitors()
+        : this.state.visitors();
+    if (this.statusFilter === 'All') return base;
+    return base.filter(v => v.status === this.statusFilter);
   }
 
   get insideCount(): number {
@@ -50,7 +51,10 @@ export class VisitorsViewComponent {
 
   onSubmitPreApprove(): void {
     if (!this.visitorName.trim() || !this.phone.trim()) return;
-    const targetUnit = this.state.currentUserRole() === 'member' ? 'A-101' : this.unitNo;
+    const targetUnit =
+      this.state.currentUserRole() === 'member'
+        ? this.state.currentResidentUnit()
+        : this.unitNo;
     this.lastGeneratedPass = this.state.preApproveVisitor({
       visitorName: this.visitorName.trim(),
       visitorType: this.visitorType,
@@ -71,4 +75,3 @@ export class VisitorsViewComponent {
     this.state.updateVisitorStatus(id, status);
   }
 }
-

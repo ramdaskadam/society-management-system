@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocietyStateService } from '../../../services/society-state.service';
@@ -7,6 +7,7 @@ import { ParkingSlot } from '../../../models/society.model';
 @Component({
   selector: 'app-parking-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './parking-view.component.html',
   styleUrls: ['./parking-view.component.css']
@@ -20,8 +21,8 @@ export class ParkingViewComponent {
   slotNo = 'EV-A101';
   wing = 'A';
   type: ParkingSlot['type'] = 'Covered Stilt';
-  unitNo = 'A-101';
-  ownerName = 'Rahul Sharma';
+  unitNo = this.state.currentResidentUnit();
+  ownerName = this.state.memberUser().name;
   vehicleNo = '';
   vehicleType: ParkingSlot['vehicleType'] = '4-Wheeler';
   evEnabled = false;
@@ -61,4 +62,3 @@ export class ParkingViewComponent {
     this.showRegisterForm = false;
   }
 }
-

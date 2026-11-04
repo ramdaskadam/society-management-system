@@ -1,42 +1,58 @@
 <header class="role-switcher-banner">
-      <div class="role-banner-left">
-        <div class="society-badge">
-          <span class="status-dot"></span>
-          <span>{{ societyName }} CHS</span>
-        </div>
-        <div class="role-switcher-tabs" role="tablist">
-          <button
-            class="role-tab-btn"
-            [class.active]="currentRole === 'admin'"
-            (click)="roleChange.emit('admin')"
-            title="Switch to Society Admin View"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Admin Portal
-          </button>
-          <button
-            class="role-tab-btn"
-            [class.active]="currentRole === 'member'"
-            (click)="roleChange.emit('member')"
-            title="Switch to Society Member View (Rahul Sharma, A-101)"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Member Portal (Flat A-101)
-          </button>
-        </div>
-      </div>
+  <div class="role-banner-left">
+    <div class="society-badge">
+      <span class="status-dot"></span>
+      <span>{{ societyName }} CHS</span>
+    </div>
+    <div class="role-switcher-tabs" role="tablist">
+      <button
+        class="role-tab-btn"
+        [class.active]="currentRole === 'admin'"
+        (click)="roleChange.emit('admin')"
+        title="Switch to Society Admin View"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        {{ 'banner.adminPortal' | t }}
+      </button>
+      <button
+        class="role-tab-btn"
+        [class.active]="currentRole === 'member'"
+        (click)="roleChange.emit('member')"
+        title="Switch to Society Member View (Rahul Sharma, A-101)"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        {{ 'banner.memberPortal' | t }}
+      </button>
+    </div>
+  </div>
 
-      <div class="role-banner-right">
-        <span class="role-context-hint">
-          Logged in as:
-          @if (currentRole === 'admin') {
-            <strong>Admin User (Super Admin)</strong>
-          } @else {
-            <strong>Rahul Sharma (Flat A-101)</strong>
-          }
-        </span>
-        <button class="reset-demo-btn" (click)="resetDemo.emit()" title="Reset all demo data to initial baseline">
-          Reset Demo
+  <div class="role-banner-right">
+    <!-- i18n Language Switcher Pill -->
+    <div class="role-switcher-tabs" role="group" aria-label="Language switcher">
+      @for (loc of i18n.availableLocales; track loc.code) {
+        <button
+          type="button"
+          class="role-tab-btn"
+          style="padding: 3px 9px; font-size: 0.72rem;"
+          [class.active]="i18n.currentLang() === loc.code"
+          (click)="setLang(loc.code)"
+          [title]="'Switch language to ' + loc.label"
+        >
+          {{ loc.nativeLabel }}
         </button>
-      </div>
-    </header>
+      }
+    </div>
+
+    <span class="role-context-hint">
+      {{ 'banner.loggedInAs' | t }}
+      @if (currentRole === 'admin') {
+        <strong>Admin User (Super Admin)</strong>
+      } @else {
+        <strong>Rahul Sharma (Flat A-101)</strong>
+      }
+    </span>
+    <button class="reset-demo-btn" (click)="resetDemo.emit()" title="Reset all demo data to initial baseline">
+      {{ 'banner.resetDemo' | t }}
+    </button>
+  </div>
+</header>

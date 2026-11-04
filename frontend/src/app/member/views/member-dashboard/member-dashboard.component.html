@@ -1,12 +1,12 @@
 <div class="page-header">
       <div class="page-title-group">
-        <h1>Welcome, {{ user.name }} 👋</h1>
-        <p>Flat {{ user.unit }} • Wing {{ user.wing }} • {{ society.name }} CHS</p>
+        <h1>{{ 'memberDash.welcome' | t:{ name: user.name } }}</h1>
+        <p>{{ 'sidebar.flat' | t }} {{ user.unit }} • Wing {{ user.wing }} • {{ society.name }} CHS</p>
       </div>
       <div class="page-header-actions">
         <button class="btn-primary" style="background: #059669;" (click)="openRaiseComplaint()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Raise Complaint
+          {{ 'memberDash.raiseComplaint' | t }}
         </button>
       </div>
     </div>
@@ -16,25 +16,25 @@
       <!-- Maintenance Dues Card -->
       <div class="member-feature-card">
         <div class="member-card-content">
-          <div class="member-card-title">Maintenance Dues</div>
+          <div class="member-card-title">{{ 'memberDash.maintenanceDues' | t }}</div>
           <div class="member-dues-amount" [style.color]="duesAmount > 0 ? '#ef4444' : '#10b981'">
             ₹ {{ duesAmount.toLocaleString('en-IN') }}
           </div>
           <div class="member-dues-date">
             @if (duesAmount > 0) {
-              Due Date: <span>31 May 2024</span>
+              {{ 'memberDash.dueDate' | t }} <span>31 May 2024</span>
             } @else {
-              <span style="color: #10b981;">All Dues Cleared ✓</span>
+              <span style="color: #10b981;">{{ 'memberDash.allDuesCleared' | t }}</span>
             }
           </div>
           @if (duesAmount > 0) {
             <button class="btn-pay-now" (click)="openPayNow()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              Pay Now
+              {{ 'memberDash.payNow' | t }}
             </button>
           } @else {
             <button class="btn-pay-now" style="background: #3b82f6;" (click)="viewLastReceipt()">
-              View Receipt
+              {{ 'memberDash.viewReceipt' | t }}
             </button>
           }
         </div>
@@ -44,7 +44,7 @@
       <!-- Unit Details Card -->
       <div class="member-feature-card">
         <div class="member-card-content">
-          <div class="member-card-title">Unit Details</div>
+          <div class="member-card-title">{{ 'memberDash.unitDetails' | t }}</div>
           <div style="font-size: 1.45rem; font-weight: 800; color: var(--text-main);">{{ user.unit }}</div>
           <div class="unit-spec-list">
             <div class="unit-spec-item">Type: <strong>{{ user.type }}</strong></div>
@@ -59,13 +59,13 @@
       <!-- Recent Notice Card -->
       <div class="member-feature-card">
         <div class="member-card-content">
-          <div class="member-card-title">Recent Notice</div>
+          <div class="member-card-title">{{ 'memberDash.recentNotice' | t }}</div>
           <div class="notice-preview-title">{{ recentNotice.title || 'Annual General Meeting' }}</div>
           <div class="notice-preview-desc">
             {{ recentNotice.meetingDate }} • {{ recentNotice.location }}
           </div>
           <a href="javascript:void(0)" class="card-footer-link" style="margin-top: 10px;" (click)="navigateTo('notices')">
-            View all notices <span>→</span>
+            {{ 'memberDash.viewAllNotices' | t }} <span>→</span>
           </a>
         </div>
         <img class="member-card-img" src="/assets/megaphone.jpg" alt="Notice Megaphone" />
@@ -74,19 +74,19 @@
       <!-- My Complaints Card -->
       <div class="member-feature-card">
         <div class="member-card-content">
-          <div class="member-card-title">My Complaints</div>
+          <div class="member-card-title">{{ 'memberDash.myComplaints' | t }}</div>
           <div class="complaint-counter-row">
             <div class="complaint-stat-item">
               <span class="complaint-stat-num open">{{ openComplaintsCount }}</span>
-              <span class="complaint-stat-lbl">Open</span>
+              <span class="complaint-stat-lbl">{{ 'memberDash.open' | t }}</span>
             </div>
             <div class="complaint-stat-item">
               <span class="complaint-stat-num resolved">{{ resolvedComplaintsCount }}</span>
-              <span class="complaint-stat-lbl">Resolved</span>
+              <span class="complaint-stat-lbl">{{ 'memberDash.resolved' | t }}</span>
             </div>
           </div>
           <a href="javascript:void(0)" class="card-footer-link" (click)="navigateTo('complaints')">
-            View all complaints <span>→</span>
+            {{ 'memberDash.viewAllComplaints' | t }} <span>→</span>
           </a>
         </div>
         <img class="member-card-img" src="/assets/clipboard.jpg" alt="Complaints Clipboard" />

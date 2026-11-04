@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocietyStateService } from '../../../services/society-state.service';
@@ -7,6 +7,7 @@ import { SocietyPoll } from '../../../models/society.model';
 @Component({
   selector: 'app-polls-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './polls-view.component.html',
   styleUrls: ['./polls-view.component.css']
@@ -61,4 +62,3 @@ export class PollsViewComponent {
     this.showCreateForm = false;
   }
 }
-

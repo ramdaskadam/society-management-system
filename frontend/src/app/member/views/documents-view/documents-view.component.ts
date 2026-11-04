@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocietyStateService } from '../../../services/society-state.service';
@@ -9,6 +9,7 @@ import { SocietyDocument } from '../../../models/society.model';
   styleUrls: ['./documents-view.component.css'],
   selector: 'app-documents-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule]
 })
 export class DocumentsViewComponent {

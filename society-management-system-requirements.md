@@ -803,6 +803,10 @@ frontend/src/
 │   ├── environment.ts                   # Dev config (useMockApi: true, mockDataBaseUrl: '/assets/mock-data')
 │   └── environment.prod.ts              # Prod config (useMockApi: false, apiBaseUrl: '/api/v1')
 ├── assets/
+│   ├── i18n/                            # Multi-language JSON translation dictionaries (English, Hindi, Marathi)
+│   │   ├── en.json                      # English (Default)
+│   │   ├── hi.json                      # Hindi (हिंदी)
+│   │   └── mr.json                      # Marathi (मराठी)
 │   └── mock-data/                       # Modular JSON mock payloads (mirrored in public/assets/mock-data/)
 │       ├── society.json                 # Society profile, admin/member profiles, KPI metrics, chart series
 │       ├── members-units.json           # Resident directory & flat/unit inventory
@@ -819,15 +823,20 @@ frontend/src/
     │   ├── interceptors/
     │   │   └── api.interceptor.ts       # Functional HttpInterceptorFn (Bearer token, X-Society-Tenant-ID, error telemetry)
     │   └── services/
-    │       └── society-api.service.ts   # HttpClient repository executing parallel forkJoin() requests
+    │       ├── society-api.service.ts   # HttpClient repository executing parallel forkJoin() requests
+    │       ├── i18n.service.ts          # Reactive runtime i18n service (en / hi / mr) + <html lang> sync
+    │       ├── dialog-modal.service.ts  # Strongly-typed Signal modal orchestration service (replaces window CustomEvents)
+    │       └── toast-notification.service.ts # Ephemeral UI toast stack decoupled from localStorage persistence
     ├── models/
     │   └── society.model.ts             # Domain TypeScript interfaces & DTO contracts
     ├── services/
-    │   └── society-state.service.ts     # Signal-based state facade hydrated via SocietyApiService & localStorage
+    │   └── society-state.service.ts     # Signal-based state facade with dynamic activeUnit* computed selectors
     ├── shared/
+    │   ├── pipes/
+    │   │   └── translate.pipe.ts        # Standalone reactive translation pipe (`{{ 'key' | t:{ param } }}`)
     │   ├── components/                  # Reusable UI atoms (role-banner, sidebar-nav, topbar, stat-card, charts, toast)
     │   ├── dialogs/                     # Shared modals (notifications-dialog, receipt-dialog)
-    │   └── views/                       # Dual-role views (visitors-view, polls-view, parking-view)
+    │   └── views/                       # Dual-role views (dashboard-host, visitors-view, polls-view, parking-view)
     ├── admin/
     │   ├── views/                       # Admin portal views (dashboard, members, units, invoices, complaints, notices, amenities, reports, settings)
     │   └── dialogs/                     # Admin operational modals (add-member, add-unit, create-notice, bulk-invoice)

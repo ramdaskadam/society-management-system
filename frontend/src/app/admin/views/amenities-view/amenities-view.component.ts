@@ -1,19 +1,21 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SocietyStateService } from '../../../services/society-state.service';
-import { Booking } from '../../../models/society.model';
+import { DialogModalService } from '../../../core/services/dialog-modal.service';
 
 @Component({
   templateUrl: './amenities-view.component.html',
   styleUrls: ['./amenities-view.component.css'],
   selector: 'app-amenities-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule]
 })
 export class AmenitiesViewComponent {
   readonly state = inject(SocietyStateService);
+  private readonly dialogs = inject(DialogModalService);
 
   openBookingModal(name: string): void {
-    window.dispatchEvent(new CustomEvent('open-booking-modal', { detail: name }));
+    this.dialogs.openBookingModal(name);
   }
 }

@@ -1,47 +1,52 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SocietyStateService } from '../../../services/society-state.service';
+import { DialogModalService } from '../../../core/services/dialog-modal.service';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
 import { ChartCollectionComponent } from '../../../shared/components/chart-collection/chart-collection.component';
 import { ChartComplaintsComponent } from '../../../shared/components/chart-complaints/chart-complaints.component';
 import { RecentActivitiesComponent } from '../../../shared/components/recent-activities/recent-activities.component';
 import { QuickActionsComponent } from '../../../shared/components/quick-actions/quick-actions.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css'],
   selector: 'app-admin-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     StatCardComponent,
     ChartCollectionComponent,
     ChartComplaintsComponent,
     RecentActivitiesComponent,
-    QuickActionsComponent
+    QuickActionsComponent,
+    TranslatePipe
   ]
 })
 export class AdminDashboardComponent {
   readonly state = inject(SocietyStateService);
+  private readonly dialogs = inject(DialogModalService);
 
   navigateTo(view: string): void {
     this.state.setView(view);
   }
 
   openNoticeDialog(): void {
-    window.dispatchEvent(new CustomEvent('open-notice-modal'));
+    this.dialogs.openNoticeModal();
   }
 
   openAddMember(): void {
-    window.dispatchEvent(new CustomEvent('open-add-member-modal'));
+    this.dialogs.openAddMemberModal();
   }
 
   openAddUnit(): void {
-    window.dispatchEvent(new CustomEvent('open-add-unit-modal'));
+    this.dialogs.openAddUnitModal();
   }
 
   openBulkInvoice(): void {
-    window.dispatchEvent(new CustomEvent('open-bulk-invoice-modal'));
+    this.dialogs.openBulkInvoiceModal();
   }
 
   exportReport(): void {
