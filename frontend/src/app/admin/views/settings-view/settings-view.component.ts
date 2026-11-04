@@ -12,5 +12,22 @@ import { SocietyStateService } from '../../../services/society-state.service';
 })
 export class SettingsViewComponent {
   readonly state = inject(SocietyStateService);
-  get society() { return this.state.society(); }
+
+  fullName = this.state.society().fullName;
+  address = this.state.society().address;
+  maintenancePerSqFt = this.state.society().maintenancePerSqFt;
+  lateFeePercentage = this.state.society().lateFeePercentage;
+
+  get society() {
+    return this.state.society();
+  }
+
+  saveSettings(): void {
+    this.state.updateSocietySettings({
+      fullName: this.fullName,
+      address: this.address,
+      maintenancePerSqFt: Number(this.maintenancePerSqFt) || 3.5,
+      lateFeePercentage: Number(this.lateFeePercentage) || 18
+    });
+  }
 }

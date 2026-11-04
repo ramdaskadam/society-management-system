@@ -1,27 +1,31 @@
-# Frontend
+# Green Meadows — Society Management System (Enterprise Angular 18 Frontend)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+An enterprise-structured residential community portal built with **Angular 18 Standalone Components**, **Angular Signals**, and a layered **Core / API Repository / Mock JSON Asset** architecture.
 
-## Development server
+For the complete Software Requirements Specification and full-stack architecture diagrams, see [`../society-management-system-requirements.md`](../society-management-system-requirements.md).
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Enterprise Layered Architecture
 
-## Code scaffolding
+1. **Environment Configuration (`src/environments/`)**:
+   - `environment.ts` (development) sets `useMockApi: true` and `mockDataBaseUrl: '/assets/mock-data'`.
+   - `environment.prod.ts` (production) sets `useMockApi: false` and `apiBaseUrl: '/api/v1'`.
+2. **Modular JSON Mock Data (`public/assets/mock-data/` & `src/assets/mock-data/`)**:
+   - `society.json` — Society configuration, Admin/Member user profiles, KPI metrics, and chart series.
+   - `members-units.json` — Resident directory and flat/unit inventory.
+   - `billing.json` — Maintenance invoices and confirmed payment history.
+   - `complaints.json` — Helpdesk service requests, SLA statuses, and star ratings.
+   - `notices-amenities.json` — Official notices, bookable amenities, and facility reservations.
+   - `operations.json` — Visitor & Gate OTP passes, community polls, parking/EV bays, documents, notifications, audit logs, and recent activities.
+3. **Core Infrastructure Layer (`src/app/core/`)**:
+   - `config/api-endpoints.config.ts` — Strongly-typed endpoint registry resolving either `/assets/mock-data/*.json` or `/api/v1/*`.
+   - `interceptors/api.interceptor.ts` — Functional `HttpInterceptorFn` injecting `X-Society-Tenant-ID`, `X-Client-Version`, and `Authorization: Bearer` headers.
+   - `guards/role.guard.ts` — Functional `CanActivateFn` enforcing role-based route access (`admin` vs. `member`).
+   - `services/society-api.service.ts` — `HttpClient` repository service using `forkJoin` to fetch all domain JSON endpoints in parallel.
+4. **Reactive State Store (`src/app/services/society-state.service.ts`)**:
+   - Hydrates state from `SocietyApiService` (`HttpClient`) and synchronizes user mutations with `localStorage`.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Development Commands
 
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- **Start dev server**: `npm start` (`http://localhost:4200/`)
+- **Typecheck & AOT template check**: `./node_modules/.bin/ngc -p tsconfig.app.json --noEmit`
+- **Production build**: `npm run build`

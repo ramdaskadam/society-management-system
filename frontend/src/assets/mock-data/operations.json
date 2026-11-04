@@ -1,0 +1,173 @@
+{
+  "recentActivities": [
+    {
+      "id": "act-1",
+      "type": "payment",
+      "title": "Payment received from A-101",
+      "subtitle": "Maintenance Dues for May 2024",
+      "amount": "₹5,000",
+      "time": "2 mins ago",
+      "timestamp": 1717150000000,
+      "icon": "payment"
+    },
+    {
+      "id": "act-2",
+      "type": "complaint",
+      "title": "New complaint #C-24 reported",
+      "subtitle": "Water leakage in Block A duct",
+      "time": "15 mins ago",
+      "timestamp": 1717149000000,
+      "icon": "alert"
+    },
+    {
+      "id": "act-3",
+      "type": "notice",
+      "title": "Notice published",
+      "subtitle": "Society Annual General Meeting on 25 May",
+      "time": "1 hour ago",
+      "timestamp": 1717146000000,
+      "icon": "megaphone"
+    },
+    {
+      "id": "act-4",
+      "type": "amenity",
+      "title": "Amenity booked",
+      "subtitle": "Community Hall by Rahul Sharma (A-101)",
+      "time": "2 hours ago",
+      "timestamp": 1717142000000,
+      "icon": "calendar"
+    }
+  ],
+  "documents": [
+    { "id": "DOC-01", "title": "Society Registration Certificate & Bye-Laws", "category": "Legal", "size": "2.4 MB", "date": "12 Jan 2019", "access": "All Members" },
+    { "id": "DOC-02", "title": "Audited Financial Statements FY 2023-24", "category": "Finance", "size": "4.8 MB", "date": "30 Apr 2024", "access": "All Members" },
+    { "id": "DOC-03", "title": "Fire Safety Certificate & Compliance NOC", "category": "Safety", "size": "1.2 MB", "date": "15 Mar 2024", "access": "All Members" },
+    { "id": "DOC-04", "title": "EV Charging Bay Installation Guidelines", "category": "Rules", "size": "850 KB", "date": "10 Feb 2024", "access": "All Members" },
+    { "id": "DOC-05", "title": "Managing Committee Election Minutes 2023", "category": "Minutes", "size": "1.9 MB", "date": "18 Sep 2023", "access": "Admin & Owners" }
+  ],
+  "notifications": [
+    { "id": "NTF-01", "title": "New Invoice Issued", "text": "Invoice INV-2024-005 for ₹7,500 has been generated for May 2024.", "time": "Today, 09:30 AM", "read": false, "type": "billing" },
+    { "id": "NTF-02", "title": "AGM Notice Published", "text": "Annual General Meeting is scheduled for 25 May at 6:00 PM.", "time": "Yesterday", "read": false, "type": "notice" },
+    { "id": "NTF-03", "title": "Complaint Status Updated", "text": "Complaint #C-21 (Intercom buzzing) is now In Progress.", "time": "2 days ago", "read": true, "type": "complaint" },
+    { "id": "NTF-04", "title": "Amenity Booking Confirmed", "text": "Community Hall reservation for 25 May 2024 confirmed.", "time": "3 days ago", "read": true, "type": "booking" }
+  ],
+  "visitors": [
+    {
+      "id": "VIS-101",
+      "passCode": "482910",
+      "visitorName": "Ramesh Kumar (Blinkit Delivery)",
+      "visitorType": "Delivery",
+      "company": "Blinkit",
+      "unitNo": "A-101",
+      "hostName": "Rahul Sharma",
+      "phone": "+91 98211 33401",
+      "expectedTime": "Today, 06:15 PM",
+      "status": "Waiting Approval"
+    },
+    {
+      "id": "VIS-102",
+      "passCode": "739204",
+      "visitorName": "Dr. Kavita Kulkarni",
+      "visitorType": "Guest",
+      "company": "Personal Guest",
+      "unitNo": "A-101",
+      "hostName": "Rahul Sharma",
+      "phone": "+91 98204 88120",
+      "expectedTime": "Today, 07:30 PM",
+      "vehicleNo": "MH-04-JK-9012",
+      "status": "Pre-Approved"
+    },
+    {
+      "id": "VIS-103",
+      "passCode": "519082",
+      "visitorName": "Santosh Yadav (Urban Company AC Tech)",
+      "visitorType": "Home Service",
+      "company": "Urban Company",
+      "unitNo": "B-101",
+      "hostName": "Ananya Deshmukh",
+      "phone": "+91 97680 12094",
+      "expectedTime": "Today, 04:00 PM",
+      "checkInTime": "04:05 PM",
+      "status": "Inside Premises"
+    },
+    {
+      "id": "VIS-104",
+      "passCode": "194827",
+      "visitorName": "Uber Cab (Driver: Irfan)",
+      "visitorType": "Cab",
+      "company": "Uber India",
+      "unitNo": "C-301",
+      "hostName": "Farhan Qureshi",
+      "phone": "+91 98192 44019",
+      "expectedTime": "Today, 02:30 PM",
+      "checkInTime": "02:28 PM",
+      "checkOutTime": "02:40 PM",
+      "vehicleNo": "MH-01-AT-4421",
+      "status": "Checked Out"
+    }
+  ],
+  "polls": [
+    {
+      "id": "POLL-01",
+      "title": "Rooftop Solar Panel Installation (60 kW Net-Metering)",
+      "description": "Proposal to install 60 kW grid-tied rooftop solar panels across Wings A–D to reduce common-area MSEB electricity bills by ~45% with a 3.2-year ROI.",
+      "category": "Capital Expenditure",
+      "createdBy": "Managing Committee",
+      "endDate": "10 Jun 2024",
+      "status": "Active",
+      "totalVotes": 94,
+      "userVotedOptionId": null,
+      "options": [
+        { "id": "opt-1", "text": "Approve Tata Power Solar Proposal (₹24.5L from Sinking Fund)", "votes": 68 },
+        { "id": "opt-2", "text": "Approve Waaree Solar Proposal (₹22.8L with 5-yr AMC)", "votes": 19 },
+        { "id": "opt-3", "text": "Defer project to next Financial Year", "votes": 7 }
+      ]
+    },
+    {
+      "id": "POLL-02",
+      "title": "Clubhouse Gymnasium Weekend Operating Hours Extension",
+      "description": "Residents requested extending weekend gymnasium & yoga studio hours from 10:30 PM to 11:30 PM on Saturdays and Sundays.",
+      "category": "Rule Amendment",
+      "createdBy": "Cultural & Sports Secretary",
+      "endDate": "05 Jun 2024",
+      "status": "Active",
+      "totalVotes": 112,
+      "userVotedOptionId": "opt-2a",
+      "options": [
+        { "id": "opt-2a", "text": "Yes, extend till 11:30 PM on Weekends", "votes": 89 },
+        { "id": "opt-2b", "text": "Keep current 10:30 PM closing time", "votes": 23 }
+      ]
+    },
+    {
+      "id": "POLL-03",
+      "title": "Annual Monsoon Tree Trimming & Bio-Compost Pit Upgrade",
+      "description": "Approval for organic garden waste composter upgrade and perimeter tree pruning before June monsoon.",
+      "category": "Event Planning",
+      "createdBy": "Estate Manager",
+      "endDate": "15 May 2024",
+      "status": "Closed",
+      "totalVotes": 118,
+      "userVotedOptionId": "opt-3a",
+      "options": [
+        { "id": "opt-3a", "text": "In Favor (Passed with 91.5% majority)", "votes": 108 },
+        { "id": "opt-3b", "text": "Against", "votes": 10 }
+      ]
+    }
+  ],
+  "parkingSlots": [
+    { "id": "PK-01", "slotNo": "S-A101", "wing": "A", "type": "Covered Stilt", "unitNo": "A-101", "ownerName": "Rahul Sharma", "vehicleNo": "MH-02-CB-4521", "vehicleType": "4-Wheeler", "rfidTag": "RFID-88412", "evEnabled": true, "status": "Allocated" },
+    { "id": "PK-02", "slotNo": "S-A101-B", "wing": "A", "type": "Open Surface", "unitNo": "A-101", "ownerName": "Rahul Sharma", "vehicleNo": "MH-02-EE-1122", "vehicleType": "2-Wheeler", "rfidTag": "RFID-88413", "evEnabled": false, "status": "Allocated" },
+    { "id": "PK-03", "slotNo": "S-A102", "wing": "A", "type": "Covered Stilt", "unitNo": "A-102", "ownerName": "Priya Iyer", "vehicleNo": "MH-43-BP-9081", "vehicleType": "4-Wheeler", "rfidTag": "RFID-88420", "evEnabled": false, "status": "Allocated" },
+    { "id": "PK-04", "slotNo": "EV-B101", "wing": "B", "type": "EV Charging Bay", "unitNo": "B-101", "ownerName": "Ananya Deshmukh", "vehicleNo": "MH-43-EV-2024", "vehicleType": "4-Wheeler", "rfidTag": "RFID-88501", "evEnabled": true, "status": "Allocated" },
+    { "id": "PK-05", "slotNo": "S-B202", "wing": "B", "type": "Covered Stilt", "unitNo": "B-202", "ownerName": "Suresh Patel", "vehicleNo": "MH-01-DL-7744", "vehicleType": "4-Wheeler", "rfidTag": "RFID-88519", "evEnabled": false, "status": "Allocated" },
+    { "id": "PK-06", "slotNo": "EV-C301", "wing": "C", "type": "EV Charging Bay", "unitNo": "C-301", "ownerName": "Farhan Qureshi", "vehicleNo": "MH-02-EV-3310", "vehicleType": "4-Wheeler", "rfidTag": "RFID-88604", "evEnabled": true, "status": "Allocated" },
+    { "id": "PK-07", "slotNo": "VIS-G01", "wing": "Visitor", "type": "Visitor Bay", "unitNo": "A-101 (Guest)", "ownerName": "Dr. Kavita Kulkarni", "vehicleNo": "MH-04-JK-9012", "vehicleType": "4-Wheeler", "rfidTag": "TEMP-PASS", "evEnabled": false, "status": "Occupied (Visitor)" },
+    { "id": "PK-08", "slotNo": "VIS-G02", "wing": "Visitor", "type": "Visitor Bay", "unitNo": "Unassigned", "ownerName": "Visitor Pool", "vehicleNo": "—", "vehicleType": "4-Wheeler", "rfidTag": "—", "evEnabled": true, "status": "Vacant" }
+  ],
+  "auditLogs": [
+    { "id": "AUD-904", "timestamp": "Today, 09:30 AM", "actor": "Admin User", "role": "admin", "action": "Generated Monthly Maintenance Invoice Batch", "module": "Billing", "details": "Issued May 2024 invoices across 128 residential units." },
+    { "id": "AUD-903", "timestamp": "Yesterday, 05:15 PM", "actor": "Admin User", "role": "admin", "action": "Assigned Vendor to Complaint #C-24", "module": "Complaints", "details": "Assigned Mahesh (Plumber) to high-priority Block A duct seepage." },
+    { "id": "AUD-902", "timestamp": "28 May 2024, 11:20 AM", "actor": "Admin User", "role": "admin", "action": "Published Society Notice #NOT-03", "module": "Notices", "details": "Clubhouse Swimming Pool Periodic Maintenance scheduled." },
+    { "id": "AUD-901", "timestamp": "25 May 2024, 04:00 PM", "actor": "Rahul Sharma", "role": "member", "action": "Online Maintenance Payment Verified", "module": "Billing", "details": "Invoice INV-2024-004 settled via UPI (Txn: UPI-89410482910)." }
+  ]
+}

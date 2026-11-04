@@ -1,0 +1,62 @@
+{
+  "complaints": [
+    {
+      "id": "C-24",
+      "ticketNo": "C-24",
+      "category": "Plumbing",
+      "subject": "Water leakage in Block A common duct",
+      "description": "Persistent seepage noticed between 1st and 2nd floor pipe junctions.",
+      "unitNo": "A-101",
+      "reportedBy": "Rahul Sharma",
+      "reportedOn": "31 May 2024",
+      "priority": "High",
+      "status": "Open",
+      "assignedTo": "Mahesh (Plumber)",
+      "internalNote": "Plumbing team scheduled inspection at 4 PM."
+    },
+    {
+      "id": "C-21",
+      "ticketNo": "C-21",
+      "category": "Electrical",
+      "subject": "Intercom buzzing sound and call drops",
+      "description": "Intercom speaker in hall has loud static noise when receiving gate calls.",
+      "unitNo": "A-101",
+      "reportedBy": "Rahul Sharma",
+      "reportedOn": "24 May 2024",
+      "priority": "Medium",
+      "status": "In Progress",
+      "assignedTo": "Vikram Telecom",
+      "internalNote": "Wiring junction tested; replacing handpiece on Monday."
+    },
+    {
+      "id": "C-15",
+      "ticketNo": "C-15",
+      "category": "Elevator",
+      "subject": "Wing A Passenger Elevator jittery leveling",
+      "description": "Lift stops 2 inches above floor level on 1st floor.",
+      "unitNo": "A-101",
+      "reportedBy": "Rahul Sharma",
+      "reportedOn": "10 May 2024",
+      "priority": "High",
+      "status": "Resolved",
+      "assignedTo": "Otis Service Team",
+      "internalNote": "Floor sensor calibrated and test run completed successfully.",
+      "rating": 5
+    },
+    {
+      "id": "C-10",
+      "ticketNo": "C-10",
+      "category": "Security",
+      "subject": "Visitor log app not triggering OTP",
+      "description": "Guest waited 10 minutes at main gate due to system delay.",
+      "unitNo": "B-202",
+      "reportedBy": "Suresh Patel",
+      "reportedOn": "04 May 2024",
+      "priority": "Low",
+      "status": "Closed",
+      "assignedTo": "Gate Security Head",
+      "internalNote": "Gate tablet WiFi restored.",
+      "rating": 4
+    }
+  ]
+}

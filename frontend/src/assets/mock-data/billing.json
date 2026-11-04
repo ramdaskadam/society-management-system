@@ -1,0 +1,90 @@
+{
+  "invoices": [
+    {
+      "id": "INV-2024-005",
+      "unitNo": "A-101",
+      "memberName": "Rahul Sharma",
+      "month": "May 2024",
+      "issueDate": "01 May 2024",
+      "dueDate": "31 May 2024",
+      "amount": 7500,
+      "breakdown": { "maintenance": 5000, "sinkingFund": 1000, "waterCharges": 800, "parkingCharge": 700 },
+      "status": "Unpaid"
+    },
+    {
+      "id": "INV-2024-004",
+      "unitNo": "A-101",
+      "memberName": "Rahul Sharma",
+      "month": "Apr 2024",
+      "issueDate": "01 Apr 2024",
+      "dueDate": "30 Apr 2024",
+      "amount": 5000,
+      "breakdown": { "maintenance": 4000, "sinkingFund": 500, "waterCharges": 500 },
+      "status": "Paid",
+      "paidOn": "28 Apr 2024",
+      "paymentMode": "UPI",
+      "txnId": "UPI-89410482910"
+    },
+    {
+      "id": "INV-2024-003",
+      "unitNo": "A-101",
+      "memberName": "Rahul Sharma",
+      "month": "Mar 2024",
+      "issueDate": "01 Mar 2024",
+      "dueDate": "31 Mar 2024",
+      "amount": 5000,
+      "breakdown": { "maintenance": 4000, "sinkingFund": 500, "waterCharges": 500 },
+      "status": "Paid",
+      "paidOn": "29 Mar 2024",
+      "paymentMode": "Net Banking",
+      "txnId": "NB-48192048123"
+    },
+    {
+      "id": "INV-2024-002",
+      "unitNo": "A-101",
+      "memberName": "Rahul Sharma",
+      "month": "Feb 2024",
+      "issueDate": "01 Feb 2024",
+      "dueDate": "29 Feb 2024",
+      "amount": 5000,
+      "breakdown": { "maintenance": 4000, "sinkingFund": 500, "waterCharges": 500 },
+      "status": "Paid",
+      "paidOn": "27 Feb 2024",
+      "paymentMode": "Card",
+      "txnId": "CARD-992019401"
+    },
+    {
+      "id": "INV-2024-001",
+      "unitNo": "A-101",
+      "memberName": "Rahul Sharma",
+      "month": "Jan 2024",
+      "issueDate": "01 Jan 2024",
+      "dueDate": "31 Jan 2024",
+      "amount": 5000,
+      "breakdown": { "maintenance": 4000, "sinkingFund": 500, "waterCharges": 500 },
+      "status": "Paid",
+      "paidOn": "30 Jan 2024",
+      "paymentMode": "UPI",
+      "txnId": "UPI-77192049102"
+    },
+    {
+      "id": "INV-2024-B202",
+      "unitNo": "B-202",
+      "memberName": "Suresh Patel",
+      "month": "May 2024",
+      "issueDate": "01 May 2024",
+      "dueDate": "31 May 2024",
+      "amount": 12500,
+      "breakdown": { "maintenance": 6500, "sinkingFund": 2000, "waterCharges": 1000, "overduePenalty": 3000 },
+      "status": "Overdue"
+    }
+  ],
+  "paymentHistory": [
+    { "date": "28 Apr 2024", "invoiceNo": "INV-2024-004", "unitNo": "A-101", "mode": "UPI", "amount": 5000, "status": "Success", "txnId": "UPI-89410482910" },
+    { "date": "29 Mar 2024", "invoiceNo": "INV-2024-003", "unitNo": "A-101", "mode": "Net Banking", "amount": 5000, "status": "Success", "txnId": "NB-48192048123" },
+    { "date": "27 Feb 2024", "invoiceNo": "INV-2024-002", "unitNo": "A-101", "mode": "Card", "amount": 5000, "status": "Success", "txnId": "CARD-992019401" },
+    { "date": "30 Jan 2024", "invoiceNo": "INV-2024-001", "unitNo": "A-101", "mode": "UPI", "amount": 5000, "status": "Success", "txnId": "UPI-77192049102" },
+    { "date": "02 May 2024", "invoiceNo": "INV-2024-A102", "unitNo": "A-102", "mode": "UPI", "amount": 4800, "status": "Success", "txnId": "UPI-11029384756" },
+    { "date": "01 May 2024", "invoiceNo": "INV-2024-B101", "unitNo": "B-101", "mode": "Cheque", "amount": 5500, "status": "Success", "txnId": "CHQ-882910" }
+  ]
+}

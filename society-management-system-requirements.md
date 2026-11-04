@@ -1,7 +1,7 @@
 # Society Management System --- Software Requirements Specification
 
-**Document version:** 1.0\
-**Status:** Initial baseline requirements\
+**Document version:** 2.0\
+**Status:** Updated with Phase 2 Extended Modules & Angular 18 Reference Architecture\
 **Product type:** Web-based digital platform for residential societies /
 housing communities
 
@@ -668,6 +668,206 @@ accounting compliance, bank account aggregation, automated bank
 reconciliation, biometric access control, hardware gate integrations,
 native mobile apps, and integrations with third-party
 property-management systems.
+
+------------------------------------------------------------------------
+
+## 15. Reference Architecture & Angular 18 Frontend Design (v2.0)
+
+This section documents the implemented **Angular 18 Standalone + Signals Architecture** and how it maps to the future **FastAPI + Django + PostgreSQL** backend for ongoing engineering reference.
+
+### 15.1 Frontend Architectural Principles
+
+1. **100% Standalone Component Hierarchy (`standalone: true`)**:
+   - Eliminates legacy `NgModule` boilerplate. Every view, dialog, and shared UI atom declares its explicit imports (`CommonModule`, `FormsModule`, child components).
+2. **Reactive Signal Store (`SocietyStateService`)**:
+   - Uses Angular Signals (`signal<T>()`, `computed()`, and `effect()`) as a single source of truth (`frontend/src/app/services/society-state.service.ts`).
+   - Automatic `localStorage` state hydration and persistence (`green_meadows_sms_angular_v2`) via a reactive `effect()` hook, enabling zero-backend interactive prototyping and instant state reset (`resetToBaseline()`).
+   - Ready for drop-in replacement with `HttpClient` observables or `rxResource` calls to `/api/v1/*` endpoints.
+3. **Role-Scoped Theme & Access Control (`admin` vs. `member`)**:
+   - Switching roles updates `<body data-role="admin|member">`, dynamically swapping CSS custom properties (`--sidebar-bg`, `--accent-primary`, `--accent-glow`) without page reloads.
+   - Views automatically scope records to the active role (e.g., Unit `A-101` for Resident Member vs. society-wide records for Admin).
+4. **Modern Web Standards Compliance**:
+   - **Accessible Responsive Data Tables**: Scrollable regions use `tabindex="0" role="region" aria-label="..."` with sticky `<thead>` headers (`position: sticky; inset-block-start: 0`) and container-query readiness (`container-type: inline-size`).
+   - **Deferred Form Validation**: Uses CSS `:user-invalid` and `:user-valid` so validation errors only appear after user interaction rather than prematurely while typing.
+   - **Modal Scroll Containment**: Uses `overscroll-behavior: contain` on `dialog:modal` and `dialog::backdrop` to prevent background page scroll chaining without layout-shifting `body { overflow: hidden }` hacks.
+
+### 15.2 Frontend Component & State Flow Diagram
+
+```mermaid
+flowchart TD
+  subgraph Shell["AppComponent Shell (app.component.ts)"]
+    RB["RoleBannerComponent (Role Switcher & Demo Reset)"]
+    SB["SidebarNavComponent (Role-Aware Navigation)"]
+    TB["TopbarComponent (Global Search & Notifications)"]
+    TC["ToastContainerComponent (Live Feedback)"]
+  end
+
+  subgraph State["Reactive State Layer"]
+    SS["SocietyStateService (Signals + Computed + Auto-Persist Effect)"]
+    LS[("Browser localStorage / Future FastAPI REST Client")]
+    SS <--> LS
+  end
+
+  subgraph AdminViews["Admin Portal Views"]
+    AD["AdminDashboardComponent"]
+    MV["MembersViewComponent"]
+    UV["UnitsViewComponent"]
+    IV["InvoicesViewComponent"]
+    RV["ReportsViewComponent"]
+    SV["SettingsViewComponent (Config + AuditLog)"]
+  end
+
+  subgraph SharedViews["Dual-Role Operational Views"]
+    CV["ComplaintsViewComponent (SLA + 5-Star Rating)"]
+    VV["VisitorsViewComponent (Gate OTP + Check-In/Out)"]
+    PV["PollsViewComponent (Live Resolution Voting)"]
+    PKV["ParkingViewComponent (Stilt/EV Bays + RFID)"]
+    NV["NoticesViewComponent"]
+    AV["AmenitiesViewComponent"]
+    DV["DocumentsViewComponent (Category Filter + Upload)"]
+  end
+
+  subgraph MemberViews["Member Portal Views"]
+    MD["MemberDashboardComponent"]
+    PRV["ProfileViewComponent"]
+    HV["Helpdesk & Emergency Contacts (SettingsView help mode)"]
+  end
+
+  Shell --> AdminViews
+  Shell --> SharedViews
+  Shell --> MemberViews
+  AdminViews <--> SS
+  SharedViews <--> SS
+  MemberViews <--> SS
+```
+
+### 15.3 Full-Stack Production Target Architecture
+
+```mermaid
+flowchart LR
+  subgraph Client["Angular 18 SPA"]
+    UI["Admin & Member Portals"]
+    Store["SocietyStateService"]
+    UI --> Store
+  end
+
+  subgraph Edge["Ingress & Gateway"]
+    Nginx["Nginx / Cloud Load Balancer"]
+  end
+
+  subgraph Backend["Python Application Tier"]
+    FastAPI["FastAPI (/api/v1/* Async REST & Webhooks)"]
+    Services["Shared Domain Services & Auth Policy Layer"]
+    Django["Django Core (ORM, Migrations, Django Admin)"]
+    FastAPI --> Services
+    Django --> Services
+  end
+
+  subgraph Data["Persistence & Async Workers"]
+    PG[("PostgreSQL 16 (Multi-Society Isolated)")]
+    Redis[("Redis + Celery Workers")]
+    S3[("S3 Object Storage (PDFs, Receipts, Docs)")]
+  end
+
+  Store -- "HTTPS JSON / JWT" --> Nginx
+  Nginx --> FastAPI
+  Nginx --> Django
+  Services --> PG
+  Services --> Redis
+  Services --> S3
+```
+
+### 15.4 Expanded Domain Entity-Relationship Diagram (v2.0)
+
+```mermaid
+erDiagram
+  SOCIETY ||--o{ UNIT : contains
+  SOCIETY ||--o{ MEMBER : registers
+  SOCIETY ||--o{ NOTICE : publishes
+  SOCIETY ||--o{ POLL : conducts
+  SOCIETY ||--o{ AUDIT_LOG : records
+  UNIT ||--o{ INVOICE : billed_to
+  UNIT ||--o{ COMPLAINT : raises
+  UNIT ||--o{ VISITOR_PASS : hosts
+  UNIT ||--o{ PARKING_SLOT : allocated
+  INVOICE ||--o{ PAYMENT : settled_by
+  AMENITY ||--o{ BOOKING : reserved_via
+  POLL ||--|{ POLL_OPTION : offers
+```
+
+### 15.5 Enterprise Layered Directory Structure (`frontend/src/`)
+
+```text
+frontend/src/
+├── environments/
+│   ├── environment.ts                   # Dev config (useMockApi: true, mockDataBaseUrl: '/assets/mock-data')
+│   └── environment.prod.ts              # Prod config (useMockApi: false, apiBaseUrl: '/api/v1')
+├── assets/
+│   └── mock-data/                       # Modular JSON mock payloads (mirrored in public/assets/mock-data/)
+│       ├── society.json                 # Society profile, admin/member profiles, KPI metrics, chart series
+│       ├── members-units.json           # Resident directory & flat/unit inventory
+│       ├── billing.json                 # Maintenance invoices & confirmed payment transactions
+│       ├── complaints.json              # Helpdesk tickets, SLA status & star ratings
+│       ├── notices-amenities.json       # Notices, bookable facilities & reservations
+│       └── operations.json              # Visitors & Gate OTPs, Polls, Parking/EV slots, Docs, Notifications, AuditLogs
+└── app/
+    ├── core/                            # Enterprise Core Singleton Layer
+    │   ├── config/
+    │   │   └── api-endpoints.config.ts  # Dynamic endpoint resolver (switches between /assets/mock-data/*.json & /api/v1/*)
+    │   ├── guards/
+    │   │   └── role.guard.ts            # Functional CanActivateFn enforcing RBAC (admin vs. member)
+    │   ├── interceptors/
+    │   │   └── api.interceptor.ts       # Functional HttpInterceptorFn (Bearer token, X-Society-Tenant-ID, error telemetry)
+    │   └── services/
+    │       └── society-api.service.ts   # HttpClient repository executing parallel forkJoin() requests
+    ├── models/
+    │   └── society.model.ts             # Domain TypeScript interfaces & DTO contracts
+    ├── services/
+    │   └── society-state.service.ts     # Signal-based state facade hydrated via SocietyApiService & localStorage
+    ├── shared/
+    │   ├── components/                  # Reusable UI atoms (role-banner, sidebar-nav, topbar, stat-card, charts, toast)
+    │   ├── dialogs/                     # Shared modals (notifications-dialog, receipt-dialog)
+    │   └── views/                       # Dual-role views (visitors-view, polls-view, parking-view)
+    ├── admin/
+    │   ├── views/                       # Admin portal views (dashboard, members, units, invoices, complaints, notices, amenities, reports, settings)
+    │   └── dialogs/                     # Admin operational modals (add-member, add-unit, create-notice, bulk-invoice)
+    └── member/
+        ├── views/                       # Resident views (member-dashboard, documents-view, profile-view)
+        └── dialogs/                     # Resident action modals (pay-now, raise-complaint, book-amenity)
+```
+
+### 15.6 Mock JSON Assets to Live REST API Transition Flow
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant UI as Angular View Component
+  participant Store as SocietyStateService (Signals)
+  participant API as SocietyApiService (HttpClient)
+  participant Int as apiInterceptor
+  participant Source as /assets/mock-data/*.json OR /api/v1/*
+
+  UI->>Store: Read reactive signals (e.g. state.visitors(), state.invoices())
+  Note over Store: On startup (if no localStorage override) or Reset Demo
+  Store->>API: fetchBootstrapBundle() via forkJoin()
+  API->>Int: HTTP GET requests (society, members-units, billing, complaints, notices-amenities, operations)
+  Int->>Source: Attach X-Society-Tenant-ID & Authorization headers
+  Source-->>API: Typed JSON Response Payloads
+  API-->>Store: Emit SocietyBootstrapPayload
+  Store->>Store: Update Signals & persist to localStorage
+  Store-->>UI: Auto-render updated view via Angular Signals
+```
+
+### 15.6 New v2.0 Modules Mapping (Frontend State to Future REST API)
+
+| Module | Angular Component | State Signal & Actions (`SocietyStateService`) | Target FastAPI Endpoint |
+| :--- | :--- | :--- | :--- |
+| **Visitors & Gate OTP** | `VisitorsViewComponent` | `visitors()`, `preApproveVisitor()`, `updateVisitorStatus()` | `GET/POST /api/v1/visitors`, `PATCH /api/v1/visitors/{id}/status` |
+| **Polls & Voting** | `PollsViewComponent` | `polls()`, `castPollVote()`, `createPoll()`, `closePoll()` | `GET/POST /api/v1/polls`, `POST /api/v1/polls/{id}/vote` |
+| **Parking & EV Bays** | `ParkingViewComponent` | `parkingSlots()`, `registerParkingVehicle()` | `GET/POST /api/v1/parking-slots` |
+| **Security Audit Trail** | `SettingsViewComponent` | `auditLogs()`, `logAudit()`, `updateSocietySettings()` | `GET /api/v1/admin/audit-logs`, `PATCH /api/v1/society/settings` |
+| **Complaint Ratings** | `ComplaintsViewComponent` | `complaints()`, `rateComplaint()`, `updateComplaintStatus()` | `PATCH /api/v1/complaints/{id}/rating` |
+| **Document Upload** | `DocumentsViewComponent` | `documents()`, `uploadDocument()` | `POST /api/v1/documents` |
 
 ------------------------------------------------------------------------
 

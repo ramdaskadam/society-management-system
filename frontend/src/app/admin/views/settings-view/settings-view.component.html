@@ -1,37 +1,146 @@
-<div class="page-header">
-      <div class="page-title-group">
-        <h1>Society Configuration & Settings</h1>
-        <p>Society rules, billing parameters, registration certificate details</p>
+@if (state.currentView() === 'help') {
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1>Helpdesk, Emergency Contacts & FAQs</h1>
+      <p>24×7 security intercom directory, on-call maintenance vendors, and resident guidelines</p>
+    </div>
+  </div>
+
+  <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 24px;">
+    <div class="dash-card">
+      <span class="badge badge-unpaid" style="width: fit-content; margin-bottom: 8px;">24×7 Security</span>
+      <h3 style="font-size: 1rem; font-weight: 700;">Main Gate & Boom Barrier</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 10px;">Intercom: <strong>#100</strong> • Direct: <strong>+91 22 2781 0100</strong></p>
+      <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">● Guard Supervisor On Duty</div>
+    </div>
+    <div class="dash-card">
+      <span class="badge badge-info" style="width: fit-content; margin-bottom: 8px;">Estate Office</span>
+      <h3 style="font-size: 1rem; font-weight: 700;">Society Manager Desk</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 10px;">Intercom: <strong>#105</strong> • Direct: <strong>+91 98201 99100</strong></p>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">Mon–Sat: 09:30 AM – 06:30 PM</div>
+    </div>
+    <div class="dash-card">
+      <span class="badge badge-pending" style="width: fit-content; margin-bottom: 8px;">On-Call Technical</span>
+      <h3 style="font-size: 1rem; font-weight: 700;">Plumbing & Electrical</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 10px;">Mahesh (Plumber): <strong>+91 98190 44211</strong></p>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">Raju (Electrician): <strong>+91 98190 44212</strong></div>
+    </div>
+    <div class="dash-card">
+      <span class="badge badge-paid" style="width: fit-content; margin-bottom: 8px;">Lift Emergency</span>
+      <h3 style="font-size: 1rem; font-weight: 700;">Otis 24×7 Rescue Line</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 10px;">Toll-Free: <strong>1800-22-6847</strong></p>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">AMC Contract #OTIS-GM-2024</div>
+    </div>
+  </div>
+
+  <div class="dash-card">
+    <h3 class="dash-card-title" style="margin-bottom: 14px;">Frequently Asked Resident Questions (Bylaws & Operations)</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <details style="padding: 12px 16px; background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+        <summary style="font-weight: 700; cursor: pointer; font-size: 0.875rem;">How are monthly maintenance charges calculated?</summary>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+          Maintenance is billed on the 1st of every month at ₹ {{ society.maintenancePerSqFt }} per sq.ft of carpet area, plus Sinking Fund contribution, municipal water charges, and allocated stilt/open parking fees.
+        </p>
+      </details>
+      <details style="padding: 12px 16px; background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+        <summary style="font-weight: 700; cursor: pointer; font-size: 0.875rem;">How do I pre-approve a guest or delivery executive at the gate?</summary>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+          Open the <strong>Visitors & Gate</strong> tab in the sidebar and click <em>Pre-Approve Visitor (OTP)</em>. Share the 6-digit passcode with your guest for instant entry at the main gate without intercom delays.
+        </p>
+      </details>
+      <details style="padding: 12px 16px; background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+        <summary style="font-weight: 700; cursor: pointer; font-size: 0.875rem;">What is the procedure for tenant police verification and Move-In/Move-Out NOC?</summary>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+          Submit the registered Leave & License agreement and online Police Verification receipt via the Estate Office at least 48 hours prior to shifting. Heavy vehicle movement is permitted between 09:00 AM and 06:00 PM.
+        </p>
+      </details>
+    </div>
+  </div>
+} @else {
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1>Society Configuration & Security Audit Trail</h1>
+      <p>Manage society billing rules, statutory registration details, and immutable administrative audit logs</p>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: start;">
+    <div class="dash-card">
+      <div class="dash-card-header">
+        <div>
+          <h3 class="dash-card-title">Society & Billing Parameters</h3>
+          <p class="dash-card-subtitle">Changes immediately apply to future invoice batches and are recorded in the audit log</p>
+        </div>
       </div>
+
+      <form (ngSubmit)="saveSettings()">
+        <div class="form-group">
+          <label class="form-label" for="soc-name">Registered Society Name</label>
+          <input id="soc-name" type="text" class="form-control" name="fullName" [(ngModel)]="fullName" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="soc-reg">Registration Number</label>
+            <input id="soc-reg" type="text" class="form-control" [value]="society.regNo" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="soc-units">Total Configured Units</label>
+            <input id="soc-units" type="text" class="form-control" [value]="society.totalUnits + ' Units (' + society.totalWings + ' Wings)'" readonly />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="soc-addr">Registered Office Address</label>
+          <input id="soc-addr" type="text" class="form-control" name="address" [(ngModel)]="address" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="soc-rate">Maintenance Rate (₹ / sq.ft / month)</label>
+            <input id="soc-rate" type="number" step="0.1" class="form-control" name="maintenancePerSqFt" [(ngModel)]="maintenancePerSqFt" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="soc-late">Overdue Interest Rate (% p.a.)</label>
+            <input id="soc-late" type="number" step="0.5" class="form-control" name="lateFeePercentage" [(ngModel)]="lateFeePercentage" required />
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+          <button type="submit" class="btn-primary">Save Configuration</button>
+        </div>
+      </form>
     </div>
 
-    <div class="dash-card" style="max-width: 720px;">
-      <div class="form-group">
-        <label class="form-label">Society Name</label>
-        <input type="text" class="form-control" [value]="society.fullName" readonly />
+    <div class="dash-card">
+      <div class="dash-card-header">
+        <div>
+          <h3 class="dash-card-title">Administrative & Financial Audit Trail</h3>
+          <p class="dash-card-subtitle">Compliance log for sensitive operations (NFR-SEC-006)</p>
+        </div>
+        <span class="badge badge-paid">Immutable Log</span>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Registration Number</label>
-          <input type="text" class="form-control" [value]="society.regNo" readonly />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Total Units</label>
-          <input type="text" class="form-control" [value]="society.totalUnits + ' Units (4 Wings)'" readonly />
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Registered Office Address</label>
-        <input type="text" class="form-control" [value]="society.address" readonly />
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Base Maintenance Charge Rate</label>
-          <input type="text" class="form-control" [value]="'₹ ' + society.maintenancePerSqFt + ' / sq.ft / month'" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Late Payment Interest Rate</label>
-          <input type="text" class="form-control" [value]="society.lateFeePercentage + '% per annum'" />
-        </div>
+
+      <div tabindex="0" role="region" aria-label="Administrative audit trail" class="table-responsive">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Log ID</th>
+              <th>Module</th>
+              <th>Actor</th>
+              <th>Event Details</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (log of state.auditLogs(); track log.id) {
+              <tr>
+                <td style="font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem;">{{ log.id }}</td>
+                <td><span class="badge badge-info">{{ log.module }}</span></td>
+                <td style="font-weight: 600;">{{ log.actor }}</td>
+                <td style="font-size: 0.78rem; color: var(--text-muted);">{{ log.details }}</td>
+                <td style="font-size: 0.75rem; white-space: nowrap;">{{ log.timestamp }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
+}

@@ -1,0 +1,218 @@
+<div class="page-header">
+  <div class="page-title-group">
+    <h1>Visitor & Gate Security Management</h1>
+    <p>Pre-approve guests & deliveries with 6-digit Gate OTP passes and monitor real-time entry logs</p>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn-primary" (click)="showPreApproveForm = !showPreApproveForm">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      {{ showPreApproveForm ? 'Close Pass Form' : 'Pre-Approve Visitor (OTP)' }}
+    </button>
+  </div>
+</div>
+
+<!-- SUMMARY METRICS -->
+<div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+  <div class="stat-card theme-green">
+    <div class="stat-info">
+      <span class="stat-label">Inside Premises Now</span>
+      <span class="stat-value">{{ insideCount }}</span>
+      <span class="stat-trend positive">Active Gate Check-ins</span>
+    </div>
+  </div>
+  <div class="stat-card theme-blue">
+    <div class="stat-info">
+      <span class="stat-label">Pre-Approved Passes</span>
+      <span class="stat-value">{{ preApprovedCount }}</span>
+      <span class="stat-trend neutral">OTP Verified Ready</span>
+    </div>
+  </div>
+  <div class="stat-card theme-orange">
+    <div class="stat-info">
+      <span class="stat-label">Waiting Gate Approval</span>
+      <span class="stat-value">{{ waitingCount }}</span>
+      <span class="stat-trend negative">Intercom / App Action</span>
+    </div>
+  </div>
+  <div class="stat-card theme-purple">
+    <div class="stat-info">
+      <span class="stat-label">Total Logged Today</span>
+      <span class="stat-value">{{ state.visitors().length }}</span>
+      <span class="stat-trend positive">Main Gate Boom Barrier</span>
+    </div>
+  </div>
+</div>
+
+<!-- NEWLY GENERATED OTP BANNER -->
+@if (lastGeneratedPass) {
+  <div class="otp-pass-banner">
+    <div class="otp-pass-left">
+      <span class="badge badge-paid">INSTANT GATE PASS READY</span>
+      <h3>{{ lastGeneratedPass.visitorName }} ({{ lastGeneratedPass.visitorType }})</h3>
+      <p>Unit {{ lastGeneratedPass.unitNo }} • Expected: {{ lastGeneratedPass.expectedTime }}</p>
+    </div>
+    <div class="otp-code-box">
+      <span class="otp-label">GATE ENTRY OTP</span>
+      <span class="otp-digits">{{ lastGeneratedPass.passCode }}</span>
+    </div>
+    <button class="btn-secondary" (click)="lastGeneratedPass = null">Dismiss</button>
+  </div>
+}
+
+<!-- INLINE PRE-APPROVE VISITOR FORM -->
+@if (showPreApproveForm) {
+  <div class="dash-card" style="margin-bottom: 24px; border: 2px solid var(--accent-primary);">
+    <div class="dash-card-header">
+      <div>
+        <h3 class="dash-card-title">Generate Pre-Approved Gate Pass</h3>
+        <p class="dash-card-subtitle">Share the 6-digit OTP with your guest or delivery executive for zero-wait gate entry</p>
+      </div>
+    </div>
+    <form (ngSubmit)="onSubmitPreApprove()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="vis-name">Visitor / Executive Name *</label>
+          <input id="vis-name" type="text" class="form-control" name="visitorName" [(ngModel)]="visitorName" required placeholder="e.g. Rohan Mehta or Amazon Delivery" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vis-type">Visitor Category</label>
+          <select id="vis-type" class="form-control" name="visitorType" [(ngModel)]="visitorType">
+            <option value="Guest">Personal Guest / Family</option>
+            <option value="Delivery">Parcel / Food Delivery</option>
+            <option value="Cab">Cab / Taxi Pickup</option>
+            <option value="Home Service">Home Service / Technician</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="vis-phone">Mobile Number *</label>
+          <input id="vis-phone" type="tel" class="form-control" name="phone" [(ngModel)]="phone" required pattern="[\+\d\s\-]{10,16}" placeholder="+91 98201 00000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vis-company">Company / Organization</label>
+          <input id="vis-company" type="text" class="form-control" name="company" [(ngModel)]="company" placeholder="e.g. Swiggy, Blinkit, Personal" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="vis-time">Expected Arrival Window</label>
+          <input id="vis-time" type="text" class="form-control" name="expectedTime" [(ngModel)]="expectedTime" placeholder="Today, 07:30 PM" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vis-veh">Vehicle Number (Optional)</label>
+          <input id="vis-veh" type="text" class="form-control" name="vehicleNo" [(ngModel)]="vehicleNo" placeholder="e.g. MH-02-AB-1234" />
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+        <button type="button" class="btn-secondary" (click)="showPreApproveForm = false">Cancel</button>
+        <button type="submit" class="btn-primary">Generate 6-Digit Gate Pass</button>
+      </div>
+    </form>
+  </div>
+}
+
+<!-- VISITOR REGISTER TABLE -->
+<div class="dash-card">
+  <div class="dash-card-header" style="flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h3 class="dash-card-title">
+        {{ state.currentUserRole() === 'admin' ? 'Live Society Gate Entry Register' : 'My Unit (A-101) Visitor & Delivery Passes' }}
+      </h3>
+      <p class="dash-card-subtitle">Real-time synchronization with Main Gate Security Kiosk</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      @for (st of ['All', 'Waiting Approval', 'Pre-Approved', 'Inside Premises', 'Checked Out']; track st) {
+        <button
+          class="btn-secondary"
+          [style.background]="statusFilter === st ? 'var(--accent-primary)' : ''"
+          [style.color]="statusFilter === st ? '#ffffff' : ''"
+          style="padding: 6px 12px; font-size: 0.75rem;"
+          (click)="statusFilter = st"
+        >
+          {{ st }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div tabindex="0" role="region" aria-label="Visitor and gate security log" class="table-responsive">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>Gate OTP</th>
+          <th>Visitor Details</th>
+          <th>Type</th>
+          <th>Unit & Host</th>
+          <th>Timings</th>
+          <th>Status</th>
+          <th>Gate Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of filteredVisitors; track v.id) {
+          <tr>
+            <td>
+              <span class="otp-pill">{{ v.passCode }}</span>
+            </td>
+            <td>
+              <strong>{{ v.visitorName }}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">
+                📞 {{ v.phone }}
+                @if (v.vehicleNo) {
+                  • 🚗 {{ v.vehicleNo }}
+                }
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-info">{{ v.visitorType }}</span>
+            </td>
+            <td>
+              <strong>{{ v.unitNo }}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">{{ v.hostName }}</div>
+            </td>
+            <td style="font-size: 0.775rem;">
+              <div>Expected: {{ v.expectedTime }}</div>
+              @if (v.checkInTime) {
+                <div style="color: #059669; font-weight: 600;">In: {{ v.checkInTime }}</div>
+              }
+              @if (v.checkOutTime) {
+                <div style="color: #64748b;">Out: {{ v.checkOutTime }}</div>
+              }
+            </td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'badge-paid': v.status === 'Inside Premises' || v.status === 'Pre-Approved',
+                  'badge-pending': v.status === 'Waiting Approval',
+                  'badge-completed': v.status === 'Checked Out',
+                  'badge-unpaid': v.status === 'Denied'
+                }"
+              >
+                {{ v.status }}
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                @if (v.status === 'Waiting Approval') {
+                  <button class="table-btn-pay" (click)="updateStatus(v.id, 'Inside Premises')">Approve Entry</button>
+                  <button class="table-btn-pay" style="background: #ef4444;" (click)="updateStatus(v.id, 'Denied')">Deny</button>
+                } @else if (v.status === 'Pre-Approved') {
+                  <button class="table-btn-pay" style="background: #2563eb;" (click)="updateStatus(v.id, 'Inside Premises')">Gate Check-In</button>
+                } @else if (v.status === 'Inside Premises') {
+                  <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" (click)="updateStatus(v.id, 'Checked Out')">Mark Exit</button>
+                } @else {
+                  <span style="color: var(--text-light); font-size: 0.75rem;">Logged</span>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+

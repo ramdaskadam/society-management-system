@@ -1,0 +1,130 @@
+<div class="page-header">
+  <div class="page-title-group">
+    <h1>Community Polls & Committee Resolutions</h1>
+    <p>Transparent digital voting on society capital projects, bylaw amendments, and AGM resolutions (1 Unit = 1 Vote)</p>
+  </div>
+  @if (state.currentUserRole() === 'admin') {
+    <div class="page-header-actions">
+      <button class="btn-primary" (click)="showCreateForm = !showCreateForm">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        {{ showCreateForm ? 'Close Form' : 'Launch Resolution Poll' }}
+      </button>
+    </div>
+  }
+</div>
+
+@if (showCreateForm) {
+  <div class="dash-card" style="margin-bottom: 24px; border: 2px solid var(--accent-primary);">
+    <div class="dash-card-header">
+      <div>
+        <h3 class="dash-card-title">Launch New Society Resolution Poll</h3>
+        <p class="dash-card-subtitle">All verified unit owners and authorized residents can cast one vote per unit</p>
+      </div>
+    </div>
+    <form (ngSubmit)="onCreatePoll()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="poll-title">Resolution / Poll Title *</label>
+          <input id="poll-title" type="text" class="form-control" name="title" [(ngModel)]="title" required placeholder="e.g. Approval for Children's Play Area EPDM Flooring" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="poll-cat">Resolution Category</label>
+          <select id="poll-cat" class="form-control" name="category" [(ngModel)]="category">
+            <option value="Capital Expenditure">Capital Expenditure</option>
+            <option value="Rule Amendment">Rule Amendment</option>
+            <option value="Committee Election">Committee Election</option>
+            <option value="Event Planning">Event Planning</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="poll-desc">Detailed Proposal & Cost Impact *</label>
+        <textarea id="poll-desc" rows="2" class="form-control" name="description" [(ngModel)]="description" required placeholder="Summarize vendor quotes, warranty, and sinking fund impact..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="poll-opt1">Option 1 *</label>
+          <input id="poll-opt1" type="text" class="form-control" name="option1" [(ngModel)]="option1" required placeholder="e.g. Approve Proposal A" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="poll-opt2">Option 2 *</label>
+          <input id="poll-opt2" type="text" class="form-control" name="option2" [(ngModel)]="option2" required placeholder="e.g. Reject / Defer" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="poll-opt3">Option 3 (Optional)</label>
+          <input id="poll-opt3" type="text" class="form-control" name="option3" [(ngModel)]="option3" placeholder="e.g. Request fresh vendor tenders" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="poll-end">Voting Deadline</label>
+          <input id="poll-end" type="text" class="form-control" name="endDate" [(ngModel)]="endDate" />
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn-secondary" (click)="showCreateForm = false">Cancel</button>
+        <button type="submit" class="btn-primary">Publish Poll to Society</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="polls-grid">
+  @for (poll of state.polls(); track poll.id) {
+    <div class="dash-card poll-card">
+      <div class="poll-header-row">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="badge badge-info">{{ poll.category }}</span>
+          <span class="badge" [ngClass]="poll.status === 'Active' ? 'badge-paid' : 'badge-completed'">
+            {{ poll.status === 'Active' ? '● Live Voting' : 'Closed' }}
+          </span>
+        </div>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+          Closes: {{ poll.endDate }}
+        </span>
+      </div>
+
+      <h3 class="poll-title">{{ poll.title }}</h3>
+      <p class="poll-desc">{{ poll.description }}</p>
+
+      <div class="poll-options-list">
+        @for (opt of poll.options; track opt.id) {
+          <button
+            type="button"
+            class="poll-option-btn"
+            [class.voted]="poll.userVotedOptionId === opt.id"
+            [disabled]="poll.status !== 'Active'"
+            (click)="vote(poll.id, opt.id)"
+          >
+            <div class="poll-option-bar" [style.width.%]="getPercentage(opt.votes, poll.totalVotes)"></div>
+            <div class="poll-option-content">
+              <span class="poll-option-text">
+                <span class="poll-radio-dot" [class.checked]="poll.userVotedOptionId === opt.id"></span>
+                {{ opt.text }}
+              </span>
+              <span class="poll-option-stats">
+                <strong>{{ getPercentage(opt.votes, poll.totalVotes) }}%</strong>
+                <span>({{ opt.votes }} votes)</span>
+              </span>
+            </div>
+          </button>
+        }
+      </div>
+
+      <div class="poll-footer">
+        <div style="font-size: 0.775rem; color: var(--text-muted);">
+          👥 <strong>{{ poll.totalVotes }} / 128 Units</strong> participated • By {{ poll.createdBy }}
+        </div>
+        @if (state.currentUserRole() === 'admin' && poll.status === 'Active') {
+          <button class="btn-secondary" style="padding: 5px 12px; font-size: 0.75rem;" (click)="closePoll(poll.id)">
+            Close Poll & Lock Tally
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>
+

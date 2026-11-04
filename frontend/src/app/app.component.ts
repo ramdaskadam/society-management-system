@@ -35,6 +35,11 @@ import { MemberDashboardComponent } from './member/views/member-dashboard/member
 import { DocumentsViewComponent } from './member/views/documents-view/documents-view.component';
 import { ProfileViewComponent } from './member/views/profile-view/profile-view.component';
 
+// ── Shared Feature Views ──────────────────────────────────────────────────────
+import { VisitorsViewComponent } from './shared/views/visitors-view/visitors-view.component';
+import { PollsViewComponent } from './shared/views/polls-view/polls-view.component';
+import { ParkingViewComponent } from './shared/views/parking-view/parking-view.component';
+
 // ── Member Dialogs ────────────────────────────────────────────────────────────
 import { PayNowDialogComponent } from './member/dialogs/pay-now-dialog/pay-now-dialog.component';
 import { RaiseComplaintDialogComponent } from './member/dialogs/raise-complaint-dialog/raise-complaint-dialog.component';
@@ -72,6 +77,10 @@ import { BookAmenityDialogComponent } from './member/dialogs/book-amenity-dialog
     MemberDashboardComponent,
     DocumentsViewComponent,
     ProfileViewComponent,
+    // Shared feature views
+    VisitorsViewComponent,
+    PollsViewComponent,
+    ParkingViewComponent,
     // Member dialogs
     PayNowDialogComponent,
     RaiseComplaintDialogComponent,
@@ -135,6 +144,12 @@ export class AppComponent implements OnInit {
       this.state.setView('amenities');
     } else if (q === 'member' || q === 'unit' || q === 'a-101') {
       this.state.setView(this.state.currentUserRole() === 'admin' ? 'members' : 'my-unit');
+    } else if (q === 'visitor' || q === 'gate' || q === 'otp' || q === 'delivery') {
+      this.state.setView('visitors');
+    } else if (q === 'poll' || q === 'vote' || q === 'solar') {
+      this.state.setView('polls');
+    } else if (q === 'parking' || q === 'ev' || q === 'vehicle' || q === 'car') {
+      this.state.setView('parking');
     }
   }
 

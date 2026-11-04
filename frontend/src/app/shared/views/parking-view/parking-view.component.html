@@ -1,0 +1,173 @@
+<div class="page-header">
+  <div class="page-title-group">
+    <h1>Parking Allocation, Vehicles & EV Bays</h1>
+    <p>Stilt & open parking directory, FASTag/RFID boom-barrier stickers, and EV charging bay telemetry</p>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn-primary" (click)="showRegisterForm = !showRegisterForm">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      {{ showRegisterForm ? 'Close Form' : 'Register Vehicle / RFID' }}
+    </button>
+  </div>
+</div>
+
+<div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+  <div class="stat-card theme-blue">
+    <div class="stat-info">
+      <span class="stat-label">Allocated Resident Bays</span>
+      <span class="stat-value">{{ allocatedCount }}</span>
+      <span class="stat-trend positive">RFID Boom-Barrier Linked</span>
+    </div>
+  </div>
+  <div class="stat-card theme-green">
+    <div class="stat-info">
+      <span class="stat-label">EV Charging Enabled Bays</span>
+      <span class="stat-value">{{ evBaysCount }}</span>
+      <span class="stat-trend positive">7.4 kW Type-2 AC Chargers</span>
+    </div>
+  </div>
+  <div class="stat-card theme-purple">
+    <div class="stat-info">
+      <span class="stat-label">Visitor Bays Vacant</span>
+      <span class="stat-value">{{ visitorBaysAvailable }}</span>
+      <span class="stat-trend neutral">Gate G1 Visitor Zone</span>
+    </div>
+  </div>
+  <div class="stat-card theme-orange">
+    <div class="stat-info">
+      <span class="stat-label">Total Tracked Bays</span>
+      <span class="stat-value">{{ state.parkingSlots().length }}</span>
+      <span class="stat-trend positive">Wings A, B, C, D & Visitor</span>
+    </div>
+  </div>
+</div>
+
+@if (showRegisterForm) {
+  <div class="dash-card" style="margin-bottom: 24px; border: 2px solid var(--accent-primary);">
+    <div class="dash-card-header">
+      <div>
+        <h3 class="dash-card-title">Register Vehicle & Issue RFID Sticker</h3>
+        <p class="dash-card-subtitle">Assign a vehicle to a stilt/surface slot and issue an automated gate RFID tag</p>
+      </div>
+    </div>
+    <form (ngSubmit)="onRegisterVehicle()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="pk-veh">Vehicle Registration Number *</label>
+          <input id="pk-veh" type="text" class="form-control" name="vehicleNo" [(ngModel)]="vehicleNo" required placeholder="e.g. MH-02-gh-8821" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pk-vtype">Vehicle Type</label>
+          <select id="pk-vtype" class="form-control" name="vehicleType" [(ngModel)]="vehicleType">
+            <option value="4-Wheeler">4-Wheeler (Car / SUV)</option>
+            <option value="2-Wheeler">2-Wheeler (Bike / Scooter)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="pk-slot">Parking Slot Code *</label>
+          <input id="pk-slot" type="text" class="form-control" name="slotNo" [(ngModel)]="slotNo" required placeholder="e.g. S-A101 or EV-A101" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pk-type">Bay Category</label>
+          <select id="pk-type" class="form-control" name="type" [(ngModel)]="type">
+            <option value="Covered Stilt">Covered Stilt</option>
+            <option value="Open Surface">Open Surface</option>
+            <option value="EV Charging Bay">EV Charging Bay</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="pk-unit">Unit Number</label>
+          <input id="pk-unit" type="text" class="form-control" name="unitNo" [(ngModel)]="unitNo" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pk-owner">Resident / Owner Name</label>
+          <input id="pk-owner" type="text" class="form-control" name="ownerName" [(ngModel)]="ownerName" required />
+        </div>
+      </div>
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <input id="pk-ev" type="checkbox" name="evEnabled" [(ngModel)]="evEnabled" />
+        <label for="pk-ev" style="font-size: 0.84rem; font-weight: 600;">Enable Sub-Metered EV Charging Point on this Bay</label>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn-secondary" (click)="showRegisterForm = false">Cancel</button>
+        <button type="submit" class="btn-primary">Allocate Bay & Issue RFID</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="dash-card">
+  <div class="dash-card-header" style="flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h3 class="dash-card-title">Society Parking & EV Bay Directory</h3>
+      <p class="dash-card-subtitle">Verified resident vehicles, RFID tags, and EV charging meter status</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      @for (tp of ['All', 'Covered Stilt', 'EV Charging Bay', 'Open Surface', 'Visitor Bay']; track tp) {
+        <button
+          class="btn-secondary"
+          [style.background]="typeFilter === tp ? 'var(--accent-primary)' : ''"
+          [style.color]="typeFilter === tp ? '#ffffff' : ''"
+          style="padding: 6px 12px; font-size: 0.75rem;"
+          (click)="typeFilter = tp"
+        >
+          {{ tp }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div tabindex="0" role="region" aria-label="Parking and EV bay allocation directory" class="table-responsive">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>Slot #</th>
+          <th>Bay Type</th>
+          <th>Unit</th>
+          <th>Resident / Assignee</th>
+          <th>Vehicle Number</th>
+          <th>RFID Sticker</th>
+          <th>EV Ready</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (slot of filteredSlots; track slot.id) {
+          <tr>
+            <td style="font-weight: 700; font-family: var(--font-mono);">{{ slot.slotNo }}</td>
+            <td>{{ slot.type }}</td>
+            <td><span class="badge badge-info">{{ slot.unitNo }}</span></td>
+            <td>{{ slot.ownerName }}</td>
+            <td style="font-weight: 700; font-family: var(--font-mono);">
+              {{ slot.vehicleType === '4-Wheeler' ? '🚗' : '🛵' }} {{ slot.vehicleNo }}
+            </td>
+            <td style="font-family: var(--font-mono); font-size: 0.75rem;">{{ slot.rfidTag }}</td>
+            <td>
+              @if (slot.evEnabled) {
+                <span class="badge badge-paid">⚡ EV 7.4kW</span>
+              } @else {
+                <span style="color: var(--text-light); font-size: 0.75rem;">Standard</span>
+              }
+            </td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="slot.status === 'Allocated' ? 'badge-confirmed' : (slot.status === 'Vacant' ? 'badge-completed' : 'badge-pending')"
+              >
+                {{ slot.status }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+

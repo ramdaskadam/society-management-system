@@ -1,0 +1,117 @@
+{
+  "notices": [
+    {
+      "id": "NOT-01",
+      "title": "Annual General Body Meeting (AGM 2024)",
+      "category": "Official Meeting",
+      "publishDate": "15 May 2024",
+      "meetingDate": "25 May 2024 at 6:00 PM",
+      "location": "Community Hall, Green Meadows Clubhouse",
+      "summary": "The 6th Annual General Body Meeting will be held to discuss annual audited accounts, maintenance fee revision for FY 24-25, and lift AMC renewals. All members are requested to attend.",
+      "pinned": true,
+      "author": "Managing Committee",
+      "attachment": "AGM_Notice_Agenda_2024.pdf"
+    },
+    {
+      "id": "NOT-02",
+      "title": "Monsoon Waterproofing and Drain Cleaning Drive",
+      "category": "Maintenance",
+      "publishDate": "20 May 2024",
+      "meetingDate": "01 June - 07 June 2024",
+      "location": "Terrace & Ground Gutters, All Wings",
+      "summary": "Annual preventive waterproofing inspection and terrace drain declogging starts next week. Please keep terrace doors closed during contractor spray operations.",
+      "pinned": false,
+      "author": "Estate Manager",
+      "attachment": "Monsoon_Guidelines.pdf"
+    },
+    {
+      "id": "NOT-03",
+      "title": "Clubhouse Swimming Pool Periodic Maintenance",
+      "category": "Amenities",
+      "publishDate": "28 May 2024",
+      "meetingDate": "02 June - 04 June 2024",
+      "location": "Clubhouse Pool Deck",
+      "summary": "The swimming pool will remain closed for 48 hours for annual deep chemical filtration, tile scrubbing, and water replacement.",
+      "pinned": false,
+      "author": "Facility Desk",
+      "attachment": null
+    }
+  ],
+  "amenities": [
+    {
+      "id": "AMN-01",
+      "name": "Community Hall",
+      "capacity": "150 Persons",
+      "charge": "₹2,500 / slot",
+      "deposit": "₹5,000 refundable",
+      "timings": "09:00 AM - 11:00 PM",
+      "available": true,
+      "description": "Fully air-conditioned banquet hall with stage, audio system, and pantry area for family celebrations."
+    },
+    {
+      "id": "AMN-02",
+      "name": "Club House",
+      "capacity": "50 Persons",
+      "charge": "₹1,000 / slot",
+      "deposit": "₹2,000 refundable",
+      "timings": "06:00 AM - 10:00 PM",
+      "available": true,
+      "description": "Indoor recreation hub equipped with table tennis, chess, billiards lounge, and soft seating."
+    },
+    {
+      "id": "AMN-03",
+      "name": "Badminton Court",
+      "capacity": "4 Players",
+      "charge": "Free for residents",
+      "deposit": "None",
+      "timings": "06:00 AM - 10:00 PM",
+      "available": true,
+      "description": "Synthetic indoor wooden-cushioned court with tournament-grade LED floodlights."
+    },
+    {
+      "id": "AMN-04",
+      "name": "Gymnasium & Yoga Studio",
+      "capacity": "25 Persons",
+      "charge": "Included in Maintenance",
+      "deposit": "None",
+      "timings": "05:30 AM - 10:30 PM",
+      "available": true,
+      "description": "Modern cardiovascular and strength training equipment with certified morning trainers."
+    }
+  ],
+  "bookings": [
+    {
+      "id": "BK-104",
+      "amenity": "Community Hall",
+      "date": "25 May 2024",
+      "time": "06:00 PM - 10:00 PM",
+      "bookedBy": "Rahul Sharma",
+      "unitNo": "A-101",
+      "purpose": "Family Anniversary Dinner",
+      "status": "Confirmed",
+      "amount": "₹2,500"
+    },
+    {
+      "id": "BK-101",
+      "amenity": "Club House",
+      "date": "12 May 2024",
+      "time": "04:00 PM - 07:00 PM",
+      "bookedBy": "Rahul Sharma",
+      "unitNo": "A-101",
+      "purpose": "Birthday Gathering",
+      "status": "Completed",
+      "amount": "₹1,000"
+    },
+    {
+      "id": "BK-105",
+      "amenity": "Community Hall",
+      "date": "08 Jun 2024",
+      "time": "10:00 AM - 02:00 PM",
+      "bookedBy": "Ananya Deshmukh",
+      "unitNo": "B-101",
+      "purpose": "Housewarming Luncheon",
+      "status": "Pending Approval",
+      "amount": "₹2,500"
+    }
+  ]
+}

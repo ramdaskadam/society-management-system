@@ -1,0 +1,61 @@
+.otp-pass-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-lg);
+}
+
+.otp-pass-left h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.otp-pass-left p {
+  font-size: 0.825rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.otp-code-box {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px dashed #10b981;
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  text-align: center;
+}
+
+.otp-label {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: #6ee7b7;
+  font-weight: 700;
+}
+
+.otp-digits {
+  font-family: var(--font-mono);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #ffffff;
+}
+
+.otp-pill {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.08em;
+}
+

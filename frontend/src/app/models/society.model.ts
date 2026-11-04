@@ -58,7 +58,7 @@ export interface ComplaintStats {
 
 export interface Activity {
   id: string;
-  type: 'payment' | 'complaint' | 'notice' | 'amenity';
+  type: 'payment' | 'complaint' | 'notice' | 'amenity' | 'visitor' | 'poll';
   title: string;
   subtitle: string;
   amount?: string;
@@ -136,6 +136,7 @@ export interface Complaint {
   status: 'Open' | 'In Progress' | 'Resolved' | 'Closed';
   assignedTo?: string;
   internalNote?: string;
+  rating?: number;
 }
 
 export interface Notice {
@@ -196,4 +197,63 @@ export interface ToastMessage {
   id: string;
   message: string;
   type: 'success' | 'info' | 'warning' | 'danger';
+}
+
+export interface VisitorPass {
+  id: string;
+  passCode: string;
+  visitorName: string;
+  visitorType: 'Guest' | 'Delivery' | 'Cab' | 'Home Service';
+  company?: string;
+  unitNo: string;
+  hostName: string;
+  phone: string;
+  expectedTime: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  vehicleNo?: string;
+  status: 'Pre-Approved' | 'Waiting Approval' | 'Inside Premises' | 'Checked Out' | 'Denied';
+}
+
+export interface PollOption {
+  id: string;
+  text: string;
+  votes: number;
+}
+
+export interface SocietyPoll {
+  id: string;
+  title: string;
+  description: string;
+  category: 'Capital Expenditure' | 'Rule Amendment' | 'Committee Election' | 'Event Planning';
+  createdBy: string;
+  endDate: string;
+  status: 'Active' | 'Closed';
+  totalVotes: number;
+  userVotedOptionId?: string | null;
+  options: PollOption[];
+}
+
+export interface ParkingSlot {
+  id: string;
+  slotNo: string;
+  wing: string;
+  type: 'Covered Stilt' | 'Open Surface' | 'EV Charging Bay' | 'Visitor Bay';
+  unitNo: string;
+  ownerName: string;
+  vehicleNo: string;
+  vehicleType: '4-Wheeler' | '2-Wheeler';
+  rfidTag: string;
+  evEnabled: boolean;
+  status: 'Allocated' | 'Vacant' | 'Occupied (Visitor)';
+}
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  actor: string;
+  role: UserRole;
+  action: string;
+  module: 'Billing' | 'Security' | 'Complaints' | 'Notices' | 'Settings' | 'Governance';
+  details: string;
 }

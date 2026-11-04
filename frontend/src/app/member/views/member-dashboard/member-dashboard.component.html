@@ -60,9 +60,9 @@
       <div class="member-feature-card">
         <div class="member-card-content">
           <div class="member-card-title">Recent Notice</div>
-          <div class="notice-preview-title">{{ recentNotice?.title || 'Annual General Meeting' }}</div>
+          <div class="notice-preview-title">{{ recentNotice.title || 'Annual General Meeting' }}</div>
           <div class="notice-preview-desc">
-            {{ recentNotice?.meetingDate }} • {{ recentNotice?.location }}
+            {{ recentNotice.meetingDate }} • {{ recentNotice.location }}
           </div>
           <a href="javascript:void(0)" class="card-footer-link" style="margin-top: 10px;" (click)="navigateTo('notices')">
             View all notices <span>→</span>

@@ -13,12 +13,14 @@ import { Complaint } from '../../../models/society.model';
 })
 export class ComplaintsViewComponent {
   readonly state = inject(SocietyStateService);
+  statusFilter = 'All';
 
   get displayedComplaints(): Complaint[] {
-    if (this.state.currentUserRole() === 'member') {
-      return this.state.complaints().filter(c => c.unitNo === 'A-101');
-    }
-    return this.state.complaints();
+    const base = this.state.currentUserRole() === 'member'
+      ? this.state.complaints().filter(c => c.unitNo === 'A-101')
+      : this.state.complaints();
+    if (this.statusFilter === 'All') return base;
+    return base.filter(c => c.status === this.statusFilter);
   }
 
   getStatusClass(status: Complaint['status']): string {
@@ -33,6 +35,10 @@ export class ComplaintsViewComponent {
 
   onStatusChange(id: string, newStatus: Complaint['status']): void {
     this.state.updateComplaintStatus(id, newStatus);
+  }
+
+  rateResolution(id: string, stars: number): void {
+    this.state.rateComplaint(id, stars);
   }
 
   openRaiseComplaint(): void {

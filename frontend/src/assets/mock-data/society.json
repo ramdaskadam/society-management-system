@@ -1,0 +1,65 @@
+{
+  "society": {
+    "name": "Green Meadows",
+    "fullName": "Green Meadows Co-operative Housing Society Ltd.",
+    "regNo": "MH/MUM/HSG/2018/1429",
+    "address": "Plot 42, Palm Beach Road, Sector 19, Sanpada, Navi Mumbai - 400705",
+    "totalWings": 4,
+    "totalUnits": 128,
+    "occupiedUnits": 128,
+    "totalMembers": 256,
+    "maintenancePerSqFt": 3.5,
+    "lateFeePercentage": 18,
+    "currency": "₹"
+  },
+  "adminUser": {
+    "name": "Admin User",
+    "role": "Super Admin",
+    "email": "admin@greenmeadows.org",
+    "avatar": "/assets/admin_avatar.jpg"
+  },
+  "memberUser": {
+    "name": "Rahul Sharma",
+    "role": "Flat Owner",
+    "email": "rahul.sharma@example.com",
+    "phone": "+91 98201 44521",
+    "unit": "A-101",
+    "wing": "A",
+    "floor": 1,
+    "type": "3 BHK",
+    "area": "1450 sq.ft",
+    "occupants": 3,
+    "avatar": "/assets/resident_avatar.jpg",
+    "vehicles": [
+      "MH-02-CB-4521 (Car)",
+      "MH-02-EE-1122 (Two-wheeler)"
+    ]
+  },
+  "metrics": {
+    "totalMembers": 256,
+    "membersGrowth": "+8 this month",
+    "totalUnits": 128,
+    "unitsOccupancy": "100% Occupied",
+    "totalCollection": 845320,
+    "collectionGrowth": "+12.5% from last month",
+    "pendingDues": 235760,
+    "duesTrend": "-8.2% from last month",
+    "openComplaints": 12,
+    "complaintsTrend": "-3 from last week"
+  },
+  "collectionOverview": [
+    { "month": "Dec", "collected": 500000, "pending": 220000 },
+    { "month": "Jan", "collected": 620000, "pending": 380000 },
+    { "month": "Feb", "collected": 710000, "pending": 420000 },
+    { "month": "Mar", "collected": 810000, "pending": 650000 },
+    { "month": "Apr", "collected": 730000, "pending": 460000 },
+    { "month": "May", "collected": 845320, "pending": 235760 }
+  ],
+  "complaintStats": {
+    "open": 12,
+    "inProgress": 6,
+    "resolved": 5,
+    "closed": 1,
+    "total": 24
+  }
+}

@@ -1,42 +1,113 @@
 <div class="page-header">
-      <div class="page-title-group">
-        <h1>Document Repository</h1>
-        <p>Society registration papers, audited balance sheets, safety NOCs, and bylaws</p>
-      </div>
+  <div class="page-title-group">
+    <h1>Document Repository</h1>
+    <p>Society registration papers, audited balance sheets, safety NOCs, and bylaws</p>
+  </div>
+  @if (state.currentUserRole() === 'admin') {
+    <div class="page-header-actions">
+      <button class="btn-primary" (click)="showUploadForm = !showUploadForm">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        {{ showUploadForm ? 'Close Upload' : 'Upload Document' }}
+      </button>
     </div>
+  }
+</div>
 
-    <div class="dash-card">
-      <div class="table-responsive">
-        <table class="app-table">
-          <thead>
-            <tr>
-              <th>Document Title</th>
-              <th>Category</th>
-              <th>File Size</th>
-              <th>Upload Date</th>
-              <th>Access Level</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (d of state.documents(); track d.id) {
-              <tr>
-                <td style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  {{ d.title }}
-                </td>
-                <td><span class="badge badge-info">{{ d.category }}</span></td>
-                <td>{{ d.size }}</td>
-                <td>{{ d.date }}</td>
-                <td>{{ d.access }}</td>
-                <td>
-                  <button class="table-btn-view" (click)="download(d.title)">
-                    Download
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+@if (showUploadForm) {
+  <div class="dash-card" style="margin-bottom: 24px; border: 2px solid var(--accent-primary);">
+    <div class="dash-card-header">
+      <div>
+        <h3 class="dash-card-title">Upload New Society Document</h3>
+        <p class="dash-card-subtitle">Publish statutory certificates, AGM minutes, or circulars to the repository</p>
       </div>
     </div>
+    <form (ngSubmit)="onUploadDoc()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="doc-title">Document Title *</label>
+          <input id="doc-title" type="text" class="form-control" name="docTitle" [(ngModel)]="docTitle" required placeholder="e.g. Lift AMC Contract Renewal 2024-25" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="doc-cat">Category</label>
+          <select id="doc-cat" class="form-control" name="docCategory" [(ngModel)]="docCategory">
+            <option value="Legal">Legal</option>
+            <option value="Finance">Finance</option>
+            <option value="Safety">Safety</option>
+            <option value="Rules">Rules</option>
+            <option value="Minutes">Minutes</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="doc-acc">Access Permission</label>
+        <select id="doc-acc" class="form-control" name="docAccess" [(ngModel)]="docAccess">
+          <option value="All Members">All Members</option>
+          <option value="Admin & Owners">Admin & Owners Only</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn-secondary" (click)="showUploadForm = false">Cancel</button>
+        <button type="submit" class="btn-primary">Publish Document</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="dash-card">
+  <div class="dash-card-header" style="flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h3 class="dash-card-title">Shared Society Files</h3>
+      <p class="dash-card-subtitle">Verified PDF records with role-based access control</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      @for (cat of ['All', 'Legal', 'Finance', 'Safety', 'Rules', 'Minutes']; track cat) {
+        <button
+          class="btn-secondary"
+          [style.background]="categoryFilter === cat ? 'var(--accent-primary)' : ''"
+          [style.color]="categoryFilter === cat ? '#ffffff' : ''"
+          style="padding: 6px 12px; font-size: 0.75rem;"
+          (click)="categoryFilter = cat"
+        >
+          {{ cat }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div tabindex="0" role="region" aria-label="Society document repository" class="table-responsive">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>Document Title</th>
+          <th>Category</th>
+          <th>File Size</th>
+          <th>Upload Date</th>
+          <th>Access Level</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (d of filteredDocs; track d.id) {
+          <tr>
+            <td style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              {{ d.title }}
+            </td>
+            <td><span class="badge badge-info">{{ d.category }}</span></td>
+            <td>{{ d.size }}</td>
+            <td>{{ d.date }}</td>
+            <td>{{ d.access }}</td>
+            <td>
+              <button class="table-btn-view" (click)="download(d.title)">
+                Download
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
