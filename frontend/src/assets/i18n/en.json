@@ -9,7 +9,8 @@
     "subtitle": "Society Management",
     "administration": "Administration",
     "residentPortal": "Resident Portal",
-    "flat": "Flat"
+    "flat": "Flat",
+    "signOut": "Sign out"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -30,7 +31,8 @@
     "documents": "Documents",
     "reports": "Reports",
     "settings": "Settings",
-    "help": "Help & Support"
+    "help": "Help & Support",
+    "accessControl": "Access Control"
   },
   "topbar": {
     "searchPlaceholder": "Search members, units, visitors, polls, notices...",

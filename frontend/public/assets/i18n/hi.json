@@ -9,7 +9,8 @@
     "subtitle": "सोसायटी प्रबंधन प्रणाली",
     "administration": "प्रशासन (Administration)",
     "residentPortal": "निवासी पोर्टल",
-    "flat": "फ़्लैट"
+    "flat": "फ़्लैट",
+    "signOut": "साइन आउट"
   },
   "nav": {
     "dashboard": "डैशबोर्ड",
@@ -30,7 +31,8 @@
     "documents": "दस्तावेज़",
     "reports": "वित्तीय रिपोर्ट",
     "settings": "सेटिंग्स और ऑडिट",
-    "help": "सहायता और आपातकालीन"
+    "help": "सहायता और आपातकालीन",
+    "accessControl": "एक्सेस नियंत्रण"
   },
   "topbar": {
     "searchPlaceholder": "सदस्य, फ़्लैट, आगंतुक, मतदान, सूचनाएं खोजें...",
@@ -73,4 +75,3 @@
     "bookAmenity": "सुविधा बुक करें"
   }
 }
-

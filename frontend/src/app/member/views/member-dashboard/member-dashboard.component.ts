@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SocietyStateService } from '../../../services/society-state.service';
 import { DialogModalService } from '../../../core/services/dialog-modal.service';
 import { Invoice } from '../../../models/society.model';
+import { AccessControlService } from '../../../core/services/access-control.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
@@ -16,6 +17,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 export class MemberDashboardComponent {
   readonly state = inject(SocietyStateService);
   private readonly dialogs = inject(DialogModalService);
+  private readonly access = inject(AccessControlService);
 
   get user() { return this.state.memberUser(); }
   get society() { return this.state.society(); }
@@ -77,6 +79,7 @@ export class MemberDashboardComponent {
   }
 
   openPayNow(): void {
+    if (!this.access.require('payments', 'execute')) return;
     const inv = this.myInvoices.find(i => i.status === 'Unpaid') || this.myInvoices[0];
     if (inv) {
       this.dialogs.openPayModal(inv);
@@ -84,6 +87,7 @@ export class MemberDashboardComponent {
   }
 
   openPayNowFor(inv: Invoice): void {
+    if (!this.access.require('payments', 'execute')) return;
     this.dialogs.openPayModal(inv);
   }
 
@@ -99,10 +103,12 @@ export class MemberDashboardComponent {
   }
 
   openRaiseComplaint(): void {
+    if (!this.access.require('complaints', 'write')) return;
     this.dialogs.openComplaintModal();
   }
 
   openBookAmenity(): void {
+    if (!this.access.require('amenities', 'execute')) return;
     this.dialogs.openBookingModal();
   }
 }

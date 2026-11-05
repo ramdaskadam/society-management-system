@@ -1,6 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
+import { AuthService } from './core/services/auth.service';
 import { SocietyStateService } from './services/society-state.service';
 import { DialogModalService } from './core/services/dialog-modal.service';
 import { UserRole } from './models/society.model';
@@ -60,6 +63,23 @@ export class AppComponent implements OnInit {
   readonly state = inject(SocietyStateService);
   readonly dialogs = inject(DialogModalService);
   readonly mobileMenuOpen = signal(false);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map(e => e.urlAfterRedirects)
+    ),
+    { initialValue: this.router.url }
+  );
+
+  /** App chrome (sidebar/topbar) is hidden on login & registration pages. */
+  readonly showShell = computed(() => {
+    const url = this.currentUrl();
+    const isAuthRoute = url.startsWith('/login') || url.startsWith('/register');
+    return this.auth.isAuthenticated() && !isAuthRoute;
+  });
 
   get openComplaintsCount(): number {
     return this.state.currentUserRole() === 'admin'

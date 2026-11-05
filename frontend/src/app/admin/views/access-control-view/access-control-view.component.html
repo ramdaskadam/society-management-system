@@ -1,0 +1,115 @@
+<div class="page-header">
+  <div class="page-title-group">
+    <h1>Access Control</h1>
+    <p>Grant or revoke Read, Write and Execute access per resident and module</p>
+  </div>
+</div>
+
+<div class="access-layout">
+  <!-- Resident picker -->
+  <aside class="dash-card access-members" aria-label="Select resident">
+    <label class="visually-hidden" for="access-member-search">Search residents</label>
+    <input
+      id="access-member-search"
+      type="search"
+      class="form-control"
+      placeholder="Search resident or unit..."
+      [ngModel]="memberSearch()"
+      (ngModelChange)="memberSearch.set($event)"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <ul class="access-member-list">
+      @for (m of filteredMembers(); track m.id) {
+        <li>
+          <button
+            type="button"
+            class="access-member-btn"
+            [class.active]="selectedMember()?.id === m.id"
+            [attr.aria-pressed]="selectedMember()?.id === m.id"
+            (click)="select(m.id)"
+          >
+            <span class="access-member-name">{{ m.name }}</span>
+            <span class="access-member-meta">{{ m.unit }} · {{ m.role }}</span>
+            <span class="badge badge-info">{{ access.countGranted(m.id) }}/{{ totalSlots }}</span>
+          </button>
+        </li>
+      } @empty {
+        <li class="access-empty">No residents found.</li>
+      }
+    </ul>
+  </aside>
+
+  <!-- Permission matrix -->
+  <section class="dash-card" aria-live="polite">
+    @if (selectedMember(); as member) {
+      <div class="dash-card-header">
+        <div>
+          <h2 class="dash-card-title">{{ member.name }} ({{ member.unit }})</h2>
+          <p class="dash-card-subtitle">{{ member.role }} · {{ access.countGranted(member.id) }} of {{ totalSlots }} permissions granted</p>
+        </div>
+        <div class="access-bulk-actions">
+          <button type="button" class="btn-secondary" (click)="access.setAll(member.id, true)">Grant all</button>
+          <button type="button" class="btn-secondary" (click)="access.setAll(member.id, false)">Revoke all</button>
+          <button type="button" class="btn-secondary" (click)="access.resetMember(member.id)">Reset defaults</button>
+        </div>
+      </div>
+
+      <div tabindex="0" role="region" aria-label="Access permission matrix" class="table-responsive">
+        <table class="app-table access-table">
+          <thead>
+            <tr>
+              <th scope="col">Module</th>
+              @for (a of access.actions; track a.id) {
+                <th scope="col" class="access-col">
+                  <div>{{ a.label }}</div>
+                  <div class="access-col-actions">
+                    <button type="button" class="table-btn-view" (click)="access.setColumn(member.id, a.id, true)" [attr.aria-label]="'Grant ' + a.label + ' on all modules'">Grant</button>
+                    <span aria-hidden="true">·</span>
+                    <button type="button" class="table-btn-view" (click)="access.setColumn(member.id, a.id, false)" [attr.aria-label]="'Revoke ' + a.label + ' on all modules'">Revoke</button>
+                  </div>
+                </th>
+              }
+              <th scope="col" class="access-col">All</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (mod of access.modules; track mod.id) {
+              <tr>
+                <th scope="row" class="access-row-head">
+                  <div class="access-module-name">{{ mod.label }}</div>
+                  <div class="access-module-desc">{{ mod.description }}</div>
+                </th>
+                @for (a of access.actions; track a.id) {
+                  <td class="access-col">
+                    <input
+                      type="checkbox"
+                      class="access-check"
+                      [checked]="access.flags(member.id, mod.id)[a.id]"
+                      (change)="toggle(mod.id, a.id, $event)"
+                      [attr.aria-label]="a.label + ' access to ' + mod.label + ' for ' + member.name"
+                    />
+                  </td>
+                }
+                <td class="access-col">
+                  <button type="button" class="table-btn-view" (click)="access.setRow(member.id, mod.id, true)">Grant</button>
+                  <span aria-hidden="true">·</span>
+                  <button type="button" class="table-btn-view" (click)="access.setRow(member.id, mod.id, false)">Revoke</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="access-legend">
+        @for (a of access.actions; track a.id) {
+          <li><strong>{{ a.label }}</strong> — {{ a.hint }}</li>
+        }
+      </ul>
+    } @else {
+      <p class="access-empty">Select a resident to manage access.</p>
+    }
+  </section>
+</div>
+

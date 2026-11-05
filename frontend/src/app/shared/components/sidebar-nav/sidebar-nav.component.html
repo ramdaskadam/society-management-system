@@ -104,5 +104,8 @@
         <div class="user-sub">{{ role === 'admin' ? user.role : ('sidebar.flat' | t) + ' ' + user.unit }}</div>
       </div>
     </div>
+    <button type="button" class="sidebar-signout-btn" (click)="auth.logout()">
+      {{ 'sidebar.signOut' | t }}
+    </button>
   </div>
 </aside>

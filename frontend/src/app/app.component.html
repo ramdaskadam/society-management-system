@@ -1,3 +1,4 @@
+@if (showShell()) {
 <!-- Top Role Switcher Floating Banner -->
 <app-role-banner
   [currentRole]="state.currentUserRole()"
@@ -99,6 +100,9 @@
     <span>Menu</span>
   </button>
 </nav>
+} @else {
+  <router-outlet />
+}
 
 <!-- ── Shared Dialogs ──────────────────────────────────────────── -->
 <app-receipt-dialog

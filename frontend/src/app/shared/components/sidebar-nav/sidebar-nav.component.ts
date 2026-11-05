@@ -1,7 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User, UserRole } from '../../../models/society.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { AuthService } from '../../../core/services/auth.service';
+import { AccessControlService, VIEW_TO_MODULE } from '../../../core/services/access-control.service';
 
 interface NavItem {
   id: string;
@@ -18,6 +20,9 @@ interface NavItem {
   imports: [CommonModule, TranslatePipe]
 })
 export class SidebarNavComponent {
+  readonly auth = inject(AuthService);
+  private readonly access = inject(AccessControlService);
+
   @Input() role: UserRole = 'admin';
   @Input() currentView: string = 'dashboard';
   @Input() openComplaintsCount: number = 0;
@@ -28,10 +33,18 @@ export class SidebarNavComponent {
   @Output() closeMobile = new EventEmitter<void>();
 
   get navItems(): NavItem[] {
+    return this.allNavItems.filter(item => {
+      const moduleId = VIEW_TO_MODULE[item.id];
+      return !moduleId || this.access.can(moduleId, 'read');
+    });
+  }
+
+  private get allNavItems(): NavItem[] {
     if (this.role === 'admin') {
       return [
         { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'grid', badge: null },
         { id: 'members', labelKey: 'nav.members', icon: 'users', badge: null },
+        { id: 'access-control', labelKey: 'nav.accessControl', icon: 'shield', badge: null },
         { id: 'units', labelKey: 'nav.units', icon: 'building', badge: null },
         { id: 'maintenance', labelKey: 'nav.maintenance', icon: 'tool', badge: null },
         { id: 'payments', labelKey: 'nav.payments', icon: 'credit-card', badge: null },
