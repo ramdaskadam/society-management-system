@@ -79,21 +79,6 @@
   </div>
 
   <div class="topbar-right">
-    <!-- Language Selector Dropdown in Topbar -->
-    <div class="date-filter-pill topbar-lang-pill" style="padding: 4px 10px;">
-      <span style="font-size: 0.85rem;">🌐</span>
-      <select
-        aria-label="Select interface language"
-        style="border: none; background: transparent; font-size: 0.8rem; font-weight: 600; color: var(--text-main); cursor: pointer;"
-        [ngModel]="i18n.currentLang()"
-        (ngModelChange)="onLangChange($event)"
-      >
-        @for (loc of i18n.availableLocales; track loc.code) {
-          <option [value]="loc.code">{{ loc.nativeLabel }} ({{ loc.label }})</option>
-        }
-      </select>
-    </div>
-
     <div class="date-filter-pill topbar-date-pill" title="Filter by date period">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -105,6 +90,38 @@
     </div>
 
     <div class="topbar-actions">
+      <!-- Interactive Theme Toggle Switch Button -->
+      <button
+        type="button"
+        class="topbar-theme-toggle-btn"
+        (click)="theme.toggle()"
+        [attr.aria-label]="theme.resolvedScheme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+        [title]="theme.resolvedScheme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+      >
+        <span class="topbar-theme-toggle-track" [class.dark]="theme.resolvedScheme() === 'dark'">
+          <span class="topbar-theme-toggle-thumb">
+            @if (theme.resolvedScheme() === 'dark') {
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            } @else {
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+              </svg>
+            }
+          </span>
+        </span>
+        <span class="topbar-theme-toggle-text">
+          {{ theme.resolvedScheme() === 'dark' ? 'Dark' : 'Light' }}
+        </span>
+      </button>
+
       <button class="icon-btn" (click)="openNotifications.emit()" [title]="'topbar.notifications' | t">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>

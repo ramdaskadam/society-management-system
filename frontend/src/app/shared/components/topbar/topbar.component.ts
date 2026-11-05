@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, inject, signal } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User, UserRole } from '../../../models/society.model';
-import { I18nService, SupportedLocale } from '../../../core/services/i18n.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { GlobalSearchResultItem, SocietyStateService } from '../../../services/society-state.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -14,8 +14,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   imports: [CommonModule, FormsModule, TranslatePipe]
 })
 export class TopbarComponent {
-  readonly i18n = inject(I18nService);
   readonly state = inject(SocietyStateService);
+  readonly theme = inject(ThemeService);
 
   @Input() user: User = { name: '', role: '', email: '', avatar: '' };
   @Input() role: UserRole = 'admin';
@@ -51,9 +51,5 @@ export class TopbarComponent {
   selectResult(item: GlobalSearchResultItem): void {
     this.dropdownOpen.set(false);
     this.state.setView(item.targetView);
-  }
-
-  onLangChange(code: SupportedLocale): void {
-    this.i18n.setLanguage(code);
   }
 }

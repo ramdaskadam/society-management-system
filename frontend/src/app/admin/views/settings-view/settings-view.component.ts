@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocietyStateService } from '../../../services/society-state.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   templateUrl: './settings-view.component.html',
@@ -13,6 +14,7 @@ import { SocietyStateService } from '../../../services/society-state.service';
 })
 export class SettingsViewComponent {
   readonly state = inject(SocietyStateService);
+  readonly theme = inject(ThemeService);
 
   fullName = this.state.society().fullName;
   address = this.state.society().address;

@@ -6,22 +6,179 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
+  /* MANDATORY: Automatically adapt native UI to user system preferences */
+  color-scheme: light dark;
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]),
+  &[data-color-scheme="dark"] {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name="color-scheme"][content="light"]),
+  &[data-color-scheme="light"] {
+    color-scheme: light;
+  }
+
+  /* MANDATORY: Automatically adapt native UI to user system preferences */
+  color-scheme: light dark;
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]),
+  &[data-color-scheme="dark"] {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name="color-scheme"][content="light"]),
+  &[data-color-scheme="light"] {
+    color-scheme: light;
+  }
+
   /* Common System Tokens */
   --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 
-  --bg-app: #f4f6fa;
-  --bg-surface: #ffffff;
-  --bg-subtle: #f8fafc;
-  --bg-hover: #f1f5f9;
+  /* Raw Light & Dark Palette Tokens */
+  --bg-app-light: #f4f6fa;
+  --bg-app-dark: #090d16;
+  --bg-surface-light: #ffffff;
+  --bg-surface-dark: #111827;
+  --bg-subtle-light: #f8fafc;
+  --bg-subtle-dark: #1e293b;
+  --bg-hover-light: #f1f5f9;
+  --bg-hover-dark: #273549;
 
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
+  --text-main-light: #0f172a;
+  --text-main-dark: #f1f5f9;
+  --text-muted-light: #64748b;
+  --text-muted-dark: #94a3b8;
+  --text-light-light: #94a3b8;
+  --text-light-dark: #64748b;
+
+  --border-subtle-light: #e2e8f0;
+  --border-subtle-dark: #26334d;
+  --border-card-light: #e5e9f2;
+  --border-card-dark: #1f2a40;
+
+  /* Default Light Token Assignments (Fallback for browsers without light-dark()) */
+  --bg-app: var(--bg-app-light);
+  --bg-surface: var(--bg-surface-light);
+  --bg-subtle: var(--bg-subtle-light);
+  --bg-hover: var(--bg-hover-light);
+
+  --text-main: var(--text-main-light);
+  --text-muted: var(--text-muted-light);
+  --text-light: var(--text-light-light);
   --text-white: #ffffff;
 
-  --border-subtle: #e2e8f0;
-  --border-card: #e5e9f2;
+  --border-subtle: var(--border-subtle-light);
+  --border-card: var(--border-card-light);
+
+  /* MANDATORY: Fallback for browsers without light-dark() support */
+  @media (prefers-color-scheme: dark) {
+    --bg-app: var(--bg-app-dark);
+    --bg-surface: var(--bg-surface-dark);
+    --bg-subtle: var(--bg-subtle-dark);
+    --bg-hover: var(--bg-hover-dark);
+    --text-main: var(--text-main-dark);
+    --text-muted: var(--text-muted-dark);
+    --text-light: var(--text-light-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --border-card: var(--border-card-dark);
+  }
+
+  /* Explicit meta override fallback when light-dark() is not supported */
+  &:has(> head > meta[name="color-scheme"][content="dark"]),
+  &[data-color-scheme="dark"] {
+    --bg-app: var(--bg-app-dark);
+    --bg-surface: var(--bg-surface-dark);
+    --bg-subtle: var(--bg-subtle-dark);
+    --bg-hover: var(--bg-hover-dark);
+    --text-main: var(--text-main-dark);
+    --text-muted: var(--text-muted-dark);
+    --text-light: var(--text-light-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --border-card: var(--border-card-dark);
+  }
+  &:has(> head > meta[name="color-scheme"][content="light"]),
+  &[data-color-scheme="light"] {
+    --bg-app: var(--bg-app-light);
+    --bg-surface: var(--bg-surface-light);
+    --bg-subtle: var(--bg-subtle-light);
+    --bg-hover: var(--bg-hover-light);
+    --text-main: var(--text-main-light);
+    --text-muted: var(--text-muted-light);
+    --text-light: var(--text-light-light);
+    --border-subtle: var(--border-subtle-light);
+    --border-card: var(--border-card-light);
+  }
+
+  /* Native CSS light-dark() automatic resolution */
+  @supports (color: light-dark(white, black)) {
+    --bg-app: light-dark(var(--bg-app-light), var(--bg-app-dark));
+    --bg-surface: light-dark(var(--bg-surface-light), var(--bg-surface-dark));
+    --bg-subtle: light-dark(var(--bg-subtle-light), var(--bg-subtle-dark));
+    --bg-hover: light-dark(var(--bg-hover-light), var(--bg-hover-dark));
+    --text-main: light-dark(var(--text-main-light), var(--text-main-dark));
+    --text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
+    --text-light: light-dark(var(--text-light-light), var(--text-light-dark));
+    --border-subtle: light-dark(var(--border-subtle-light), var(--border-subtle-dark));
+    --border-card: light-dark(var(--border-card-light), var(--border-card-dark));
+    --scrollbar-track: light-dark(#f1f5f9, #0f172a);
+    --scrollbar-thumb: light-dark(#cbd5e1, #475569);
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  /* MANDATORY: Fallback for browsers without light-dark() support */
+  @media (prefers-color-scheme: dark) {
+    --bg-app: var(--bg-app-dark);
+    --bg-surface: var(--bg-surface-dark);
+    --bg-subtle: var(--bg-subtle-dark);
+    --bg-hover: var(--bg-hover-dark);
+    --text-main: var(--text-main-dark);
+    --text-muted: var(--text-muted-dark);
+    --text-light: var(--text-light-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --border-card: var(--border-card-dark);
+  }
+
+  /* Explicit meta override fallback when light-dark() is not supported */
+  &:has(> head > meta[name="color-scheme"][content="dark"]),
+  &[data-color-scheme="dark"] {
+    --bg-app: var(--bg-app-dark);
+    --bg-surface: var(--bg-surface-dark);
+    --bg-subtle: var(--bg-subtle-dark);
+    --bg-hover: var(--bg-hover-dark);
+    --text-main: var(--text-main-dark);
+    --text-muted: var(--text-muted-dark);
+    --text-light: var(--text-light-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --border-card: var(--border-card-dark);
+  }
+  &:has(> head > meta[name="color-scheme"][content="light"]),
+  &[data-color-scheme="light"] {
+    --bg-app: var(--bg-app-light);
+    --bg-surface: var(--bg-surface-light);
+    --bg-subtle: var(--bg-subtle-light);
+    --bg-hover: var(--bg-hover-light);
+    --text-main: var(--text-main-light);
+    --text-muted: var(--text-muted-light);
+    --text-light: var(--text-light-light);
+    --border-subtle: var(--border-subtle-light);
+    --border-card: var(--border-card-light);
+  }
+
+  /* Native CSS light-dark() automatic resolution */
+  @supports (color: light-dark(white, black)) {
+    --bg-app: light-dark(var(--bg-app-light), var(--bg-app-dark));
+    --bg-surface: light-dark(var(--bg-surface-light), var(--bg-surface-dark));
+    --bg-subtle: light-dark(var(--bg-subtle-light), var(--bg-subtle-dark));
+    --bg-hover: light-dark(var(--bg-hover-light), var(--bg-hover-dark));
+    --text-main: light-dark(var(--text-main-light), var(--text-main-dark));
+    --text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
+    --text-light: light-dark(var(--text-light-light), var(--text-light-dark));
+    --border-subtle: light-dark(var(--border-subtle-light), var(--border-subtle-dark));
+    --border-card: light-dark(var(--border-card-light), var(--border-card-dark));
+    --scrollbar-track: light-dark(#f1f5f9, #0f172a);
+    --scrollbar-thumb: light-dark(#cbd5e1, #475569);
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
 
   --success: #10b981;
   --success-bg: #ecfdf5;
@@ -65,6 +222,7 @@
   --sidebar-text-active: #ffffff;
   --accent-primary: #2563eb;
   --accent-glow: rgba(37, 99, 235, 0.2);
+  accent-color: var(--accent-primary);
 }
 
 /* Member Mode Theme Overrides */
@@ -435,7 +593,7 @@ a {
 }
 
 .search-box input:focus {
-  background: #ffffff;
+  background: var(--bg-surface);
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
@@ -1005,7 +1163,7 @@ a {
 }
 
 .quick-action-btn:hover {
-  background: #ffffff;
+  background: var(--bg-surface);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
   box-shadow: var(--shadow-sm);
@@ -1326,9 +1484,10 @@ a {
 .app-dialog, dialog.app-dialog {
   margin: auto;
   padding: 0;
-  border: none;
+  border: 1px solid var(--border-card);
   border-radius: var(--radius-xl);
-  background: #ffffff;
+  background: var(--bg-surface);
+  color: var(--text-main);
   box-shadow: var(--shadow-xl), 0 0 0 1px rgba(0, 0, 0, 0.05);
   max-width: 620px;
   width: 90vw;
@@ -1442,7 +1601,7 @@ dialog:modal {
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
   font-size: 0.875rem;
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-main);
   transition: all var(--transition-fast);
 }
@@ -1666,7 +1825,7 @@ dialog:modal {
   gap: 16px;
   margin-bottom: 16px;
   font-size: 0.8125rem;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   padding: 12px;
   border-radius: 8px;
 }
@@ -1832,7 +1991,7 @@ dialog:modal {
     inset-inline: 0;
     inset-block-end: 0;
     z-index: 1100;
-    background: rgba(255, 255, 255, 0.96);
+    background: var(--bg-surface);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid var(--border-subtle);
@@ -2082,7 +2241,7 @@ dialog:modal {
 }
 
 .global-dash-result-card:hover {
-  background: #ffffff;
+  background: var(--bg-surface);
   border-color: var(--accent-primary);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
@@ -2106,4 +2265,174 @@ dialog:modal {
 .global-dash-result-sub {
   font-size: 0.76rem;
   color: var(--text-muted);
+}
+
+/* Legacy fallback for WebKit/Blink browsers without scrollbar-color */
+@supports not (scrollbar-color: auto) {
+  .table-responsive::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb, #94a3b8);
+    border-radius: 5px;
+  }
+
+  .table-responsive::-webkit-scrollbar-track {
+    background: var(--scrollbar-track, transparent);
+  }
+}
+
+/* ========================================================
+   THEME TOGGLE SWITCH BUTTON (TOPBAR HEADER)
+   ======================================================== */
+.topbar-theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 4px 12px 4px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.topbar-theme-toggle-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+}
+
+.topbar-theme-toggle-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  transition: background-color var(--transition-fast);
+}
+
+.topbar-theme-toggle-track.dark {
+  background: var(--accent-primary);
+}
+
+.topbar-theme-toggle-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #f59e0b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xs);
+  transform: translateX(0);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.topbar-theme-toggle-track.dark .topbar-theme-toggle-thumb {
+  transform: translateX(18px);
+  color: #1e293b;
+}
+
+@media (max-width: 600px) {
+  .topbar-theme-toggle-text {
+    display: none;
+  }
+
+  .topbar-theme-toggle-btn {
+    padding: 4px;
+  }
+}
+
+/* Legacy fallback for WebKit/Blink browsers without scrollbar-color */
+@supports not (scrollbar-color: auto) {
+  .table-responsive::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb, #94a3b8);
+    border-radius: 5px;
+  }
+
+  .table-responsive::-webkit-scrollbar-track {
+    background: var(--scrollbar-track, transparent);
+  }
+}
+
+/* ========================================================
+   THEME TOGGLE SWITCH BUTTON (TOPBAR HEADER)
+   ======================================================== */
+.topbar-theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 4px 12px 4px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.topbar-theme-toggle-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+}
+
+.topbar-theme-toggle-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  transition: background-color var(--transition-fast);
+}
+
+.topbar-theme-toggle-track.dark {
+  background: var(--accent-primary);
+}
+
+.topbar-theme-toggle-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #f59e0b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xs);
+  transform: translateX(0);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.topbar-theme-toggle-track.dark .topbar-theme-toggle-thumb {
+  transform: translateX(18px);
+  color: #1e293b;
+}
+
+@media (max-width: 600px) {
+  .topbar-theme-toggle-text {
+    display: none;
+  }
+
+  .topbar-theme-toggle-btn {
+    padding: 4px;
+  }
 }

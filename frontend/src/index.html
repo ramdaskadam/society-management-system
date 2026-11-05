@@ -5,6 +5,12 @@
   <title>Green Meadows Society Management System</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    try {
+      document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem("color-scheme") ?? "light dark";
+    } catch {}
+  </script>
   <meta name="description" content="Centralized digital platform for residential society members and society administrators." />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M12 3L2 12h3v8h14v-8h3L12 3zm0 3.8l6 5.4V18H6v-5.8l6-5.4z'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
