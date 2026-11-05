@@ -1,47 +1,145 @@
 <div class="page-header">
-      <div class="page-title-group">
-        <h1>Members Directory</h1>
-        <p>Complete record of flat owners, registered tenants, and resident contacts</p>
-      </div>
-      <div class="page-header-actions">
-        <button class="btn-primary" (click)="openAddMember()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Add New Member
-        </button>
-      </div>
+  <div class="page-title-group">
+    <h1>Members Directory</h1>
+    <p>Complete record of flat owners, registered tenants, and resident contacts</p>
+  </div>
+  <div class="page-header-actions">
+    <button type="button" class="btn-secondary" (click)="state.exportCsv('members')">
+      Export CSV
+    </button>
+    <button type="button" class="btn-primary" (click)="openAddMember()">
+      <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add New Member
+    </button>
+  </div>
+</div>
+
+<div class="dash-card">
+  <!-- Semantic <search> landmark for filtering the Members Directory -->
+  <search class="members-search-bar" aria-label="Search and filter society members">
+    <div class="members-search-input-wrap">
+      <label for="member-directory-search" class="visually-hidden">
+        Search members by name, flat unit, phone, email, or member ID
+      </label>
+      <svg aria-hidden="true" class="members-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        id="member-directory-search"
+        type="search"
+        name="memberSearch"
+        class="form-control members-search-input"
+        placeholder="Search by name, unit (e.g. A-101), phone, email, or ID..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="search"
+      />
     </div>
 
-    <div class="dash-card">
-      <div class="table-responsive">
-        <table class="app-table">
-          <thead>
-            <tr>
-              <th>Member ID</th>
-              <th>Resident Name</th>
-              <th>Unit / Wing</th>
-              <th>Contact Phone</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Dues</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (m of state.members(); track m.id) {
-              <tr>
-                <td style="font-family: var(--font-mono); font-weight: 600;">{{ m.id }}</td>
-                <td style="font-weight: 600;">{{ m.name }}</td>
-                <td><span class="badge badge-info">{{ m.unit }} (Wing {{ m.wing }})</span></td>
-                <td>{{ m.phone }}</td>
-                <td>{{ m.email }}</td>
-                <td><strong>{{ m.role }}</strong></td>
-                <td style="font-weight: 700;" [style.color]="m.dues > 0 ? '#ef4444' : '#10b981'">
-                  ₹ {{ m.dues.toLocaleString('en-IN') }}
-                </td>
-                <td><span class="badge badge-active">{{ m.status }}</span></td>
-              </tr>
-            }
-          </tbody>
-        </table>
+    <div class="members-filter-controls">
+      <!-- Wing Filter -->
+      <div class="members-filter-group">
+        <label for="member-wing-filter" class="visually-hidden">Filter by Wing</label>
+        <select
+          id="member-wing-filter"
+          name="wingFilter"
+          class="card-select-filter members-select"
+          [ngModel]="selectedWing()"
+          (ngModelChange)="selectedWing.set($event)"
+        >
+          @for (w of wings; track w) {
+            <option [value]="w">{{ w === 'All' ? 'All Wings' : 'Wing ' + w }}</option>
+          }
+        </select>
       </div>
+
+      <!-- Role Filter Pills -->
+      <div class="members-pill-group" role="group" aria-label="Filter by resident role">
+        @for (r of ['All', 'Owner', 'Tenant']; track r) {
+          <button
+            type="button"
+            class="members-filter-pill"
+            [class.active]="selectedRole() === r"
+            (click)="selectedRole.set($any(r))"
+          >
+            {{ r === 'All' ? 'All Roles' : r + 's' }}
+          </button>
+        }
+      </div>
+
+      <!-- Dues Filter -->
+      <div class="members-filter-group">
+        <label for="member-dues-filter" class="visually-hidden">Filter by Dues Status</label>
+        <select
+          id="member-dues-filter"
+          name="duesFilter"
+          class="card-select-filter members-select"
+          [ngModel]="duesFilter()"
+          (ngModelChange)="duesFilter.set($event)"
+        >
+          <option value="All">All Dues Status</option>
+          <option value="Pending">Pending Dues</option>
+          <option value="Clear">No Dues (Cleared)</option>
+        </select>
+      </div>
+
+      @if (hasActiveFilters()) {
+        <button type="button" class="btn-secondary members-clear-btn" (click)="clearFilters()">
+          Reset
+        </button>
+      }
     </div>
+  </search>
+
+  <div class="members-results-meta" aria-live="polite">
+    <span>
+      Showing <strong>{{ filteredMembers().length }}</strong> of <strong>{{ state.members().length }}</strong> members
+    </span>
+  </div>
+
+  <div tabindex="0" role="region" aria-label="Society members directory table" class="table-responsive">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>Member ID</th>
+          <th>Resident Name</th>
+          <th>Unit / Wing</th>
+          <th>Contact Phone</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Dues</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of filteredMembers(); track m.id) {
+          <tr>
+            <td style="font-family: var(--font-mono); font-weight: 600;">{{ m.id }}</td>
+            <td style="font-weight: 600;">{{ m.name }}</td>
+            <td><span class="badge badge-info">{{ m.unit }} (Wing {{ m.wing }})</span></td>
+            <td>{{ m.phone }}</td>
+            <td>{{ m.email }}</td>
+            <td><strong>{{ m.role }}</strong></td>
+            <td style="font-weight: 700;" [style.color]="m.dues > 0 ? '#ef4444' : '#10b981'">
+              ₹ {{ m.dues.toLocaleString('en-IN') }}
+            </td>
+            <td><span class="badge badge-active">{{ m.status }}</span></td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8" class="members-empty-state">
+              <div>No members match your search criteria.</div>
+              <button type="button" class="btn-secondary" style="margin-top: 10px;" (click)="clearFilters()">
+                Clear Search & Filters
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

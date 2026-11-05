@@ -482,7 +482,7 @@ export class SocietyStateService {
     this.showToast('All notifications marked as read', 'info');
   }
 
-  exportCsv(type: 'payments' | 'collections' | 'dues'): void {
+  exportCsv(type: 'payments' | 'collections' | 'dues' | 'members'): void {
     let csvContent = 'data:text/csv;charset=utf-8,';
     let filename = 'society_export.csv';
 
@@ -492,6 +492,12 @@ export class SocietyStateService {
         csvContent += `${p.date},${p.invoiceNo},${p.unitNo},${p.mode},${p.amount},${p.status},${p.txnId}\n`;
       });
       filename = 'payment_transactions.csv';
+    } else if (type === 'members') {
+      csvContent += 'Member_ID,Resident_Name,Unit,Wing,Role,Phone,Email,Dues,Status\n';
+      this.members().forEach(m => {
+        csvContent += `${m.id},"${m.name}",${m.unit},${m.wing},${m.role},"${m.phone}",${m.email},${m.dues},${m.status}\n`;
+      });
+      filename = 'members_directory.csv';
     } else {
       csvContent += 'Unit_No,Owner_Name,Maintenance,Sinking_Fund,Total_Billed,Status\n';
       this.invoices().forEach(i => {

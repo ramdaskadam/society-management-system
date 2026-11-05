@@ -1,1 +1,132 @@
 /* members-view styles */
+
+.visually-hidden {
+  position: absolute;
+  clip-path: inset(50%);
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}
+
+.members-search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.members-search-input-wrap {
+  position: relative;
+  flex: 1 1 280px;
+  min-inline-size: 0;
+}
+
+.members-search-icon {
+  position: absolute;
+  inset-inline-start: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  pointer-events: none;
+}
+
+.members-search-input {
+  padding-inline-start: 40px;
+  height: 42px;
+  background: var(--bg-subtle);
+}
+
+.members-search-input:focus {
+  background: #ffffff;
+}
+
+.members-filter-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.members-select {
+  height: 40px;
+  padding: 0 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.members-pill-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 2px;
+}
+
+.members-filter-pill {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.members-filter-pill:hover {
+  color: var(--text-main);
+}
+
+.members-filter-pill.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: var(--shadow-xs);
+}
+
+.members-clear-btn {
+  height: 40px;
+  padding: 0 14px;
+  font-size: 0.78rem;
+}
+
+.members-results-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.members-empty-state {
+  text-align: center;
+  padding: 36px 16px !important;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .members-filter-controls {
+    width: 100%;
+  }
+
+  .members-filter-group,
+  .members-select {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .members-pill-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .members-filter-pill {
+    flex: 1;
+    text-align: center;
+  }
+}
