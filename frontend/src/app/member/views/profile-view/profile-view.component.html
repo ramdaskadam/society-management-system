@@ -5,7 +5,7 @@
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px;">
+    <div class="profile-layout-grid">
       <div class="dash-card" style="text-align: center; align-items: center;">
         <img [src]="user.avatar" [alt]="user.name" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #10b981; margin-bottom: 14px;" />
         <h2 style="font-size: 1.2rem; font-weight: 700;">{{ user.name }}</h2>
@@ -17,7 +17,7 @@
 
       <div class="dash-card">
         <h3 class="dash-card-title" style="margin-bottom: 18px;">Household Information</h3>
-        <div class="unit-spec-list" style="grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.875rem;">
+        <div class="unit-spec-list profile-spec-grid">
           <div>Primary Email: <strong>{{ user.email }}</strong></div>
           <div>Mobile Phone: <strong>{{ user.phone }}</strong></div>
           <div>Unit / Flat: <strong>{{ user.unit }} (Wing {{ user.wing }}, Floor {{ user.floor }})</strong></div>

@@ -7,6 +7,15 @@
 />
 
 <div class="app-container">
+  <!-- Mobile Sidebar Backdrop -->
+  @if (mobileMenuOpen()) {
+    <div
+      class="mobile-sidebar-backdrop"
+      (click)="closeMobileMenu()"
+      aria-hidden="true"
+    ></div>
+  }
+
   <!-- Sidebar Navigation Component -->
   <app-sidebar-nav
     [role]="state.currentUserRole()"
@@ -14,7 +23,9 @@
     [openComplaintsCount]="openComplaintsCount"
     [user]="state.activeUser()"
     [societyName]="state.society().name"
+    [mobileOpen]="mobileMenuOpen()"
     (navSelect)="onNavSelect($event)"
+    (closeMobile)="closeMobileMenu()"
   />
 
   <!-- Main Content Area -->
@@ -26,6 +37,7 @@
       [unreadNotificationsCount]="state.unreadNotificationsCount()"
       (openNotifications)="dialogs.openNotificationsModal()"
       (search)="onGlobalSearch($event)"
+      (toggleMobileMenu)="toggleMobileMenu()"
     />
 
     <!-- Lazy-Loaded Route Outlet -->
@@ -34,6 +46,59 @@
     </section>
   </main>
 </div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<nav class="mobile-bottom-nav" aria-label="Primary mobile navigation">
+  <button
+    type="button"
+    class="mobile-bottom-nav-item"
+    [class.active]="state.currentView() === 'dashboard'"
+    (click)="onNavSelect('dashboard')"
+  >
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>{{ 'nav.dashboard' | t }}</span>
+  </button>
+
+  <button
+    type="button"
+    class="mobile-bottom-nav-item"
+    [class.active]="state.currentView() === 'payments' || state.currentView() === 'maintenance'"
+    (click)="onNavSelect('payments')"
+  >
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    <span>{{ 'nav.payments' | t }}</span>
+  </button>
+
+  <button
+    type="button"
+    class="mobile-bottom-nav-item"
+    [class.active]="state.currentView() === 'visitors'"
+    (click)="onNavSelect('visitors')"
+  >
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>{{ 'nav.visitors' | t }}</span>
+  </button>
+
+  <button
+    type="button"
+    class="mobile-bottom-nav-item"
+    [class.active]="state.currentView() === 'complaints'"
+    (click)="onNavSelect('complaints')"
+  >
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>{{ 'nav.complaints' | t }}</span>
+  </button>
+
+  <button
+    type="button"
+    class="mobile-bottom-nav-item"
+    [class.active]="mobileMenuOpen()"
+    (click)="toggleMobileMenu()"
+  >
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <span>Menu</span>
+  </button>
+</nav>
 
 <!-- ── Shared Dialogs ──────────────────────────────────────────── -->
 <app-receipt-dialog

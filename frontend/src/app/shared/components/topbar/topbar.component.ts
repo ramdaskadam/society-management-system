@@ -20,6 +20,7 @@ export class TopbarComponent {
   @Input() unreadNotificationsCount: number = 0;
   @Output() openNotifications = new EventEmitter<void>();
   @Output() search = new EventEmitter<string>();
+  @Output() toggleMobileMenu = new EventEmitter<void>();
 
   query = '';
 

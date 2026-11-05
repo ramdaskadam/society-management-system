@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SocietyStateService } from './services/society-state.service';
 import { DialogModalService } from './core/services/dialog-modal.service';
 import { UserRole } from './models/society.model';
+import { TranslatePipe } from './shared/pipes/translate.pipe';
 
 // ── Shared Layout Components ──────────────────────────────────────────────────
 import { RoleBannerComponent } from './shared/components/role-banner/role-banner.component';
@@ -33,6 +34,7 @@ import { BookAmenityDialogComponent } from './member/dialogs/book-amenity-dialog
   imports: [
     CommonModule,
     RouterOutlet,
+    TranslatePipe,
     // Shared layout
     RoleBannerComponent,
     SidebarNavComponent,
@@ -57,6 +59,7 @@ import { BookAmenityDialogComponent } from './member/dialogs/book-amenity-dialog
 export class AppComponent implements OnInit {
   readonly state = inject(SocietyStateService);
   readonly dialogs = inject(DialogModalService);
+  readonly mobileMenuOpen = signal(false);
 
   get openComplaintsCount(): number {
     return this.state.currentUserRole() === 'admin'
@@ -70,8 +73,17 @@ export class AppComponent implements OnInit {
     document.body.setAttribute('data-role', this.state.currentUserRole());
   }
 
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update(open => !open);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
+
   onRoleChange(role: UserRole): void {
     this.state.setRole(role);
+    this.mobileMenuOpen.set(false);
     document.body.setAttribute('data-role', role);
   }
 
@@ -83,6 +95,7 @@ export class AppComponent implements OnInit {
 
   onNavSelect(viewId: string): void {
     this.state.setView(viewId);
+    this.mobileMenuOpen.set(false);
   }
 
   onGlobalSearch(query: string): void {

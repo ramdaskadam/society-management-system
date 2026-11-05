@@ -23,7 +23,9 @@ export class SidebarNavComponent {
   @Input() openComplaintsCount: number = 0;
   @Input() user: User = { name: '', role: '', email: '', avatar: '' };
   @Input() societyName: string = 'Green Meadows';
+  @Input() mobileOpen: boolean = false;
   @Output() navSelect = new EventEmitter<string>();
+  @Output() closeMobile = new EventEmitter<void>();
 
   get navItems(): NavItem[] {
     if (this.role === 'admin') {
