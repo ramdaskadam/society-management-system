@@ -35,15 +35,41 @@ export class MemberDashboardComponent {
   }
 
   get myInvoices() {
-    return this.state.activeUnitInvoices();
+    const q = this.state.globalSearchQuery().toLowerCase().trim();
+    const list = this.state.activeUnitInvoices();
+    if (!q) return list;
+    return list.filter(
+      i =>
+        i.id.toLowerCase().includes(q) ||
+        i.month.toLowerCase().includes(q) ||
+        i.status.toLowerCase().includes(q)
+    );
   }
 
   get myPayments() {
-    return this.state.activeUnitPayments();
+    const q = this.state.globalSearchQuery().toLowerCase().trim();
+    const list = this.state.activeUnitPayments();
+    if (!q) return list;
+    return list.filter(
+      p =>
+        p.invoiceNo.toLowerCase().includes(q) ||
+        p.mode.toLowerCase().includes(q) ||
+        p.date.toLowerCase().includes(q) ||
+        p.txnId.toLowerCase().includes(q)
+    );
   }
 
   get myBookings() {
-    return this.state.activeUnitBookings();
+    const q = this.state.globalSearchQuery().toLowerCase().trim();
+    const list = this.state.activeUnitBookings();
+    if (!q) return list;
+    return list.filter(
+      b =>
+        b.amenity.toLowerCase().includes(q) ||
+        b.purpose.toLowerCase().includes(q) ||
+        b.date.toLowerCase().includes(q) ||
+        b.status.toLowerCase().includes(q)
+    );
   }
 
   navigateTo(view: string): void {

@@ -99,23 +99,7 @@ export class AppComponent implements OnInit {
   }
 
   onGlobalSearch(query: string): void {
-    const q = query.toLowerCase().trim();
-    if (!q) return;
-    if (q === 'notice' || q === 'meeting' || q === 'agm') {
-      this.state.setView('notices');
-    } else if (q === 'complaint' || q === 'plumbing' || q === 'lift') {
-      this.state.setView('complaints');
-    } else if (q === 'amenity' || q === 'hall' || q === 'clubhouse') {
-      this.state.setView('amenities');
-    } else if (q === 'member' || q === 'unit' || q === 'a-101') {
-      this.state.setView(this.state.currentUserRole() === 'admin' ? 'members' : 'my-unit');
-    } else if (q === 'visitor' || q === 'gate' || q === 'otp' || q === 'delivery') {
-      this.state.setView('visitors');
-    } else if (q === 'poll' || q === 'vote' || q === 'solar') {
-      this.state.setView('polls');
-    } else if (q === 'parking' || q === 'ev' || q === 'vehicle' || q === 'car') {
-      this.state.setView('parking');
-    }
+    this.state.setGlobalSearch(query);
   }
 
   onPaymentConfirmed(event: { invoiceId: string; method: string }): void {

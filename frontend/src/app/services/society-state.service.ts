@@ -36,6 +36,26 @@ import complaintsSeed from '../../assets/mock-data/complaints.json';
 import noticesAmenitiesSeed from '../../assets/mock-data/notices-amenities.json';
 import operationsSeed from '../../assets/mock-data/operations.json';
 
+export interface GlobalSearchResultItem {
+  id: string;
+  category:
+    | 'Member'
+    | 'Unit'
+    | 'Invoice'
+    | 'Complaint'
+    | 'Notice'
+    | 'Visitor'
+    | 'Parking'
+    | 'Poll'
+    | 'Amenity'
+    | 'Document';
+  title: string;
+  subtitle: string;
+  badge: string;
+  badgeClass: string;
+  targetView: string;
+}
+
 const STORAGE_KEY = 'green_meadows_sms_angular_v2';
 
 @Injectable({
@@ -80,6 +100,9 @@ export class SocietyStateService {
 
   // Selected invoice for receipt modal
   readonly selectedReceiptInvoice = signal<Invoice | null>(null);
+
+  // Global Search State across Dashboard & Views
+  readonly globalSearchQuery = signal<string>('');
 
   // ── Dynamic Computed Selectors (No Hardcoded Unit IDs) ────────────────────────
   readonly activeUser = computed(() => {
@@ -126,6 +149,243 @@ export class SocietyStateService {
 
   /** Alias preserved for backward compatibility */
   readonly memberA101Dues = this.activeUnitDues;
+
+  /** Filtered recent activities for Admin Dashboard based on globalSearchQuery */
+  readonly filteredRecentActivities = computed(() => {
+    const q = this.globalSearchQuery().toLowerCase().trim();
+    const list = this.recentActivities();
+    if (!q) return list;
+    return list.filter(
+      a =>
+        a.title.toLowerCase().includes(q) ||
+        a.subtitle.toLowerCase().includes(q) ||
+        a.type.toLowerCase().includes(q) ||
+        (a.amount && a.amount.toLowerCase().includes(q))
+    );
+  });
+
+  /** Cross-module Global Search Results for Dashboard & Topbar Command Palette */
+  readonly globalSearchResults = computed<GlobalSearchResultItem[]>(() => {
+    const q = this.globalSearchQuery().toLowerCase().trim();
+    if (!q) return [];
+
+    const role = this.currentUserRole();
+    const results: GlobalSearchResultItem[] = [];
+
+    // 1. Members
+    this.members().forEach(m => {
+      if (
+        m.name.toLowerCase().includes(q) ||
+        m.unit.toLowerCase().includes(q) ||
+        m.id.toLowerCase().includes(q) ||
+        m.phone.toLowerCase().includes(q) ||
+        m.email.toLowerCase().includes(q) ||
+        m.role.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: `mem-${m.id}`,
+          category: 'Member',
+          title: `${m.name} (${m.unit})`,
+          subtitle: `${m.role} • Wing ${m.wing} • ${m.phone}`,
+          badge: m.dues > 0 ? `Dues ₹${m.dues.toLocaleString('en-IN')}` : m.status,
+          badgeClass: m.dues > 0 ? 'badge-unpaid' : 'badge-active',
+          targetView: role === 'admin' ? 'members' : 'my-unit'
+        });
+      }
+    });
+
+    // 2. Units
+    this.units().forEach(u => {
+      if (
+        u.unitNo.toLowerCase().includes(q) ||
+        u.owner.toLowerCase().includes(q) ||
+        u.type.toLowerCase().includes(q) ||
+        u.occupancy.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: `unit-${u.id}`,
+          category: 'Unit',
+          title: `Flat ${u.unitNo} (Wing ${u.wing})`,
+          subtitle: `${u.owner} • ${u.type} (${u.area} sq.ft) • ${u.occupancy}`,
+          badge: u.dues > 0 ? `₹${u.dues.toLocaleString('en-IN')} Due` : 'No Dues',
+          badgeClass: u.dues > 0 ? 'badge-unpaid' : 'badge-paid',
+          targetView: role === 'admin' ? 'units' : 'my-unit'
+        });
+      }
+    });
+
+    // 3. Invoices
+    const invoicePool = role === 'admin' ? this.invoices() : this.activeUnitInvoices();
+    invoicePool.forEach(inv => {
+      if (
+        inv.id.toLowerCase().includes(q) ||
+        inv.unitNo.toLowerCase().includes(q) ||
+        inv.memberName.toLowerCase().includes(q) ||
+        inv.month.toLowerCase().includes(q) ||
+        inv.status.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: `inv-${inv.id}`,
+          category: 'Invoice',
+          title: `${inv.id} • ${inv.month}`,
+          subtitle: `${inv.memberName} (${inv.unitNo}) • ₹${inv.amount.toLocaleString('en-IN')}`,
+          badge: inv.status,
+          badgeClass: inv.status === 'Paid' ? 'badge-paid' : 'badge-unpaid',
+          targetView: 'payments'
+        });
+      }
+    });
+
+    // 4. Complaints
+    const complaintPool = role === 'admin' ? this.complaints() : this.activeUnitComplaints();
+    complaintPool.forEach(c => {
+      if (
+        c.id.toLowerCase().includes(q) ||
+        c.ticketNo.toLowerCase().includes(q) ||
+        c.subject.toLowerCase().includes(q) ||
+        c.category.toLowerCase().includes(q) ||
+        c.unitNo.toLowerCase().includes(q) ||
+        c.reportedBy.toLowerCase().includes(q) ||
+        c.status.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: `cmp-${c.id}`,
+          category: 'Complaint',
+          title: `${c.ticketNo}: ${c.subject}`,
+          subtitle: `${c.category} • Flat ${c.unitNo} (${c.reportedBy})`,
+          badge: c.status,
+          badgeClass:
+            c.status === 'Resolved' || c.status === 'Closed'
+              ? 'badge-resolved'
+              : c.status === 'In Progress'
+                ? 'badge-in-progress'
+                : 'badge-open',
+          targetView: 'complaints'
+        });
+      }
+    });
+
+    // 5. Notices
+    this.notices().forEach(n => {
+      if (
+        n.title.toLowerCase().includes(q) ||
+        n.category.toLowerCase().includes(q) ||
+        n.summary.toLowerCase().includes(q) ||
+        (n.location && n.location.toLowerCase().includes(q))
+      ) {
+        results.push({
+          id: `not-${n.id}`,
+          category: 'Notice',
+          title: n.title,
+          subtitle: `${n.category} • ${n.publishDate}${n.location ? ' • ' + n.location : ''}`,
+          badge: n.category,
+          badgeClass: 'badge-info',
+          targetView: 'notices'
+        });
+      }
+    });
+
+    // 6. Visitors & Gate Passes
+    const visitorPool = role === 'admin' ? this.visitors() : this.activeUnitVisitors();
+    visitorPool.forEach(v => {
+      if (
+        v.visitorName.toLowerCase().includes(q) ||
+        v.passCode.toLowerCase().includes(q) ||
+        v.unitNo.toLowerCase().includes(q) ||
+        v.visitorType.toLowerCase().includes(q) ||
+        (v.company && v.company.toLowerCase().includes(q))
+      ) {
+        results.push({
+          id: `vis-${v.id}`,
+          category: 'Visitor',
+          title: `${v.visitorName} (${v.visitorType})`,
+          subtitle: `Flat ${v.unitNo} • OTP: ${v.passCode} • ${v.company || 'Guest'}`,
+          badge: v.status,
+          badgeClass: v.status === 'Inside Premises' ? 'badge-paid' : 'badge-info',
+          targetView: 'visitors'
+        });
+      }
+    });
+
+    // 7. Parking & Vehicles
+    this.parkingSlots().forEach(p => {
+      if (
+        p.slotNo.toLowerCase().includes(q) ||
+        p.vehicleNo.toLowerCase().includes(q) ||
+        p.unitNo.toLowerCase().includes(q) ||
+        p.ownerName.toLowerCase().includes(q) ||
+        p.vehicleType.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: `pk-${p.id}`,
+          category: 'Parking',
+          title: `Bay ${p.slotNo} • ${p.vehicleNo || 'Vacant'}`,
+          subtitle: `${p.ownerName} (${p.unitNo}) • ${p.vehicleType}`,
+          badge: p.type,
+          badgeClass: p.type === 'EV Charging Bay' ? 'badge-paid' : 'badge-info',
+          targetView: 'parking'
+        });
+      }
+    });
+
+    // 8. Polls
+    this.polls().forEach(pl => {
+      if (
+        pl.title.toLowerCase().includes(q) ||
+        pl.category.toLowerCase().includes(q) ||
+        pl.description.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: `poll-${pl.id}`,
+          category: 'Poll',
+          title: pl.title,
+          subtitle: `${pl.category} • ${pl.totalVotes} votes cast`,
+          badge: pl.status,
+          badgeClass: pl.status === 'Active' ? 'badge-active' : 'badge-closed',
+          targetView: 'polls'
+        });
+      }
+    });
+
+    // 9. Amenities & Documents
+    this.amenities().forEach(a => {
+      if (a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q)) {
+        results.push({
+          id: `am-${a.id}`,
+          category: 'Amenity',
+          title: a.name,
+          subtitle: `${a.timings} • ${a.charge}`,
+          badge: a.available ? 'Available' : 'Maintenance',
+          badgeClass: 'badge-confirmed',
+          targetView: 'amenities'
+        });
+      }
+    });
+
+    this.documents().forEach(d => {
+      if (d.title.toLowerCase().includes(q) || d.category.toLowerCase().includes(q)) {
+        results.push({
+          id: `doc-${d.id}`,
+          category: 'Document',
+          title: d.title,
+          subtitle: `${d.category} • ${d.size} • ${d.date}`,
+          badge: 'PDF',
+          badgeClass: 'badge-info',
+          targetView: 'documents'
+        });
+      }
+    });
+
+    return results;
+  });
+
+  setGlobalSearch(query: string): void {
+    this.globalSearchQuery.set(query);
+  }
+
+  clearGlobalSearch(): void {
+    this.globalSearchQuery.set('');
+  }
 
   constructor() {
     const hasLocalCache = this.loadFromStorage();

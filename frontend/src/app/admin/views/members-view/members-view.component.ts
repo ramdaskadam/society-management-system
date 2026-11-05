@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, NO_ERRORS_SCHEMA, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocietyStateService } from '../../../services/society-state.service';
@@ -23,6 +23,18 @@ export class MembersViewComponent {
   readonly duesFilter = signal<'All' | 'Pending' | 'Clear'>('All');
 
   readonly wings = ['All', 'A', 'B', 'C', 'D'];
+
+  constructor() {
+    effect(
+      () => {
+        const globalQ = this.state.globalSearchQuery();
+        if (globalQ !== undefined) {
+          this.searchQuery.set(globalQ);
+        }
+      },
+      { allowSignalWrites: true }
+    );
+  }
 
   readonly hasActiveFilters = computed(() =>
     this.searchQuery().trim().length > 0 ||
@@ -71,6 +83,7 @@ export class MembersViewComponent {
 
   clearFilters(): void {
     this.searchQuery.set('');
+    this.state.clearGlobalSearch();
     this.selectedWing.set('All');
     this.selectedRole.set('All');
     this.duesFilter.set('All');

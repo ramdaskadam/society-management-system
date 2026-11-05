@@ -11,6 +11,48 @@
   </div>
 </div>
 
+<!-- GLOBAL SEARCH RESULTS PANEL ON DASHBOARD -->
+@if (state.globalSearchQuery().trim()) {
+  <div class="dash-card global-dash-search-card" aria-live="polite">
+    <div class="dash-card-header">
+      <div>
+        <h3 class="dash-card-title">
+          Global Search Results for "{{ state.globalSearchQuery() }}"
+        </h3>
+        <p class="dash-card-subtitle">
+          Found {{ state.globalSearchResults().length }} matching records across Members, Units, Billing, Complaints, Notices & Gate Logs
+        </p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="state.clearGlobalSearch()">
+        Clear Search
+      </button>
+    </div>
+
+    @if (state.globalSearchResults().length > 0) {
+      <div class="global-dash-results-grid">
+        @for (item of state.globalSearchResults(); track item.id) {
+          <button
+            type="button"
+            class="global-dash-result-card"
+            (click)="navigateTo(item.targetView)"
+          >
+            <div class="global-dash-result-top">
+              <span class="global-search-category">{{ item.category }}</span>
+              <span class="badge" [ngClass]="item.badgeClass">{{ item.badge }}</span>
+            </div>
+            <div class="global-dash-result-title">{{ item.title }}</div>
+            <div class="global-dash-result-sub">{{ item.subtitle }}</div>
+          </button>
+        }
+      </div>
+    } @else {
+      <div style="padding: 18px 0; color: var(--text-muted); font-size: 0.875rem;">
+        No matching records found across society modules for "{{ state.globalSearchQuery() }}".
+      </div>
+    }
+  </div>
+}
+
 <!-- 5 STAT CARDS -->
 <div class="stats-grid">
   <app-stat-card
@@ -63,7 +105,7 @@
 
 <!-- LOWER ROW: RECENT ACTIVITIES & QUICK ACTIONS -->
 <div class="admin-lower-grid">
-  <app-recent-activities [activities]="state.recentActivities()" (viewAll)="navigateTo('payments')" />
+  <app-recent-activities [activities]="state.filteredRecentActivities()" (viewAll)="navigateTo('payments')" />
   <app-quick-actions
     (addMember)="openAddMember()"
     (addUnit)="openAddUnit()"
