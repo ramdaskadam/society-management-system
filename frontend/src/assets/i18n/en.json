@@ -107,6 +107,10 @@
     "roleRestricted": "Access restricted to {{roles}} role.",
     "passwordUpdated": "Password updated. Please sign in with your new password.",
     "downloading": "Downloading: {{name}}",
-    "bankImported": "Imported bank statement feed: {{count}} entries reconciled!"
+    "bankImported": "Imported bank statement feed: {{count}} entries reconciled!",
+    "profileUpdated": "Your profile has been updated.",
+    "familyAdded": "{{name}} added as a family member.",
+    "familyUpdated": "{{name}}'s details updated.",
+    "familyRemoved": "{{name}} removed from your household."
   }
 }

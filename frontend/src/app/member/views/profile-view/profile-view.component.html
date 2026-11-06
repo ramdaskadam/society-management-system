@@ -3,13 +3,20 @@
         <h1>Resident Profile & Household</h1>
         <p>Personal profile, emergency contacts, registered vehicles, and flat ownership</p>
       </div>
+      <div class="page-header-actions">
+        <button type="button" class="btn-secondary" (click)="openPrimary()">Update my details</button>
+        <button type="button" class="btn-primary" (click)="openAddFamily()">+ Add family member</button>
+      </div>
     </div>
 
     <div class="profile-layout-grid">
       <div class="dash-card" style="text-align: center; align-items: center;">
         <img [src]="user.avatar" [alt]="user.name" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #10b981; margin-bottom: 14px;" />
         <h2 style="font-size: 1.2rem; font-weight: 700;">{{ user.name }}</h2>
-        <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">Owner • Flat {{ user.unit }}</div>
+        <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">{{ user.role }} • Flat {{ user.unit }}</div>
+        @if (state.primaryProfile().dob) {
+          <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">{{ state.primaryProfile().gender }} • {{ age(state.primaryProfile().dob) }} yrs</div>
+        }
         <div style="margin-top: 14px; font-size: 0.8rem; color: #10b981; background: #ecfdf5; padding: 4px 12px; border-radius: 9999px; font-weight: 600;">
           Verified Society Member
         </div>
@@ -22,7 +29,7 @@
           <div>Mobile Phone: <strong>{{ user.phone }}</strong></div>
           <div>Unit / Flat: <strong>{{ user.unit }} (Wing {{ user.wing }}, Floor {{ user.floor }})</strong></div>
           <div>Apartment Carpet: <strong>{{ user.area }} ({{ user.type }})</strong></div>
-          <div>Total Family Occupants: <strong>{{ user.occupants }} persons</strong></div>
+          <div>Total Occupants: <strong>{{ 1 + state.activeFamily().length }} persons</strong></div>
           <div>Intercom Code: <strong>#101</strong></div>
         </div>
 
@@ -36,3 +43,56 @@
         </div>
       </div>
     </div>
+
+<!-- Family members (secondary members of this flat) -->
+<div class="dash-card" style="margin-top: 20px;">
+  <h3 class="dash-card-title" style="margin-bottom: 14px;">Family Members ({{ state.activeFamily().length }})</h3>
+  @if (state.activeFamily().length === 0) {
+    <p style="color: var(--text-muted); font-size: 0.875rem;">
+      No family members added yet. Use “Add family member” to register the people living with you.
+    </p>
+  }
+  <div class="family-grid">
+    @for (m of state.activeFamily(); track m.id) {
+      <article class="family-card">
+        <div class="family-card-head">
+          @if (m.photo) {
+            <img [src]="m.photo" [alt]="fullName(m)" class="person-photo" />
+          } @else {
+            <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
+          }
+          <div>
+            <strong>{{ fullName(m) }}</strong>
+            <div><span class="family-tag">{{ m.relation }}</span> <span class="family-tag">Secondary</span></div>
+          </div>
+        </div>
+        <div class="family-meta">
+          <span>{{ m.gender }} • {{ age(m.dob) }} yrs (DOB {{ m.dob }})</span>
+          @if (m.qualification) { <span>🎓 {{ m.qualification }}</span> }
+          @if (m.mobile) { <span>📱 {{ m.mobile }}</span> }
+          @if (m.email) { <span>✉ {{ m.email }}</span> }
+          @if (m.hasDisability) { <span>♿ {{ m.disabilityDetails }}</span> }
+        </div>
+        <div class="family-actions">
+          @if (confirmRemoveId() === m.id) {
+            <span style="font-size: 0.8rem;">Remove {{ m.firstName }}?</span>
+            <button type="button" class="btn-primary" (click)="confirmRemove(m.id)">Yes, remove</button>
+            <button type="button" class="btn-secondary" (click)="cancelRemove()">Cancel</button>
+          } @else {
+            <button type="button" class="btn-secondary" (click)="openEditFamily(m)">Edit</button>
+            <button type="button" class="btn-secondary" (click)="askRemove(m.id)">Remove</button>
+          }
+        </div>
+      </article>
+    }
+  </div>
+</div>
+
+<app-person-dialog
+  [isOpen]="dialog() !== 'none'"
+  [mode]="dialog() === 'primary' ? 'primary' : 'family'"
+  [title]="dialogTitle()"
+  [person]="dialogPerson()"
+  (close)="closeDialog()"
+  (save)="onSave($event)"
+/>

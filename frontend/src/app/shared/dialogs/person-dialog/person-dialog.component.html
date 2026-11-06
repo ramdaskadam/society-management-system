@@ -1,0 +1,106 @@
+@if (isOpen()) {
+  <div class="modal-backdrop" (click)="close.emit()">
+    <div class="app-dialog modal-card" role="dialog" aria-modal="true" aria-labelledby="person-dlg-title" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h3 id="person-dlg-title" class="dialog-title">{{ title() }}</h3>
+        <button type="button" class="dialog-close-btn" aria-label="Close" (click)="close.emit()">✕</button>
+      </div>
+
+      <form (ngSubmit)="submit()" novalidate>
+        <div class="dialog-body" style="overflow-y: auto; max-height: 70dvh;">
+          <!-- Photo -->
+          <div class="person-photo-row">
+            @if (photo(); as src) {
+              <img [src]="src" alt="Profile photo preview" class="person-photo" />
+            } @else {
+              <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
+            }
+            <div class="person-photo-actions">
+              <label class="btn-secondary person-photo-btn">
+                Upload photo
+                <input type="file" accept="image/*" (change)="onPhotoSelected($event)" hidden />
+              </label>
+              @if (photo()) {
+                <button type="button" class="auth-link-btn" (click)="removePhoto()">Remove</button>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="p-first">First name *</label>
+              <input id="p-first" name="firstName" class="form-control" [(ngModel)]="firstName" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="p-middle">Middle name</label>
+              <input id="p-middle" name="middleName" class="form-control" [(ngModel)]="middleName" autocomplete="off" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-last">Last name *</label>
+            <input id="p-last" name="lastName" class="form-control" [(ngModel)]="lastName" autocomplete="off" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="p-dob">Date of birth *</label>
+              <input id="p-dob" name="dob" type="date" class="form-control" [(ngModel)]="dob" [max]="today" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="p-gender">Gender *</label>
+              <select id="p-gender" name="gender" class="form-control" [(ngModel)]="gender">
+                <option value="" disabled>Select…</option>
+                @for (g of genders; track g) { <option [value]="g">{{ g }}</option> }
+              </select>
+            </div>
+          </div>
+
+          @if (mode() === 'family') {
+            <div class="form-group">
+              <label class="form-label" for="p-rel">Relationship *</label>
+              <select id="p-rel" name="relation" class="form-control" [(ngModel)]="relation">
+                <option value="" disabled>Select…</option>
+                @for (r of relations; track r) { <option [value]="r">{{ r }}</option> }
+              </select>
+            </div>
+          }
+
+          <div class="form-group">
+            <label class="form-label" for="p-qual">Qualification <span class="auth-optional">(optional)</span></label>
+            <input id="p-qual" name="qualification" class="form-control" [(ngModel)]="qualification" list="p-qual-list" autocomplete="off" />
+            <datalist id="p-qual-list">
+              @for (q of qualifications; track q) { <option [value]="q"></option> }
+            </datalist>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="p-mobile">Mobile number {{ mode() === 'primary' ? '*' : '' }}</label>
+            <input id="p-mobile" name="mobile" type="tel" inputmode="numeric" class="form-control" [(ngModel)]="mobile" placeholder="10-digit number" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-email">Email {{ mode() === 'primary' ? '*' : '' }}</label>
+            <input id="p-email" name="email" type="email" inputmode="email" class="form-control" [(ngModel)]="email" autocapitalize="off" spellcheck="false" autocomplete="off" />
+          </div>
+
+          <label class="auth-radio">
+            <input type="checkbox" name="hasDisability" [(ngModel)]="hasDisability" /> Has a disability
+          </label>
+          @if (hasDisability) {
+            <div class="form-group">
+              <label class="form-label" for="p-dis">Disability details *</label>
+              <input id="p-dis" name="disabilityDetails" class="form-control" [(ngModel)]="disabilityDetails" placeholder="e.g. Uses wheelchair" autocomplete="off" />
+            </div>
+          }
+
+          @if (error()) {
+            <div class="auth-error" role="alert"><span aria-hidden="true">⚠</span> {{ error() }}</div>
+          }
+        </div>
+        <div class="dialog-footer">
+          <button type="button" class="btn-secondary" (click)="close.emit()">Cancel</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

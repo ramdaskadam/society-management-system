@@ -254,6 +254,34 @@ export interface AuditLogEntry {
   actor: string;
   role: UserRole;
   action: string;
-  module: 'Billing' | 'Security' | 'Complaints' | 'Notices' | 'Settings' | 'Governance';
+  module: 'Billing' | 'Security' | 'Complaints' | 'Notices' | 'Settings' | 'Governance' | 'Profile';
   details: string;
+}
+
+/** Personal details shared by the primary resident and their family members. */
+export type Gender = 'Male' | 'Female' | 'Other';
+
+export interface PersonDetails {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  /** ISO date (yyyy-mm-dd). */
+  dob: string;
+  gender: Gender | '';
+  /** Small JPEG data-URL (or image URL from the backend). */
+  photo?: string;
+  /** Optional. */
+  qualification?: string;
+  mobile?: string;
+  email?: string;
+  hasDisability: boolean;
+  disabilityDetails?: string;
+}
+
+/** Secondary member of a flat, owned by the primary (verified) member. */
+export interface FamilyMember extends PersonDetails {
+  id: string;
+  unitNo: string;
+  relation: string;
+  addedOn: string;
 }

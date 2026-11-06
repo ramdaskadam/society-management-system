@@ -23,7 +23,9 @@ import {
   VisitorPass,
   SocietyPoll,
   ParkingSlot,
-  AuditLogEntry
+  AuditLogEntry,
+  FamilyMember,
+  PersonDetails
 } from '../models/society.model';
 import { SocietyApiService, SocietyBootstrapPayload } from '../core/services/society-api.service';
 import { ToastNotificationService } from '../core/services/toast-notification.service';
@@ -109,6 +111,11 @@ export class SocietyStateService {
   readonly parkingSlots = signal<ParkingSlot[]>(operationsSeed.parkingSlots as ParkingSlot[]);
   readonly auditLogs = signal<AuditLogEntry[]>(operationsSeed.auditLogs as AuditLogEntry[]);
 
+  /** Secondary members added by primary residents (all flats; filtered per flat below). */
+  readonly familyMembers = signal<FamilyMember[]>([]);
+  /** Extra personal details of the primary resident (DOB, gender, photo...). Name/email/phone mirror `memberUser`. */
+  readonly primaryExtras = signal<Partial<PersonDetails>>({});
+
   // Ephemeral UI Toasts (delegated to ToastNotificationService; excluded from localStorage)
   readonly toasts = this.toastService.toasts;
 
@@ -154,6 +161,32 @@ export class SocietyStateService {
   readonly activeUnitVisitors = computed(() => {
     const unit = this.currentResidentUnit();
     return this.visitors().filter(v => v.unitNo === unit);
+  });
+
+  /** Family members of the signed-in resident's flat. */
+  readonly activeFamily = computed(() => {
+    const unit = this.currentResidentUnit();
+    return this.familyMembers().filter(f => f.unitNo === unit);
+  });
+
+  /** Full editable profile of the primary resident, built from `memberUser` + saved extras. */
+  readonly primaryProfile = computed<PersonDetails>(() => {
+    const u = this.memberUser();
+    const parts = u.name.trim().split(/\s+/);
+    const x = this.primaryExtras();
+    return {
+      firstName: x.firstName ?? parts[0] ?? '',
+      middleName: x.middleName ?? (parts.length > 2 ? parts.slice(1, -1).join(' ') : ''),
+      lastName: x.lastName ?? (parts.length > 1 ? parts[parts.length - 1] : ''),
+      dob: x.dob ?? '',
+      gender: x.gender ?? '',
+      photo: u.avatar,
+      qualification: x.qualification ?? '',
+      mobile: u.phone ?? '',
+      email: u.email,
+      hasDisability: x.hasDisability ?? false,
+      disabilityDetails: x.disabilityDetails ?? ''
+    };
   });
 
   readonly activeUnitDues = computed(() => {
@@ -559,6 +592,52 @@ export class SocietyStateService {
     this.selectedReceiptInvoice.set(updated);
     this.logAudit('Billing', `Invoice ${invoiceId} paid via ${paymentMethod} (Txn: ${txnId}).`);
     this.showToast('msg.paymentConfirmed', 'success', { amount: amount.toLocaleString('en-IN'), method: paymentMethod });
+  }
+
+  // ── Family (secondary members) & primary profile ─────────────────────────────
+  /** Primary member updates his/her own details; name/email/phone/photo are mirrored to the user record. */
+  updatePrimaryProfile(d: PersonDetails): void {
+    const name = [d.firstName, d.middleName, d.lastName].map(p => (p ?? '').trim()).filter(Boolean).join(' ');
+    this.primaryExtras.set({ ...d });
+    this.memberUser.update(u => ({
+      ...u,
+      name,
+      email: d.email?.trim() || u.email,
+      phone: d.mobile?.trim() || u.phone,
+      avatar: d.photo || u.avatar
+    }));
+    this.logAudit('Profile', `Primary member profile updated (${name}).`);
+    this.showToast('msg.profileUpdated', 'success');
+  }
+
+  addFamilyMember(d: PersonDetails, relation: string): void {
+    const unitNo = this.currentResidentUnit();
+    const member: FamilyMember = { ...d, id: uid('FAM'), unitNo, relation, addedOn: todayLabel() };
+    this.familyMembers.update(list => [...list, member]);
+    this.syncOccupants();
+    this.logAudit('Profile', `Family member ${d.firstName} ${d.lastName} (${relation}) added to ${unitNo}.`);
+    this.showToast('msg.familyAdded', 'success', { name: d.firstName });
+  }
+
+  updateFamilyMember(id: string, d: PersonDetails, relation: string): void {
+    this.familyMembers.update(list => list.map(f => (f.id === id ? { ...f, ...d, relation } : f)));
+    this.logAudit('Profile', `Family member ${d.firstName} ${d.lastName} updated.`);
+    this.showToast('msg.familyUpdated', 'success', { name: d.firstName });
+  }
+
+  removeFamilyMember(id: string): void {
+    const m = this.familyMembers().find(f => f.id === id);
+    if (!m) return;
+    this.familyMembers.update(list => list.filter(f => f.id !== id));
+    this.syncOccupants();
+    this.logAudit('Profile', `Family member ${m.firstName} ${m.lastName} removed from ${m.unitNo}.`);
+    this.showToast('msg.familyRemoved', 'info', { name: m.firstName });
+  }
+
+  /** Occupants = primary member + family members of the flat. */
+  private syncOccupants(): void {
+    const count = 1 + this.activeFamily().length;
+    this.memberUser.update(u => ({ ...u, occupants: count }));
   }
 
   // ── Complaints & SLA Management ───────────────────────────────────────────────
@@ -1026,6 +1105,8 @@ export class SocietyStateService {
     this.polls.set(operationsSeed.polls as SocietyPoll[]);
     this.parkingSlots.set(operationsSeed.parkingSlots as ParkingSlot[]);
     this.auditLogs.set(operationsSeed.auditLogs as AuditLogEntry[]);
+    this.familyMembers.set([]);
+    this.primaryExtras.set({});
     this.setView('dashboard');
     this.hydrateFromApi(true);
   }
@@ -1053,7 +1134,10 @@ export class SocietyStateService {
         visitors: this.visitors(),
         polls: this.polls(),
         parkingSlots: this.parkingSlots(),
-        auditLogs: this.auditLogs()
+        auditLogs: this.auditLogs(),
+        familyMembers: this.familyMembers(),
+        primaryExtras: this.primaryExtras(),
+        memberUser: this.memberUser()
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
@@ -1086,6 +1170,9 @@ export class SocietyStateService {
       if (data.polls) this.polls.set(data.polls);
       if (data.parkingSlots) this.parkingSlots.set(data.parkingSlots);
       if (data.auditLogs) this.auditLogs.set(data.auditLogs);
+      if (data.familyMembers) this.familyMembers.set(data.familyMembers);
+      if (data.primaryExtras) this.primaryExtras.set(data.primaryExtras);
+      if (data.memberUser) this.memberUser.set(data.memberUser);
       this.dataSourceMode.set('local-storage-cache');
       return true;
     } catch (e) {

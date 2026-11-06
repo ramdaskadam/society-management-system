@@ -2724,3 +2724,17 @@ svg[width] { height: auto; }
   .btn-primary, .btn-secondary, .form-control { border: 1px solid ButtonText; }
 }
 :focus-visible { outline: 2px solid var(--accent-primary, #10b981); outline-offset: 2px; }
+
+/* Person (profile / family) dialog + family cards */
+.person-photo-row { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.person-photo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-primary, #10b981); }
+.person-photo-empty { display: grid; place-items: center; font-size: 2rem; background: var(--bg-subtle); }
+.person-photo-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.person-photo-btn { cursor: pointer; }
+.family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.family-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-lg, 12px); padding: 14px; display: grid; gap: 10px; background: var(--bg-surface); }
+.family-card-head { display: flex; gap: 12px; align-items: center; }
+.family-card-head img, .family-card-head .person-photo-empty { width: 52px; height: 52px; flex: none; }
+.family-meta { font-size: 0.8rem; color: var(--text-muted); display: grid; gap: 2px; word-break: break-word; }
+.family-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.family-tag { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: var(--bg-subtle); color: var(--text-muted); }
