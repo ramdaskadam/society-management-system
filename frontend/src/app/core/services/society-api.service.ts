@@ -22,7 +22,9 @@ import {
   VisitorPass,
   SocietyPoll,
   ParkingSlot,
-  AuditLogEntry
+  AuditLogEntry,
+  FamilyMember,
+  PersonDetails
 } from '../../models/society.model';
 
 export interface SocietyOverviewResponse {
@@ -122,5 +124,21 @@ export class SocietyApiService {
       operations: this.getOperationsData()
     });
   }
-}
 
+  // ── Backend Mutation Endpoints (used when environment.useMockApi === false) ──
+  savePrimaryProfile(details: PersonDetails): Observable<PersonDetails> {
+    return this.http.put<PersonDetails>(API_ENDPOINTS.mutations.primaryProfile(), details);
+  }
+
+  createFamilyMember(member: FamilyMember): Observable<FamilyMember> {
+    return this.http.post<FamilyMember>(API_ENDPOINTS.mutations.familyMembers(), member);
+  }
+
+  updateFamilyMember(id: string, member: Partial<FamilyMember>): Observable<FamilyMember> {
+    return this.http.put<FamilyMember>(API_ENDPOINTS.mutations.familyMemberById(id), member);
+  }
+
+  deleteFamilyMember(id: string): Observable<void> {
+    return this.http.delete<void>(API_ENDPOINTS.mutations.familyMemberById(id));
+  }
+}

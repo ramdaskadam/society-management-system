@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnChanges, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FAMILY_RELATIONS, GENDERS, QUALIFICATION_SUGGESTIONS } from '../../../core/config/family.config';
 import { Gender, PersonDetails } from '../../../models/society.model';
 import { MOBILE_RE, normalizeMobile } from '../../../core/services/auth.service';
@@ -22,7 +23,7 @@ const MAX_PHOTO_PX = 256;
   selector: 'app-person-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './person-dialog.component.html'
 })
 export class PersonDialogComponent implements OnChanges {

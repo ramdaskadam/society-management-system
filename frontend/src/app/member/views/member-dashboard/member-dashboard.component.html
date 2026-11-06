@@ -147,7 +147,7 @@
         </div>
 
         <div class="table-responsive">
-          <table class="app-table">
+          <table class="app-table stack-mobile">
             <thead>
               <tr>
                 <th>Invoice #</th>
@@ -161,16 +161,16 @@
             <tbody>
               @for (inv of myInvoices; track inv.id) {
                 <tr>
-                  <td style="font-weight: 600;">{{ inv.id }}</td>
-                  <td>{{ inv.month }}</td>
-                  <td>{{ inv.dueDate }}</td>
-                  <td style="font-weight: 700;">{{ inv.amount.toLocaleString('en-IN') }}</td>
-                  <td>
+                  <td style="font-weight: 600;" data-label="Invoice #">{{ inv.id }}</td>
+                  <td data-label="Month">{{ inv.month }}</td>
+                  <td data-label="Due Date">{{ inv.dueDate }}</td>
+                  <td style="font-weight: 700;" data-label="Amount (₹)">{{ inv.amount.toLocaleString('en-IN') }}</td>
+                  <td data-label="Status">
                     <span class="badge" [ngClass]="inv.status === 'Paid' ? 'badge-paid' : 'badge-unpaid'">
                       {{ inv.status }}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Action">
                     @if (inv.status === 'Unpaid') {
                       <button class="table-btn-pay" (click)="openPayNowFor(inv)">Pay Now</button>
                     } @else {
@@ -198,7 +198,7 @@
         </div>
 
         <div class="table-responsive">
-          <table class="app-table">
+          <table class="app-table stack-mobile">
             <thead>
               <tr>
                 <th>Date</th>
@@ -211,11 +211,11 @@
             <tbody>
               @for (p of myPayments; track p.txnId) {
                 <tr>
-                  <td>{{ p.date }}</td>
-                  <td style="font-weight: 600;">{{ p.invoiceNo }}</td>
-                  <td>{{ p.mode }}</td>
-                  <td style="font-weight: 700;">{{ p.amount.toLocaleString('en-IN') }}</td>
-                  <td>
+                  <td data-label="Date">{{ p.date }}</td>
+                  <td style="font-weight: 600;" data-label="Invoice #">{{ p.invoiceNo }}</td>
+                  <td data-label="Mode">{{ p.mode }}</td>
+                  <td style="font-weight: 700;" data-label="Amount (₹)">{{ p.amount.toLocaleString('en-IN') }}</td>
+                  <td data-label="Status">
                     <span style="color: #10b981; font-weight: 600;">✓ {{ p.status }}</span>
                   </td>
                 </tr>
@@ -239,7 +239,7 @@
         </div>
 
         <div class="table-responsive">
-          <table class="app-table">
+          <table class="app-table stack-mobile">
             <thead>
               <tr>
                 <th>Amenity</th>
@@ -251,10 +251,10 @@
             <tbody>
               @for (b of myBookings; track b.id) {
                 <tr>
-                  <td style="font-weight: 600;">{{ b.amenity }}</td>
-                  <td>{{ b.date }}</td>
-                  <td style="font-size: 0.75rem;">{{ b.time }}</td>
-                  <td>
+                  <td style="font-weight: 600;" data-label="Amenity">{{ b.amenity }}</td>
+                  <td data-label="Date">{{ b.date }}</td>
+                  <td style="font-size: 0.75rem;" data-label="Time">{{ b.time }}</td>
+                  <td data-label="Status">
                     <span class="badge" [ngClass]="b.status === 'Confirmed' ? 'badge-confirmed' : 'badge-completed'">
                       {{ b.status }}
                     </span>

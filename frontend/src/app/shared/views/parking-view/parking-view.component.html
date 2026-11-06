@@ -125,7 +125,7 @@
   </div>
 
   <div tabindex="0" role="region" aria-label="Parking and EV bay allocation directory" class="table-responsive">
-    <table class="app-table">
+    <table class="app-table stack-mobile">
       <thead>
         <tr>
           <th>Slot #</th>
@@ -141,22 +141,22 @@
       <tbody>
         @for (slot of filteredSlots; track slot.id) {
           <tr>
-            <td style="font-weight: 700; font-family: var(--font-mono);">{{ slot.slotNo }}</td>
-            <td>{{ slot.type }}</td>
-            <td><span class="badge badge-info">{{ slot.unitNo }}</span></td>
-            <td>{{ slot.ownerName }}</td>
-            <td style="font-weight: 700; font-family: var(--font-mono);">
+            <td style="font-weight: 700; font-family: var(--font-mono);" data-label="Slot #">{{ slot.slotNo }}</td>
+            <td data-label="Bay Type">{{ slot.type }}</td>
+            <td data-label="Unit"><span class="badge badge-info">{{ slot.unitNo }}</span></td>
+            <td data-label="Resident / Assignee">{{ slot.ownerName }}</td>
+            <td style="font-weight: 700; font-family: var(--font-mono);" data-label="Vehicle Number">
               {{ slot.vehicleType === '4-Wheeler' ? '🚗' : '🛵' }} {{ slot.vehicleNo }}
             </td>
-            <td style="font-family: var(--font-mono); font-size: 0.75rem;">{{ slot.rfidTag }}</td>
-            <td>
+            <td style="font-family: var(--font-mono); font-size: 0.75rem;" data-label="RFID Sticker">{{ slot.rfidTag }}</td>
+            <td data-label="EV Ready">
               @if (slot.evEnabled) {
                 <span class="badge badge-paid">⚡ EV 7.4kW</span>
               } @else {
                 <span style="color: var(--text-light); font-size: 0.75rem;">Standard</span>
               }
             </td>
-            <td>
+            <td data-label="Status">
               <span
                 class="badge"
                 [ngClass]="slot.status === 'Allocated' ? 'badge-confirmed' : (slot.status === 'Vacant' ? 'badge-completed' : 'badge-pending')"

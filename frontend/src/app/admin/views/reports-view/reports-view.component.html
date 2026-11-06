@@ -41,7 +41,7 @@
         <button class="btn-secondary" (click)="state.exportCsv('dues')">Export Defaulters</button>
       </div>
       <div class="table-responsive">
-        <table class="app-table">
+        <table class="app-table stack-mobile">
           <thead>
             <tr>
               <th>Unit</th>
@@ -55,40 +55,40 @@
           </thead>
           <tbody>
             <tr>
-              <td style="font-weight: 700;">B-202</td>
-              <td>Suresh Patel</td>
-              <td>₹ 5,000</td>
-              <td>₹ 4,500</td>
-              <td style="color: #ef4444; font-weight: 700;">₹ 3,000</td>
-              <td style="font-weight: 800; color: #ef4444;">₹ 12,500</td>
-              <td>₹ 562.50</td>
+              <td style="font-weight: 700;" data-label="Unit">B-202</td>
+              <td data-label="Owner Name">Suresh Patel</td>
+              <td data-label="0-30 Days Dues">₹ 5,000</td>
+              <td data-label="31-60 Days Dues">₹ 4,500</td>
+              <td style="color: #ef4444; font-weight: 700;" data-label="60+ Days Overdue">₹ 3,000</td>
+              <td style="font-weight: 800; color: #ef4444;" data-label="Total Outstanding">₹ 12,500</td>
+              <td data-label="Interest (18% p.a.)">₹ 562.50</td>
             </tr>
             <tr>
-              <td style="font-weight: 700;">A-101</td>
-              <td>Rahul Sharma</td>
-              <td>₹ {{ state.memberA101Dues().toLocaleString('en-IN') }}</td>
-              <td>₹ 0</td>
-              <td>₹ 0</td>
-              <td style="font-weight: 800; color: #ef4444;">₹ {{ state.memberA101Dues().toLocaleString('en-IN') }}</td>
-              <td>₹ 0</td>
+              <td style="font-weight: 700;" data-label="Unit">A-101</td>
+              <td data-label="Owner Name">Rahul Sharma</td>
+              <td data-label="0-30 Days Dues">₹ {{ state.memberA101Dues().toLocaleString('en-IN') }}</td>
+              <td data-label="31-60 Days Dues">₹ 0</td>
+              <td data-label="60+ Days Overdue">₹ 0</td>
+              <td style="font-weight: 800; color: #ef4444;" data-label="Total Outstanding">₹ {{ state.memberA101Dues().toLocaleString('en-IN') }}</td>
+              <td data-label="Interest (18% p.a.)">₹ 0</td>
             </tr>
             <tr>
-              <td style="font-weight: 700;">C-402</td>
-              <td>Deepika Nair</td>
-              <td>₹ 6,000</td>
-              <td>₹ 0</td>
-              <td>₹ 0</td>
-              <td style="font-weight: 800; color: #ef4444;">₹ 6,000</td>
-              <td>₹ 0</td>
+              <td style="font-weight: 700;" data-label="Unit">C-402</td>
+              <td data-label="Owner Name">Deepika Nair</td>
+              <td data-label="0-30 Days Dues">₹ 6,000</td>
+              <td data-label="31-60 Days Dues">₹ 0</td>
+              <td data-label="60+ Days Overdue">₹ 0</td>
+              <td style="font-weight: 800; color: #ef4444;" data-label="Total Outstanding">₹ 6,000</td>
+              <td data-label="Interest (18% p.a.)">₹ 0</td>
             </tr>
             <tr>
-              <td style="font-weight: 700;">A-201</td>
-              <td>Vikram Malhotra</td>
-              <td>₹ 5,000</td>
-              <td>₹ 0</td>
-              <td>₹ 0</td>
-              <td style="font-weight: 800; color: #ef4444;">₹ 5,000</td>
-              <td>₹ 0</td>
+              <td style="font-weight: 700;" data-label="Unit">A-201</td>
+              <td data-label="Owner Name">Vikram Malhotra</td>
+              <td data-label="0-30 Days Dues">₹ 5,000</td>
+              <td data-label="31-60 Days Dues">₹ 0</td>
+              <td data-label="60+ Days Overdue">₹ 0</td>
+              <td style="font-weight: 800; color: #ef4444;" data-label="Total Outstanding">₹ 5,000</td>
+              <td data-label="Interest (18% p.a.)">₹ 0</td>
             </tr>
           </tbody>
         </table>

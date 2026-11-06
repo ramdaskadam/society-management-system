@@ -139,7 +139,7 @@
   </div>
 
   <div tabindex="0" role="region" aria-label="Visitor and gate security log" class="table-responsive">
-    <table class="app-table">
+    <table class="app-table stack-mobile">
       <thead>
         <tr>
           <th>Gate OTP</th>
@@ -154,10 +154,10 @@
       <tbody>
         @for (v of filteredVisitors; track v.id) {
           <tr>
-            <td>
+            <td data-label="Gate OTP">
               <span class="otp-pill">{{ v.passCode }}</span>
             </td>
-            <td>
+            <td data-label="Visitor Details">
               <strong>{{ v.visitorName }}</strong>
               <div style="font-size: 0.75rem; color: var(--text-muted);">
                 📞 {{ v.phone }}
@@ -166,14 +166,14 @@
                 }
               </div>
             </td>
-            <td>
+            <td data-label="Type">
               <span class="badge badge-info">{{ v.visitorType }}</span>
             </td>
-            <td>
+            <td data-label="Unit & Host">
               <strong>{{ v.unitNo }}</strong>
               <div style="font-size: 0.75rem; color: var(--text-muted);">{{ v.hostName }}</div>
             </td>
-            <td style="font-size: 0.775rem;">
+            <td style="font-size: 0.775rem;" data-label="Timings">
               <div>Expected: {{ v.expectedTime }}</div>
               @if (v.checkInTime) {
                 <div style="color: #059669; font-weight: 600;">In: {{ v.checkInTime }}</div>
@@ -182,7 +182,7 @@
                 <div style="color: #64748b;">Out: {{ v.checkOutTime }}</div>
               }
             </td>
-            <td>
+            <td data-label="Status">
               <span
                 class="badge"
                 [ngClass]="{
@@ -195,7 +195,7 @@
                 {{ v.status }}
               </span>
             </td>
-            <td>
+            <td data-label="Gate Action">
               <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                 @if (v.status === 'Waiting Approval') {
                   <button class="table-btn-pay" (click)="updateStatus(v.id, 'Inside Premises')">Approve Entry</button>

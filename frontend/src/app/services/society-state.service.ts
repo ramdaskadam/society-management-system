@@ -606,6 +606,7 @@ export class SocietyStateService {
       phone: d.mobile?.trim() || u.phone,
       avatar: d.photo || u.avatar
     }));
+    if (LIVE_API) { this.apiService?.savePrimaryProfile(d).subscribe(); }
     this.logAudit('Profile', `Primary member profile updated (${name}).`);
     this.showToast('msg.profileUpdated', 'success');
   }
@@ -615,12 +616,14 @@ export class SocietyStateService {
     const member: FamilyMember = { ...d, id: uid('FAM'), unitNo, relation, addedOn: todayLabel() };
     this.familyMembers.update(list => [...list, member]);
     this.syncOccupants();
+    if (LIVE_API) { this.apiService?.createFamilyMember(member).subscribe(); }
     this.logAudit('Profile', `Family member ${d.firstName} ${d.lastName} (${relation}) added to ${unitNo}.`);
     this.showToast('msg.familyAdded', 'success', { name: d.firstName });
   }
 
   updateFamilyMember(id: string, d: PersonDetails, relation: string): void {
     this.familyMembers.update(list => list.map(f => (f.id === id ? { ...f, ...d, relation } : f)));
+    if (LIVE_API) { this.apiService?.updateFamilyMember(id, { ...d, relation }).subscribe(); }
     this.logAudit('Profile', `Family member ${d.firstName} ${d.lastName} updated.`);
     this.showToast('msg.familyUpdated', 'success', { name: d.firstName });
   }
@@ -630,6 +633,7 @@ export class SocietyStateService {
     if (!m) return;
     this.familyMembers.update(list => list.filter(f => f.id !== id));
     this.syncOccupants();
+    if (LIVE_API) { this.apiService?.deleteFamilyMember(id).subscribe(); }
     this.logAudit('Profile', `Family member ${m.firstName} ${m.lastName} removed from ${m.unitNo}.`);
     this.showToast('msg.familyRemoved', 'info', { name: m.firstName });
   }

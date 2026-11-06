@@ -38,7 +38,7 @@
         <h3 class="dash-card-title">Society Amenity Reservations</h3>
       </div>
       <div class="table-responsive">
-        <table class="app-table">
+        <table class="app-table stack-mobile">
           <thead>
             <tr>
               <th>Booking ID</th>
@@ -57,20 +57,20 @@
           <tbody>
             @for (b of state.bookings(); track b.id) {
               <tr>
-                <td style="font-weight: 700; font-family: var(--font-mono);">{{ b.id }}</td>
-                <td style="font-weight: 600;">{{ b.amenity }}</td>
-                <td>{{ b.date }}</td>
-                <td style="font-size: 0.75rem;">{{ b.time }}</td>
-                <td>{{ b.bookedBy }}</td>
-                <td><span class="badge badge-info">{{ b.unitNo }}</span></td>
-                <td>{{ b.purpose }}</td>
-                <td>
+                <td style="font-weight: 700; font-family: var(--font-mono);" data-label="Booking ID">{{ b.id }}</td>
+                <td style="font-weight: 600;" data-label="Facility">{{ b.amenity }}</td>
+                <td data-label="Date">{{ b.date }}</td>
+                <td style="font-size: 0.75rem;" data-label="Time Slot">{{ b.time }}</td>
+                <td data-label="Booked By">{{ b.bookedBy }}</td>
+                <td data-label="Unit"><span class="badge badge-info">{{ b.unitNo }}</span></td>
+                <td data-label="Purpose">{{ b.purpose }}</td>
+                <td data-label="Status">
                   <span class="badge" [ngClass]="b.status === 'Confirmed' ? 'badge-confirmed' : (b.status === 'Completed' ? 'badge-completed' : 'badge-pending')">
                     {{ b.status }}
                   </span>
                 </td>
                 @if (state.currentUserRole() === 'admin') {
-                  <td>
+                  <td data-label="Action">
                     @if (b.status === 'Pending Approval') {
                       <button class="table-btn-pay" (click)="state.approveBooking(b.id)">Approve</button>
                     } @else {

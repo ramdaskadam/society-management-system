@@ -35,5 +35,19 @@ export const API_ENDPOINTS = {
     environment.useMockApi
       ? `${environment.mockDataBaseUrl}/operations.json`
       : `${environment.apiBaseUrl}/operations/bootstrap`
+  ,
+  /** REST mutation endpoints used when `environment.useMockApi === false` */
+  mutations: {
+    authLogin: () => `${environment.apiBaseUrl}/auth/login`,
+    authRegister: () => `${environment.apiBaseUrl}/auth/register`,
+    authResetPassword: () => `${environment.apiBaseUrl}/auth/reset-password`,
+    primaryProfile: () => `${environment.apiBaseUrl}/profile/primary`,
+    familyMembers: () => `${environment.apiBaseUrl}/profile/family`,
+    familyMemberById: (id: string) => `${environment.apiBaseUrl}/profile/family/${encodeURIComponent(id)}`,
+    payInvoice: (id: string) => `${environment.apiBaseUrl}/billing/invoices/${encodeURIComponent(id)}/pay`,
+    complaints: () => `${environment.apiBaseUrl}/complaints`,
+    notices: () => `${environment.apiBaseUrl}/facilities/notices`,
+    bookings: () => `${environment.apiBaseUrl}/facilities/bookings`
+  }
 } as const;
 

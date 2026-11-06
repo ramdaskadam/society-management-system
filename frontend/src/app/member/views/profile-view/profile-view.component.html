@@ -1,11 +1,11 @@
 <div class="page-header">
       <div class="page-title-group">
-        <h1>Resident Profile & Household</h1>
-        <p>Personal profile, emergency contacts, registered vehicles, and flat ownership</p>
+        <h1>{{ 'profile.title' | t }}</h1>
+        <p>{{ 'profile.subtitle' | t }}</p>
       </div>
       <div class="page-header-actions">
-        <button type="button" class="btn-secondary" (click)="openPrimary()">Update my details</button>
-        <button type="button" class="btn-primary" (click)="openAddFamily()">+ Add family member</button>
+        <button type="button" class="btn-secondary" (click)="openPrimary()">{{ 'profile.updateMyDetails' | t }}</button>
+        <button type="button" class="btn-primary" (click)="openAddFamily()">{{ 'profile.addFamilyMember' | t }}</button>
       </div>
     </div>
 
@@ -18,12 +18,12 @@
           <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">{{ state.primaryProfile().gender }} • {{ age(state.primaryProfile().dob) }} yrs</div>
         }
         <div style="margin-top: 14px; font-size: 0.8rem; color: #10b981; background: #ecfdf5; padding: 4px 12px; border-radius: 9999px; font-weight: 600;">
-          Verified Society Member
+          {{ 'profile.verifiedBadge' | t }}
         </div>
       </div>
 
       <div class="dash-card">
-        <h3 class="dash-card-title" style="margin-bottom: 18px;">Household Information</h3>
+        <h3 class="dash-card-title" style="margin-bottom: 18px;">{{ 'profile.householdInfo' | t }}</h3>
         <div class="unit-spec-list profile-spec-grid">
           <div>Primary Email: <strong>{{ user.email }}</strong></div>
           <div>Mobile Phone: <strong>{{ user.phone }}</strong></div>
@@ -46,10 +46,10 @@
 
 <!-- Family members (secondary members of this flat) -->
 <div class="dash-card" style="margin-top: 20px;">
-  <h3 class="dash-card-title" style="margin-bottom: 14px;">Family Members ({{ state.activeFamily().length }})</h3>
+  <h3 class="dash-card-title" style="margin-bottom: 14px;">{{ 'profile.familyMembers' | t }} ({{ state.activeFamily().length }})</h3>
   @if (state.activeFamily().length === 0) {
     <p style="color: var(--text-muted); font-size: 0.875rem;">
-      No family members added yet. Use “Add family member” to register the people living with you.
+      {{ 'profile.noFamilyYet' | t }}
     </p>
   }
   <div class="family-grid">
@@ -63,7 +63,7 @@
           }
           <div>
             <strong>{{ fullName(m) }}</strong>
-            <div><span class="family-tag">{{ m.relation }}</span> <span class="family-tag">Secondary</span></div>
+            <div><span class="family-tag">{{ m.relation }}</span> <span class="family-tag">{{ 'profile.secondaryTag' | t }}</span></div>
           </div>
         </div>
         <div class="family-meta">
@@ -79,8 +79,8 @@
             <button type="button" class="btn-primary" (click)="confirmRemove(m.id)">Yes, remove</button>
             <button type="button" class="btn-secondary" (click)="cancelRemove()">Cancel</button>
           } @else {
-            <button type="button" class="btn-secondary" (click)="openEditFamily(m)">Edit</button>
-            <button type="button" class="btn-secondary" (click)="askRemove(m.id)">Remove</button>
+            <button type="button" class="btn-secondary" (click)="openEditFamily(m)">{{ 'profile.edit' | t }}</button>
+            <button type="button" class="btn-secondary" (click)="askRemove(m.id)">{{ 'profile.remove' | t }}</button>
           }
         </div>
       </article>

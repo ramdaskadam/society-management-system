@@ -33,7 +33,7 @@
   </div>
 
   <div tabindex="0" role="region" aria-label="Complaints and service requests table" class="table-responsive">
-    <table class="app-table">
+    <table class="app-table stack-mobile">
       <thead>
         <tr>
           <th>Ticket #</th>
@@ -50,24 +50,24 @@
       <tbody>
         @for (c of displayedComplaints; track c.id) {
           <tr>
-            <td style="font-weight: 700; font-family: var(--font-mono);">{{ c.ticketNo }}</td>
-            <td><span class="badge badge-info">{{ c.category }}</span></td>
-            <td>
+            <td style="font-weight: 700; font-family: var(--font-mono);" data-label="Ticket #">{{ c.ticketNo }}</td>
+            <td data-label="Category"><span class="badge badge-info">{{ c.category }}</span></td>
+            <td data-label="Subject & Notes">
               <strong>{{ c.subject }}</strong>
               <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">{{ c.description }}</div>
             </td>
-            <td>{{ c.unitNo }}</td>
-            <td>{{ c.reportedOn }}</td>
-            <td>
+            <td data-label="Unit">{{ c.unitNo }}</td>
+            <td data-label="Reported On">{{ c.reportedOn }}</td>
+            <td data-label="Priority">
               <span class="badge" [ngClass]="c.priority === 'High' ? 'badge-high' : 'badge-medium'">
                 {{ c.priority }}
               </span>
             </td>
-            <td style="font-size: 0.8rem; color: #475569;">{{ c.assignedTo || 'Unassigned' }}</td>
-            <td>
+            <td style="font-size: 0.8rem; color: #475569;" data-label="Assigned To">{{ c.assignedTo || 'Unassigned' }}</td>
+            <td data-label="Status">
               <span class="badge" [ngClass]="getStatusClass(c.status)">{{ c.status }}</span>
             </td>
-            <td>
+            <td [attr.data-label]="state.currentUserRole() === 'admin' ? 'Manage Status' : 'Resolution Rating'">
               @if (state.currentUserRole() === 'admin') {
                 <select class="card-select-filter" [ngModel]="c.status" (ngModelChange)="onStatusChange(c.id, $event)" aria-label="Change complaint status">
                   <option value="Open">Open</option>

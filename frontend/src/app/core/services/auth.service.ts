@@ -250,6 +250,15 @@ export class AuthService {
     };
     this.session.set(session);
     this.persistSession(session);
+    if (account.role === 'member') {
+      // Sync signed-in resident's identity into the active member profile
+      this.state.memberUser.update(u => ({
+        ...u,
+        name: account.fullName || u.name,
+        email: account.email || u.email,
+        phone: account.mobile || u.phone
+      }));
+    }
     this.applyRole(session.role);
   }
 

@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { SocietyStateService } from '../../../services/society-state.service';
 import { FamilyMember } from '../../../models/society.model';
 import { PersonDialogComponent, PersonFormResult } from '../../../shared/dialogs/person-dialog/person-dialog.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { I18nService } from '../../../core/services/i18n.service';
 
 /**
  * Resident profile + household.
@@ -15,10 +17,11 @@ import { PersonDialogComponent, PersonFormResult } from '../../../shared/dialogs
   selector: 'app-profile-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PersonDialogComponent]
+  imports: [PersonDialogComponent, TranslatePipe]
 })
 export class ProfileViewComponent {
   readonly state = inject(SocietyStateService);
+  private readonly i18n = inject(I18nService);
   get user() { return this.state.memberUser(); }
 
   /** Which dialog is open: own profile, family form, or none. */
@@ -29,7 +32,7 @@ export class ProfileViewComponent {
   readonly confirmRemoveId = signal<string | null>(null);
 
   readonly dialogTitle = computed(() =>
-    this.dialog() === 'primary' ? 'Update my details' : this.editing() ? 'Edit family member' : 'Add family member'
+    this.dialog() === 'primary' ? this.i18n.translate('profile.updateMyDetails') : this.editing() ? this.i18n.translate('profile.editFamilyMember') : this.i18n.translate('profile.addFamilyMember')
   );
   readonly dialogPerson = computed(() =>
     this.dialog() === 'primary' ? this.state.primaryProfile() : this.editing()
