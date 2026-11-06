@@ -1,0 +1,31 @@
+/* data-table styles — base table look comes from global `.app-table` in styles.css */
+:host { display: block; }
+
+.dt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  flex-wrap: wrap;
+}
+.dt-search { max-width: 320px; width: 100%; }
+.dt-count { font-size: 0.78rem; color: var(--text-muted); }
+.dt-sortable { cursor: pointer; user-select: none; }
+.dt-row { cursor: default; }
+.dt-empty { text-align: center; color: var(--text-muted); padding: 28px 14px !important; }
+.dt-more { display: flex; justify-content: center; padding: 12px; }
+
+/* Animated placeholder shown while loading */
+.dt-skeleton {
+  display: block;
+  height: 14px;
+  width: 70%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--bg-subtle), var(--border-subtle), var(--bg-subtle));
+  background-size: 200% 100%;
+  animation: dt-shimmer 1.2s infinite linear;
+}
+@keyframes dt-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .dt-skeleton { animation: none; } }
+

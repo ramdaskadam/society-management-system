@@ -27,6 +27,7 @@ import {
 } from '../models/society.model';
 import { SocietyApiService, SocietyBootstrapPayload } from '../core/services/society-api.service';
 import { ToastNotificationService } from '../core/services/toast-notification.service';
+import { environment } from '../../environments/environment';
 
 // Typed baseline JSON seed imports from `src/assets/mock-data/*.json`
 import societySeed from '../../assets/mock-data/society.json';
@@ -58,6 +59,17 @@ export interface GlobalSearchResultItem {
 
 const STORAGE_KEY = 'green_meadows_sms_angular_v2';
 
+/** Human readable "today" (e.g. "05 Nov 2026") used instead of hardcoded demo dates. */
+const todayLabel = (): string =>
+  new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+/** Collision-safe id generator: prefix + timestamp + counter (replaces Math.random ids). */
+let idCounter = 0;
+const uid = (prefix: string): string => `${prefix}-${Date.now().toString(36)}${(idCounter++).toString(36)}`.toUpperCase();
+
+/** True when the app talks to the real backend (so local cache must not shadow server data). */
+const LIVE_API = !environment.useMockApi;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -68,7 +80,9 @@ export class SocietyStateService {
 
   // Observability & Loading Signals
   readonly isLoading = signal<boolean>(false);
-  readonly dataSourceMode = signal<'mock-json-assets' | 'local-storage-cache'>('mock-json-assets');
+  readonly dataSourceMode = signal<'mock-json-assets' | 'local-storage-cache' | 'live-api'>('mock-json-assets');
+  /** Last backend load error (null when healthy). Views can show a retry banner from this. */
+  readonly loadError = signal<string | null>(null);
 
   // Domain State Signals
   readonly society = signal<Society>(societySeed.society as Society);
@@ -388,7 +402,10 @@ export class SocietyStateService {
   }
 
   constructor() {
-    const hasLocalCache = this.loadFromStorage();
+    // Startup flow:
+    //  - Live backend: ALWAYS fetch from the API (server is the source of truth, no stale cache).
+    //  - Mock mode: reuse the browser cache if present so demo edits survive a refresh.
+    const hasLocalCache = LIVE_API ? false : this.loadFromStorage();
     if (!hasLocalCache) {
       this.hydrateFromApi(false);
     }
@@ -412,18 +429,23 @@ export class SocietyStateService {
   hydrateFromApi(notifyUser = false): void {
     if (!this.apiService) return;
     this.isLoading.set(true);
+    this.loadError.set(null);
 
+    // Loads all domain endpoints in parallel and pushes them into the signals below.
     this.apiService.fetchBootstrapBundle().subscribe({
       next: (bundle: SocietyBootstrapPayload) => {
         this.applyBootstrapPayload(bundle);
-        this.dataSourceMode.set('mock-json-assets');
+        this.dataSourceMode.set(LIVE_API ? 'live-api' : 'mock-json-assets');
         this.isLoading.set(false);
         if (notifyUser) {
-          this.showToast('Reloaded fresh baseline data from /assets/mock-data/*.json', 'info');
+          this.showToast(LIVE_API ? 'Data refreshed from server' : 'Reloaded fresh baseline data from /assets/mock-data/*.json', 'info');
         }
       },
-      error: () => {
+      error: err => {
+        // Keep whatever data is on screen, but tell the user and allow a retry via hydrateFromApi().
         this.isLoading.set(false);
+        this.loadError.set(err?.message || 'Unable to reach the server');
+        this.showToast('Could not load data from the server. Please retry.', 'danger');
       }
     });
   }
@@ -492,7 +514,7 @@ export class SocietyStateService {
           ? {
               ...item,
               status: 'Paid',
-              paidOn: '31 May 2024',
+              paidOn: todayLabel(),
               paymentMode: `${paymentMethod} (Instant)`,
               txnId
             }
@@ -510,7 +532,7 @@ export class SocietyStateService {
     }));
 
     const newPayment: Payment = {
-      date: '31 May 2024',
+      date: todayLabel(),
       invoiceNo: invoiceId,
       unitNo,
       mode: paymentMethod,
@@ -524,7 +546,7 @@ export class SocietyStateService {
       id: `act-${Date.now()}`,
       type: 'payment',
       title: `Payment received from ${unitNo}`,
-      subtitle: `Maintenance Dues for May 2024 (${paymentMethod})`,
+      subtitle: `Maintenance dues (${paymentMethod})`,
       amount: `₹${amount.toLocaleString('en-IN')}`,
       time: 'Just now',
       timestamp: Date.now(),
@@ -540,7 +562,9 @@ export class SocietyStateService {
 
   // ── Complaints & SLA Management ───────────────────────────────────────────────
   raiseComplaint(data: { category: string; priority: Complaint['priority']; subject: string; description: string }): void {
-    const tNo = `C-${this.complaints().length + 25}`;
+    // Next ticket number = highest existing number + 1 (length-based numbering could collide)
+    const maxNo = this.complaints().reduce((max, c) => Math.max(max, parseInt(c.ticketNo.replace(/\D/g, ''), 10) || 0), 0);
+    const tNo = `C-${maxNo + 1}`;
     const unitNo = this.currentResidentUnit();
     const reportedBy = this.memberUser().name;
 
@@ -600,7 +624,7 @@ export class SocietyStateService {
       id: `NOT-${Date.now()}`,
       title: data.title,
       category: data.category,
-      publishDate: 'Today',
+      publishDate: todayLabel(),
       meetingDate: data.meetingDate || 'Upcoming',
       location: data.location || 'Clubhouse',
       summary: data.summary,
@@ -644,7 +668,7 @@ export class SocietyStateService {
     const bookedBy = this.memberUser().name;
     const charge = data.amenity.includes('Hall') ? '₹2,500' : data.amenity.includes('Club') ? '₹1,000' : 'Free';
     const newBooking: Booking = {
-      id: `BK-${Math.floor(100 + Math.random() * 900)}`,
+      id: uid('BK'),
       amenity: data.amenity,
       date: data.date,
       time: data.time,
@@ -680,10 +704,10 @@ export class SocietyStateService {
   // ── Directory & Bulk Operations ───────────────────────────────────────────────
   addMember(data: { name: string; unit: string; role: string; email: string; phone: string }): void {
     const newMember: Member = {
-      id: `M-${Math.floor(110 + Math.random() * 800)}`,
+      id: uid('M'),
       name: data.name,
       unit: data.unit,
-      wing: data.unit[0] || 'A',
+      wing: data.unit.trim()[0]?.toUpperCase() || 'A',
       role: data.role,
       email: data.email,
       phone: data.phone,
@@ -697,11 +721,16 @@ export class SocietyStateService {
   }
 
   addUnit(data: { unitNo: string; wing: string; type: string; area: number; owner: string }): void {
+    if (this.units().some(u => u.unitNo.toLowerCase() === data.unitNo.trim().toLowerCase())) {
+      this.showToast(`Unit ${data.unitNo} already exists`, 'danger');
+      return;
+    }
     const newUnit: Unit = {
       id: `U-${data.unitNo}`,
       unitNo: data.unitNo,
       wing: data.wing,
-      floor: parseInt(data.unitNo[2], 10) || 1,
+      // Floor from the numeric part of the unit no: A-101 -> 1, B-1204 -> 12
+      floor: Math.floor((parseInt(data.unitNo.replace(/\D/g, ''), 10) || 100) / 100) || 1,
       type: data.type,
       area: data.area,
       owner: data.owner,
@@ -715,17 +744,19 @@ export class SocietyStateService {
   }
 
   generateBulkInvoices(): void {
-    this.metrics.update(m => ({
-      ...m,
-      totalCollection: m.totalCollection + 450000,
-      pendingDues: m.pendingDues + 442400
-    }));
+    // Figures are derived from live data (unit count x configured rate) instead of fixed demo numbers.
+    const rate = this.society().maintenancePerSqFt || 0;
+    const units = this.units();
+    const billed = Math.round(units.reduce((sum, u) => sum + u.area * rate, 0));
+    const month = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+    this.metrics.update(m => ({ ...m, pendingDues: m.pendingDues + billed }));
 
     this.notifications.update(list => [
       {
-        id: `ntf-${Date.now()}`,
+        id: uid('NTF'),
         title: 'Bulk Invoices Issued',
-        text: 'June 2024 maintenance invoices issued to all 128 units.',
+        text: `${month} maintenance invoices issued to all ${units.length} units.`,
         time: 'Just now',
         read: false,
         type: 'billing'
@@ -733,8 +764,8 @@ export class SocietyStateService {
       ...list
     ]);
 
-    this.logAudit('Billing', 'Generated monthly maintenance invoices for 128 units.');
-    this.showToast('Successfully issued 128 monthly maintenance invoices!', 'success');
+    this.logAudit('Billing', `Generated monthly maintenance invoices for ${units.length} units.`);
+    this.showToast(`Successfully issued ${units.length} monthly maintenance invoices!`, 'success');
   }
 
   markNotificationsAsRead(): void {
@@ -761,18 +792,21 @@ export class SocietyStateService {
     } else {
       csvContent += 'Unit_No,Owner_Name,Maintenance,Sinking_Fund,Total_Billed,Status\n';
       this.invoices().forEach(i => {
-        csvContent += `${i.unitNo},"${i.memberName}",${i.amount * 0.7},${i.amount * 0.3},${i.amount},${i.status}\n`;
+        csvContent += `${i.unitNo},"${i.memberName}",${Math.round(i.amount * 0.7)},${Math.round(i.amount * 0.3)},${i.amount},${i.status}\n`;
       });
       filename = 'maintenance_collections.csv';
     }
 
-    const encodedUri = encodeURI(csvContent);
+    // Blob download works for any size/characters (data: URIs break on '#' and large files)
+    const blob = new Blob([csvContent.replace('data:text/csv;charset=utf-8,', '')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', filename);
+    link.href = url;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
     this.showToast(`Exported ${filename} successfully!`, 'success');
   }
@@ -789,7 +823,7 @@ export class SocietyStateService {
   }): VisitorPass {
     const passCode = Math.floor(100000 + Math.random() * 900000).toString();
     const newVisitor: VisitorPass = {
-      id: `VIS-${Math.floor(105 + Math.random() * 890)}`,
+      id: uid('VIS'),
       passCode,
       visitorName: data.visitorName,
       visitorType: data.visitorType,
@@ -873,12 +907,12 @@ export class SocietyStateService {
     options: string[];
   }): void {
     const newPoll: SocietyPoll = {
-      id: `POLL-0${this.polls().length + 1}`,
+      id: uid('POLL'),
       title: data.title,
       description: data.description,
       category: data.category,
       createdBy: this.activeUser().name,
-      endDate: data.endDate || '30 Jun 2024',
+      endDate: data.endDate || todayLabel(),
       status: 'Active',
       totalVotes: 0,
       userVotedOptionId: null,
@@ -912,7 +946,7 @@ export class SocietyStateService {
     evEnabled: boolean;
   }): void {
     const newSlot: ParkingSlot = {
-      id: `PK-${Math.floor(10 + Math.random() * 90)}`,
+      id: uid('PK'),
       slotNo: data.slotNo,
       wing: data.wing,
       type: data.type,
@@ -937,11 +971,11 @@ export class SocietyStateService {
 
   uploadDocument(data: { title: string; category: string; access: string }): void {
     const newDoc: SocietyDocument = {
-      id: `DOC-0${this.documents().length + 1}`,
+      id: uid('DOC'),
       title: data.title,
       category: data.category,
       size: '1.5 MB',
-      date: 'Today',
+      date: todayLabel(),
       access: data.access
     };
     this.documents.update(list => [newDoc, ...list]);
@@ -957,7 +991,7 @@ export class SocietyStateService {
 
   logAudit(module: AuditLogEntry['module'], details: string, action?: string): void {
     const entry: AuditLogEntry = {
-      id: `AUD-${Math.floor(905 + Math.random() * 900)}`,
+      id: uid('AUD'),
       timestamp: 'Just now',
       actor: this.activeUser().name,
       role: this.currentUserRole(),
@@ -996,6 +1030,7 @@ export class SocietyStateService {
   }
 
   private saveToStorage(): void {
+    if (LIVE_API) return; // server owns the data in live mode
     try {
       const data = {
         society: this.society(),

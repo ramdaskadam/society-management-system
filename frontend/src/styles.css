@@ -2601,3 +2601,62 @@ dialog:modal {
   transition: background-color var(--transition-fast);
 }
 .sidebar-signout-btn:hover { background: var(--sidebar-hover); }
+
+/* ========================================================
+   RESPONSIVE ADDENDUM
+   - Stacked "card" tables on phones (cells use data-label from <app-data-table>)
+   - Full-width dialogs, comfortable touch targets, reduced motion
+   ======================================================== */
+@media (max-width: 600px) {
+  .app-table.stack-mobile thead {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .app-table.stack-mobile,
+  .app-table.stack-mobile tbody,
+  .app-table.stack-mobile tr,
+  .app-table.stack-mobile td {
+    display: block;
+    width: 100%;
+  }
+  .app-table.stack-mobile tr {
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 8px 0;
+  }
+  .app-table.stack-mobile td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: none;
+    padding: 6px 14px;
+    text-align: right;
+  }
+  .app-table.stack-mobile td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  .app-table.stack-mobile td[colspan] { display: block; text-align: center; }
+  .app-table.stack-mobile td[colspan]::before { content: none; }
+
+  .app-dialog, dialog.app-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100dvh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+  button, .btn-primary, .btn-secondary { min-height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
