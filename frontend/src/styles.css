@@ -2660,3 +2660,21 @@ dialog:modal {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Login extras: social buttons, divider, forgot link, password toggle */
+.auth-label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.auth-label-row .auth-link { font-size: 0.78rem; }
+.auth-password-wrap { position: relative; }
+.auth-password-wrap .auth-input { padding-inline-end: 64px; }
+.auth-toggle { position: absolute; inset-block: 0; inset-inline-end: 12px; font-size: 0.78rem; }
+.auth-divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; color: var(--text-muted); font-size: 0.75rem; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-top: 1px solid var(--border-subtle); }
+.auth-social { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.auth-social-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; }
+.auth-social-step { display: grid; gap: 10px; }
+.auth-social-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.auth-optional { font-weight: 400; color: var(--text-muted); font-size: 0.72rem; }
+.auth-fieldset { border: 1px solid var(--border-subtle); border-radius: var(--radius-md, 10px); padding: 10px 14px; margin: 0 0 14px; display: flex; gap: 18px; flex-wrap: wrap; }
+.auth-fieldset legend { padding: 0 6px; }
+.auth-fieldset .auth-help { flex-basis: 100%; margin: 0; }
+.auth-radio { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; min-height: 32px; cursor: pointer; }

@@ -1,25 +1,38 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { PasswordChecklistComponent } from '../../shared/components/password-checklist/password-checklist.component';
+import { AuthService, HINT_QUESTIONS } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, PasswordChecklistComponent],
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  fullName = '';
+  firstName = '';
+  lastName = '';
+  mobile = '';
   email = '';
-  username = '';
+  /** Which identifier the user will sign in with (becomes the username). */
+  loginWith: 'email' | 'mobile' = 'email';
   password = '';
   confirmPassword = '';
+  /** Options for the hint-question dropdown (used later by Forgot password). */
+  readonly hintQuestions = HINT_QUESTIONS;
+  hintQuestion = '';
+  hintAnswer = '';
   readonly error = signal('');
+
+  /** Values the password must not contain (fed to the live checklist). */
+  get personalInfo(): string[] {
+    return [this.firstName, this.lastName, this.email.split('@')[0], this.mobile.replace(/\D/g, '')];
+  }
 
   submit(): void {
     if (this.password !== this.confirmPassword) {
@@ -27,10 +40,14 @@ export class RegisterComponent {
       return;
     }
     const result = this.auth.register({
-      fullName: this.fullName,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      mobile: this.mobile,
       email: this.email,
-      username: this.username,
-      password: this.password
+      loginWith: this.loginWith,
+      password: this.password,
+      hintQuestion: this.hintQuestion,
+      hintAnswer: this.hintAnswer
     });
     if (!result.ok) {
       this.error.set(result.error ?? 'Registration failed.');

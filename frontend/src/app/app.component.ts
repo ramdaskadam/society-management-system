@@ -77,7 +77,7 @@ export class AppComponent implements OnInit {
   /** App chrome (sidebar/topbar) is hidden on login & registration pages. */
   readonly showShell = computed(() => {
     const url = this.currentUrl();
-    const isAuthRoute = url.startsWith('/login') || url.startsWith('/register');
+    const isAuthRoute = ['/login', '/register', '/forgot-password'].some(r => url.startsWith(r));
     return this.auth.isAuthenticated() && !isAuthRoute;
   });
 
