@@ -24,7 +24,8 @@ import {
   ParkingSlot,
   AuditLogEntry,
   FamilyMember,
-  PersonDetails
+  PersonDetails,
+  TenantRecord
 } from '../../models/society.model';
 
 export interface SocietyOverviewResponse {
@@ -140,5 +141,17 @@ export class SocietyApiService {
 
   deleteFamilyMember(id: string): Observable<void> {
     return this.http.delete<void>(API_ENDPOINTS.mutations.familyMemberById(id));
+  }
+
+  createTenant(tenant: TenantRecord): Observable<TenantRecord> {
+    return this.http.post<TenantRecord>(API_ENDPOINTS.mutations.tenants(), tenant);
+  }
+
+  updateTenant(id: string, tenant: Partial<TenantRecord>): Observable<TenantRecord> {
+    return this.http.put<TenantRecord>(API_ENDPOINTS.mutations.tenantById(id), tenant);
+  }
+
+  deleteTenant(id: string): Observable<void> {
+    return this.http.delete<void>(API_ENDPOINTS.mutations.tenantById(id));
   }
 }

@@ -285,3 +285,16 @@ export interface FamilyMember extends PersonDetails {
   relation: string;
   addedOn: string;
 }
+
+/** Tenant registered against a residential unit, along with their household family members. */
+export interface TenantRecord extends PersonDetails {
+  id: string;
+  unitNo: string;
+  leaseStart: string;
+  leaseEnd: string;
+  monthlyRent?: number;
+  policeVerified: boolean;
+  status: 'Active' | 'Past';
+  addedOn: string;
+  familyMembers: FamilyMember[];
+}

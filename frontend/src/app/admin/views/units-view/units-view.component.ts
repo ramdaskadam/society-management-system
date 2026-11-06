@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { SocietyStateService } from '../../../services/society-state.service';
 import { DialogModalService } from '../../../core/services/dialog-modal.service';
+import { Router } from '@angular/router';
 import { DataColumn, DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { Unit } from '../../../models/society.model';
 
 /**
@@ -15,11 +17,12 @@ import { Unit } from '../../../models/society.model';
   selector: 'app-units-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DataTableComponent]
+  imports: [DataTableComponent, TranslatePipe]
 })
 export class UnitsViewComponent {
   readonly state = inject(SocietyStateService);
   private readonly dialogs = inject(DialogModalService);
+  private readonly router = inject(Router);
 
   /** Admins see every unit; residents only see their own flat (the route is shared with /my-unit). */
   readonly visibleUnits = computed<Unit[]>(() =>
@@ -49,6 +52,11 @@ export class UnitsViewComponent {
     },
     { key: 'dues', label: 'Outstanding', type: 'currency', color: u => (u.dues > 0 ? '#ef4444' : '#10b981') }
   ];
+
+  viewTenantHistory(): void {
+    this.state.currentView.set('tenants');
+    this.router.navigate(['/tenants'], { queryParams: { history: '1' } });
+  }
 
   openAddUnit(): void {
     this.dialogs.openAddUnitModal();

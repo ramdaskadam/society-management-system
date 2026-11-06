@@ -32,7 +32,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "help": "Help & Support",
-    "accessControl": "Access Control"
+    "accessControl": "Access Control",
+    "tenants": "Tenants & Lease"
   },
   "topbar": {
     "searchPlaceholder": "Search members, units, visitors, polls, notices...",
@@ -111,7 +112,11 @@
     "profileUpdated": "Your profile has been updated.",
     "familyAdded": "{{name}} added as a family member.",
     "familyUpdated": "{{name}}'s details updated.",
-    "familyRemoved": "{{name}} removed from your household."
+    "familyRemoved": "{{name}} removed from your household.",
+    "tenantAdded": "Tenant {{name}} registered successfully.",
+    "tenantUpdated": "Tenant {{name}} details updated.",
+    "tenantRemoved": "Tenant {{name}} removed from your unit.",
+    "tenantEnded": "Lease for {{name}} marked as completed and saved to Tenant History."
   },
   "profile": {
     "title": "Resident Profile & Household",
@@ -142,5 +147,35 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "remove": "Remove"
+  },
+  "tenant": {
+    "title": "Tenant & Sub-Tenant Management",
+    "subtitle": "Register, update, or remove tenants and their family members for your flat",
+    "addTenant": "+ Add Tenant",
+    "editTenant": "Edit Tenant Details",
+    "noTenants": "No tenants registered for your flat yet. Click \"+ Add Tenant\" to add a tenant and their family members.",
+    "leaseStart": "Lease start date",
+    "leaseEnd": "Lease end date",
+    "monthlyRent": "Monthly rent (₹)",
+    "policeVerified": "Police verification completed",
+    "status": "Tenancy status",
+    "active": "Active",
+    "past": "Past",
+    "verified": "Police Verified",
+    "pendingVerification": "Verification Pending",
+    "leasePeriod": "Lease Period",
+    "rent": "Rent",
+    "familySection": "Tenant Family Members",
+    "addFamily": "+ Add Family Member",
+    "noFamily": "No family members listed for this tenant.",
+    "confirmDeleteTenant": "Delete tenant {{name}} and all family records?",
+    "yesDelete": "Yes, delete",
+    "viewHistory": "Tenant History",
+    "backToActive": "Active Tenants",
+    "historyTitle": "Flat {{unit}} — Tenant History",
+    "historySubtitle": "Complete chronological record of past and current tenants for this flat",
+    "noHistory": "No past tenant history recorded for Flat {{unit}}.",
+    "endTenancy": "Move Out / End Lease",
+    "movedOutMsg": "Lease ended and moved to Tenant History."
   }
 }

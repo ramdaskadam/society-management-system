@@ -61,6 +61,11 @@ export const routes: Routes = [
           import('./admin/views/units-view/units-view.component').then(m => m.UnitsViewComponent)
       },
       {
+        path: 'tenants',
+        loadComponent: () =>
+          import('./member/views/tenants-view/tenants-view.component').then(m => m.TenantsViewComponent)
+      },
+      {
         path: 'maintenance',
         loadComponent: () =>
           import('./admin/views/invoices-view/invoices-view.component').then(m => m.InvoicesViewComponent)

@@ -25,7 +25,8 @@ import {
   ParkingSlot,
   AuditLogEntry,
   FamilyMember,
-  PersonDetails
+  PersonDetails,
+  TenantRecord
 } from '../models/society.model';
 import { SocietyApiService, SocietyBootstrapPayload } from '../core/services/society-api.service';
 import { ToastNotificationService } from '../core/services/toast-notification.service';
@@ -58,6 +59,68 @@ export interface GlobalSearchResultItem {
   badgeClass: string;
   targetView: string;
 }
+
+const DEFAULT_TENANTS: TenantRecord[] = [
+  {
+    id: 'TEN-HIST-01',
+    unitNo: 'A-101',
+    firstName: 'Vikram',
+    middleName: 'Rajesh',
+    lastName: 'Deshmukh',
+    dob: '1988-04-14',
+    gender: 'Male',
+    qualification: 'Post Graduate',
+    mobile: '9820456123',
+    email: 'vikram.deshmukh@example.com',
+    hasDisability: false,
+    disabilityDetails: '',
+    leaseStart: '2022-06-01',
+    leaseEnd: '2023-05-31',
+    monthlyRent: 26000,
+    policeVerified: true,
+    status: 'Past',
+    addedOn: '01 Jun 2022',
+    familyMembers: [
+      {
+        id: 'TFAM-HIST-01',
+        unitNo: 'A-101',
+        firstName: 'Neha',
+        middleName: '',
+        lastName: 'Deshmukh',
+        dob: '1990-09-22',
+        gender: 'Female',
+        relation: 'Spouse',
+        qualification: 'Graduate',
+        mobile: '9820456124',
+        email: 'neha.deshmukh@example.com',
+        hasDisability: false,
+        disabilityDetails: '',
+        addedOn: '01 Jun 2022'
+      }
+    ]
+  },
+  {
+    id: 'TEN-HIST-02',
+    unitNo: 'A-101',
+    firstName: 'Siddharth',
+    middleName: '',
+    lastName: 'Kulkarni',
+    dob: '1992-11-08',
+    gender: 'Male',
+    qualification: 'Graduate',
+    mobile: '9819223344',
+    email: 'siddharth.k@example.com',
+    hasDisability: false,
+    disabilityDetails: '',
+    leaseStart: '2020-05-01',
+    leaseEnd: '2022-04-30',
+    monthlyRent: 23500,
+    policeVerified: true,
+    status: 'Past',
+    addedOn: '01 May 2020',
+    familyMembers: []
+  }
+];
 
 const STORAGE_KEY = 'green_meadows_sms_angular_v2';
 
@@ -115,6 +178,8 @@ export class SocietyStateService {
   readonly familyMembers = signal<FamilyMember[]>([]);
   /** Extra personal details of the primary resident (DOB, gender, photo...). Name/email/phone mirror `memberUser`. */
   readonly primaryExtras = signal<Partial<PersonDetails>>({});
+  /** Tenants registered by flat owners (each tenant includes their own `familyMembers` list). */
+  readonly tenants = signal<TenantRecord[]>(DEFAULT_TENANTS);
 
   // Ephemeral UI Toasts (delegated to ToastNotificationService; excluded from localStorage)
   readonly toasts = this.toastService.toasts;
@@ -167,6 +232,14 @@ export class SocietyStateService {
   readonly activeFamily = computed(() => {
     const unit = this.currentResidentUnit();
     return this.familyMembers().filter(f => f.unitNo === unit);
+  });
+
+  /** Tenants belonging to the current resident's flat (or all tenants for admin). */
+  readonly activeUnitTenants = computed(() => {
+    const unit = this.currentResidentUnit();
+    return this.currentUserRole() === 'admin'
+      ? this.tenants()
+      : this.tenants().filter(t => t.unitNo === unit);
   });
 
   /** Full editable profile of the primary resident, built from `memberUser` + saved extras. */
@@ -644,6 +717,132 @@ export class SocietyStateService {
     this.memberUser.update(u => ({ ...u, occupants: count }));
   }
 
+  /** Syncs flat occupancy status when tenants are added/updated/deleted. */
+  private syncUnitTenantStatus(unitNo: string): void {
+    const hasActiveTenant = this.tenants().some(t => t.unitNo === unitNo && t.status === 'Active');
+    this.units.update(list =>
+      list.map(u => (u.unitNo === unitNo ? { ...u, occupancy: hasActiveTenant ? 'Tenant Occupied' : 'Owner Occupied' } : u))
+    );
+  }
+
+  addTenant(
+    d: PersonDetails,
+    lease: { leaseStart: string; leaseEnd: string; monthlyRent?: number; policeVerified: boolean; status: 'Active' | 'Past' }
+  ): void {
+    const unitNo = this.currentResidentUnit();
+    const tenant: TenantRecord = {
+      ...d,
+      id: uid('TEN'),
+      unitNo,
+      leaseStart: lease.leaseStart,
+      leaseEnd: lease.leaseEnd,
+      monthlyRent: lease.monthlyRent,
+      policeVerified: lease.policeVerified,
+      status: lease.status,
+      addedOn: todayLabel(),
+      familyMembers: []
+    };
+    this.tenants.update(list => [tenant, ...list]);
+    this.syncUnitTenantStatus(unitNo);
+    if (LIVE_API) { this.apiService?.createTenant(tenant).subscribe(); }
+    this.logAudit('Profile', `Tenant ${d.firstName} ${d.lastName} added for Unit ${unitNo}.`);
+    this.showToast('msg.tenantAdded', 'success', { name: `${d.firstName} ${d.lastName}` });
+  }
+
+  updateTenant(
+    id: string,
+    d: PersonDetails,
+    lease: { leaseStart: string; leaseEnd: string; monthlyRent?: number; policeVerified: boolean; status: 'Active' | 'Past' }
+  ): void {
+    let unitNo = this.currentResidentUnit();
+    this.tenants.update(list =>
+      list.map(t => {
+        if (t.id !== id) return t;
+        unitNo = t.unitNo;
+        return { ...t, ...d, ...lease };
+      })
+    );
+    this.syncUnitTenantStatus(unitNo);
+    if (LIVE_API) { this.apiService?.updateTenant(id, { ...d, ...lease }).subscribe(); }
+    this.logAudit('Profile', `Tenant ${d.firstName} ${d.lastName} updated for Unit ${unitNo}.`);
+    this.showToast('msg.tenantUpdated', 'success', { name: `${d.firstName} ${d.lastName}` });
+  }
+
+  /** Marks an active tenant's lease as completed ('Past') so they remain in the flat's tenant history. */
+  endTenancy(id: string): void {
+    const t = this.tenants().find(x => x.id === id);
+    if (!t) return;
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const leaseEnd = t.leaseEnd && t.leaseEnd <= todayIso ? t.leaseEnd : todayIso;
+    this.tenants.update(list =>
+      list.map(x => (x.id === id ? { ...x, status: 'Past', leaseEnd } : x))
+    );
+    this.syncUnitTenantStatus(t.unitNo);
+    if (LIVE_API) { this.apiService?.updateTenant(id, { status: 'Past', leaseEnd }).subscribe(); }
+    this.logAudit('Profile', `Lease ended for tenant ${t.firstName} ${t.lastName} (Unit ${t.unitNo}).`);
+    this.showToast('msg.tenantEnded', 'info', { name: `${t.firstName} ${t.lastName}` });
+  }
+
+  deleteTenant(id: string): void {
+    const t = this.tenants().find(x => x.id === id);
+    if (!t) return;
+    this.tenants.update(list => list.filter(x => x.id !== id));
+    this.syncUnitTenantStatus(t.unitNo);
+    if (LIVE_API) { this.apiService?.deleteTenant(id).subscribe(); }
+    this.logAudit('Profile', `Tenant ${t.firstName} ${t.lastName} removed from Unit ${t.unitNo}.`);
+    this.showToast('msg.tenantRemoved', 'info', { name: `${t.firstName} ${t.lastName}` });
+  }
+
+  addTenantFamilyMember(tenantId: string, d: PersonDetails, relation: string): void {
+    const member: FamilyMember = {
+      ...d,
+      id: uid('TFAM'),
+      unitNo: this.currentResidentUnit(),
+      relation,
+      addedOn: todayLabel()
+    };
+    this.tenants.update(list =>
+      list.map(t => (t.id === tenantId ? { ...t, familyMembers: [...t.familyMembers, member] } : t))
+    );
+    const updated = this.tenants().find(t => t.id === tenantId);
+    if (LIVE_API && updated) { this.apiService?.updateTenant(tenantId, { familyMembers: updated.familyMembers }).subscribe(); }
+    this.logAudit('Profile', `Tenant family member ${d.firstName} ${d.lastName} (${relation}) added.`);
+    this.showToast('msg.familyAdded', 'success', { name: d.firstName });
+  }
+
+  updateTenantFamilyMember(tenantId: string, familyId: string, d: PersonDetails, relation: string): void {
+    this.tenants.update(list =>
+      list.map(t =>
+        t.id === tenantId
+          ? {
+              ...t,
+              familyMembers: t.familyMembers.map(f => (f.id === familyId ? { ...f, ...d, relation } : f))
+            }
+          : t
+      )
+    );
+    const updated = this.tenants().find(t => t.id === tenantId);
+    if (LIVE_API && updated) { this.apiService?.updateTenant(tenantId, { familyMembers: updated.familyMembers }).subscribe(); }
+    this.logAudit('Profile', `Tenant family member ${d.firstName} ${d.lastName} updated.`);
+    this.showToast('msg.familyUpdated', 'success', { name: d.firstName });
+  }
+
+  removeTenantFamilyMember(tenantId: string, familyId: string): void {
+    let removedName = '';
+    this.tenants.update(list =>
+      list.map(t => {
+        if (t.id !== tenantId) return t;
+        const target = t.familyMembers.find(f => f.id === familyId);
+        if (target) removedName = target.firstName;
+        return { ...t, familyMembers: t.familyMembers.filter(f => f.id !== familyId) };
+      })
+    );
+    const updated = this.tenants().find(t => t.id === tenantId);
+    if (LIVE_API && updated) { this.apiService?.updateTenant(tenantId, { familyMembers: updated.familyMembers }).subscribe(); }
+    this.logAudit('Profile', `Tenant family member ${removedName} removed.`);
+    this.showToast('msg.familyRemoved', 'info', { name: removedName || 'Member' });
+  }
+
   // ── Complaints & SLA Management ───────────────────────────────────────────────
   raiseComplaint(data: { category: string; priority: Complaint['priority']; subject: string; description: string }): void {
     // Next ticket number = highest existing number + 1 (length-based numbering could collide)
@@ -1111,6 +1310,7 @@ export class SocietyStateService {
     this.auditLogs.set(operationsSeed.auditLogs as AuditLogEntry[]);
     this.familyMembers.set([]);
     this.primaryExtras.set({});
+    this.tenants.set(DEFAULT_TENANTS);
     this.setView('dashboard');
     this.hydrateFromApi(true);
   }
@@ -1141,6 +1341,7 @@ export class SocietyStateService {
         auditLogs: this.auditLogs(),
         familyMembers: this.familyMembers(),
         primaryExtras: this.primaryExtras(),
+        tenants: this.tenants(),
         memberUser: this.memberUser()
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -1176,6 +1377,7 @@ export class SocietyStateService {
       if (data.auditLogs) this.auditLogs.set(data.auditLogs);
       if (data.familyMembers) this.familyMembers.set(data.familyMembers);
       if (data.primaryExtras) this.primaryExtras.set(data.primaryExtras);
+      if (data.tenants && data.tenants.length) this.tenants.set(data.tenants);
       if (data.memberUser) this.memberUser.set(data.memberUser);
       this.dataSourceMode.set('local-storage-cache');
       return true;

@@ -1,23 +1,41 @@
 import { ChangeDetectionStrategy, Component, OnChanges, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '../../pipes/translate.pipe';
 import { FAMILY_RELATIONS, GENDERS, QUALIFICATION_SUGGESTIONS } from '../../../core/config/family.config';
 import { Gender, PersonDetails } from '../../../models/society.model';
 import { MOBILE_RE, normalizeMobile } from '../../../core/services/auth.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface PersonFormResult {
   details: PersonDetails;
   /** Only set in 'family' mode. */
   relation: string;
+  /** Only set in 'tenant' mode. */
+  lease?: {
+    leaseStart: string;
+    leaseEnd: string;
+    monthlyRent?: number;
+    policeVerified: boolean;
+    status: 'Active' | 'Past';
+  };
 }
+
+export type PersonDialogData = PersonDetails & {
+  relation?: string;
+  leaseStart?: string;
+  leaseEnd?: string;
+  monthlyRent?: number;
+  policeVerified?: boolean;
+  status?: 'Active' | 'Past';
+};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_PHOTO_PX = 256;
 
 /**
- * Reusable person form dialog, used for BOTH the primary member's own profile ('primary')
- * and for adding/editing family members ('family').
- * Flow: parent opens it with `person` (empty = add) -> user edits -> validate -> emits `save`.
+ * Reusable person form dialog, used for:
+ *  - 'primary': primary member's own profile
+ *  - 'family':  adding/editing family members (for either primary member or a tenant)
+ *  - 'tenant':  adding/editing a tenant (includes lease dates, rent, police verification)
  */
 @Component({
   selector: 'app-person-dialog',
@@ -28,10 +46,10 @@ const MAX_PHOTO_PX = 256;
 })
 export class PersonDialogComponent implements OnChanges {
   readonly isOpen = input(false);
-  readonly mode = input<'primary' | 'family'>('family');
+  readonly mode = input<'primary' | 'family' | 'tenant'>('family');
   readonly title = input('');
   /** Existing values to edit; null/undefined means "new". */
-  readonly person = input<(PersonDetails & { relation?: string }) | null>(null);
+  readonly person = input<PersonDialogData | null>(null);
   readonly close = output<void>();
   readonly save = output<PersonFormResult>();
 
@@ -55,6 +73,13 @@ export class PersonDialogComponent implements OnChanges {
   hasDisability = false;
   disabilityDetails = '';
 
+  // Tenant-only fields
+  leaseStart = '';
+  leaseEnd = '';
+  monthlyRent: number | null = null;
+  policeVerified = false;
+  tenantStatus: 'Active' | 'Past' = 'Active';
+
   /** Loads the form from `person` every time the dialog is (re)opened. */
   ngOnChanges(): void {
     if (!this.isOpen()) return;
@@ -70,6 +95,11 @@ export class PersonDialogComponent implements OnChanges {
     this.relation = p?.relation ?? '';
     this.hasDisability = p?.hasDisability ?? false;
     this.disabilityDetails = p?.disabilityDetails ?? '';
+    this.leaseStart = p?.leaseStart ?? this.today;
+    this.leaseEnd = p?.leaseEnd ?? '';
+    this.monthlyRent = p?.monthlyRent ?? null;
+    this.policeVerified = p?.policeVerified ?? false;
+    this.tenantStatus = p?.status ?? 'Active';
     this.photo.set(p?.photo);
     this.error.set('');
   }
@@ -104,17 +134,21 @@ export class PersonDialogComponent implements OnChanges {
   }
 
   submit(): void {
-    const primary = this.mode() === 'primary';
+    const mode = this.mode();
+    const requireContact = mode === 'primary' || mode === 'tenant';
     const mobile = normalizeMobile(this.mobile);
     const email = this.email.trim().toLowerCase();
 
     if (!this.firstName.trim() || !this.lastName.trim()) return this.fail('First name and last name are required.');
     if (!this.dob || this.dob > this.today) return this.fail('Enter a valid date of birth (not in the future).');
     if (!this.gender) return this.fail('Select a gender.');
-    if (!primary && !this.relation) return this.fail('Select the relationship.');
-    // Primary needs contact details; family members (e.g. children) may skip them but they must be valid if given.
-    if ((primary || this.mobile.trim()) && !MOBILE_RE.test(mobile)) return this.fail('Enter a valid 10-digit mobile number.');
-    if ((primary || email) && !EMAIL_RE.test(email)) return this.fail('Enter a valid email address.');
+    if (mode === 'family' && !this.relation) return this.fail('Select the relationship.');
+    if ((requireContact || this.mobile.trim()) && !MOBILE_RE.test(mobile)) return this.fail('Enter a valid 10-digit mobile number.');
+    if ((requireContact || email) && !EMAIL_RE.test(email)) return this.fail('Enter a valid email address.');
+    if (mode === 'tenant') {
+      if (!this.leaseStart || !this.leaseEnd) return this.fail('Enter both lease start and lease end dates.');
+      if (this.leaseEnd < this.leaseStart) return this.fail('Lease end date must be after lease start date.');
+    }
     if (this.hasDisability && !this.disabilityDetails.trim()) return this.fail('Please describe the disability.');
 
     this.save.emit({
@@ -131,7 +165,17 @@ export class PersonDialogComponent implements OnChanges {
         email,
         hasDisability: this.hasDisability,
         disabilityDetails: this.hasDisability ? this.disabilityDetails.trim() : ''
-      }
+      },
+      lease:
+        mode === 'tenant'
+          ? {
+              leaseStart: this.leaseStart,
+              leaseEnd: this.leaseEnd,
+              monthlyRent: this.monthlyRent && this.monthlyRent > 0 ? Number(this.monthlyRent) : undefined,
+              policeVerified: this.policeVerified,
+              status: this.tenantStatus
+            }
+          : undefined
     });
   }
 

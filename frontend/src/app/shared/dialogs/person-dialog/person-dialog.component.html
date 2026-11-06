@@ -65,6 +65,35 @@
             </div>
           }
 
+          @if (mode() === 'tenant') {
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="p-lstart">{{ 'tenant.leaseStart' | t }} *</label>
+                <input id="p-lstart" name="leaseStart" type="date" class="form-control" [(ngModel)]="leaseStart" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="p-lend">{{ 'tenant.leaseEnd' | t }} *</label>
+                <input id="p-lend" name="leaseEnd" type="date" class="form-control" [(ngModel)]="leaseEnd" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="p-rent">{{ 'tenant.monthlyRent' | t }} <span class="auth-optional">{{ 'profile.optional' | t }}</span></label>
+                <input id="p-rent" name="monthlyRent" type="number" min="0" class="form-control" [(ngModel)]="monthlyRent" placeholder="e.g. 25000" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="p-tstatus">{{ 'tenant.status' | t }}</label>
+                <select id="p-tstatus" name="tenantStatus" class="form-control" [(ngModel)]="tenantStatus">
+                  <option value="Active">{{ 'tenant.active' | t }}</option>
+                  <option value="Past">{{ 'tenant.past' | t }}</option>
+                </select>
+              </div>
+            </div>
+            <label class="auth-radio" style="margin-bottom: 10px;">
+              <input type="checkbox" name="policeVerified" [(ngModel)]="policeVerified" /> {{ 'tenant.policeVerified' | t }}
+            </label>
+          }
+
           <div class="form-group">
             <label class="form-label" for="p-qual">{{ 'profile.qualification' | t }} <span class="auth-optional">{{ 'profile.optional' | t }}</span></label>
             <input id="p-qual" name="qualification" class="form-control" [(ngModel)]="qualification" list="p-qual-list" autocomplete="off" />
@@ -74,11 +103,11 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="p-mobile">{{ 'profile.mobile' | t }} {{ mode() === 'primary' ? '*' : '' }}</label>
+            <label class="form-label" for="p-mobile">{{ 'profile.mobile' | t }} {{ mode() !== 'family' ? '*' : '' }}</label>
             <input id="p-mobile" name="mobile" type="tel" inputmode="numeric" class="form-control" [(ngModel)]="mobile" placeholder="10-digit number" autocomplete="off" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="p-email">{{ 'profile.email' | t }} {{ mode() === 'primary' ? '*' : '' }}</label>
+            <label class="form-label" for="p-email">{{ 'profile.email' | t }} {{ mode() !== 'family' ? '*' : '' }}</label>
             <input id="p-email" name="email" type="email" inputmode="email" class="form-control" [(ngModel)]="email" autocapitalize="off" spellcheck="false" autocomplete="off" />
           </div>
 

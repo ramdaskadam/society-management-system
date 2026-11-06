@@ -63,6 +63,7 @@ export class SidebarNavComponent {
         { id: 'dashboard', labelKey: 'nav.myDashboard', icon: 'home', badge: null },
         { id: 'profile', labelKey: 'nav.profile', icon: 'user', badge: null },
         { id: 'my-unit', labelKey: 'nav.myUnit', icon: 'building', badge: null },
+        { id: 'tenants', labelKey: 'nav.tenants', icon: 'users', badge: null },
         { id: 'maintenance', labelKey: 'nav.maintenance', icon: 'tool', badge: null },
         { id: 'payments', labelKey: 'nav.invoicesPayments', icon: 'credit-card', badge: null },
         { id: 'complaints', labelKey: 'nav.complaints', icon: 'alert', badge: this.openComplaintsCount || null },
