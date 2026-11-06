@@ -81,7 +81,7 @@ export class I18nService {
 
     if (notify) {
       const meta = this.availableLocales.find(l => l.code === lang);
-      this.toast.showToast(`Language switched to ${meta?.label} (${meta?.nativeLabel})`, 'info');
+      this.toast.showToast('msg.langSwitched', 'info', { label: meta?.label ?? lang, native: meta?.nativeLabel ?? lang });
     }
   }
 

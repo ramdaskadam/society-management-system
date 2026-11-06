@@ -15,7 +15,10 @@ export class RoleBannerComponent {
   readonly i18n = inject(I18nService);
 
   @Input() currentRole: UserRole = 'admin';
-  @Input() societyName: string = 'Green Meadows';
+  @Input() societyName: string = '';
+  /** Display names come from the signed-in users in the state store (no hardcoded people). */
+  @Input() adminLabel: string = '';
+  @Input() memberLabel: string = '';
   @Output() roleChange = new EventEmitter<UserRole>();
   @Output() resetDemo = new EventEmitter<void>();
 

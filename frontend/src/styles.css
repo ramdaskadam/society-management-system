@@ -2453,6 +2453,7 @@ dialog:modal {
 }
 
 .auth-page {
+  min-height: 100vh;
   min-height: 100dvh;
   display: grid;
   place-items: center;
@@ -2678,3 +2679,48 @@ dialog:modal {
 .auth-fieldset legend { padding: 0 6px; }
 .auth-fieldset .auth-help { flex-basis: 100%; margin: 0; }
 .auth-radio { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; min-height: 32px; cursor: pointer; }
+
+/* ========================================================
+   CROSS-BROWSER / DEVICE COMPATIBILITY
+   ======================================================== */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-tap-highlight-color: transparent; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+button, a, input, select, textarea, [role="button"] { touch-action: manipulation; }
+img, svg, video { max-width: 100%; height: auto; }
+svg[width] { height: auto; }
+
+/* iOS Safari zooms into inputs below 16px: keep form controls at 16px on touch/phone widths */
+@media (max-width: 768px), (pointer: coarse) {
+  input, select, textarea, .form-control { font-size: 16px; }
+}
+
+/* Hover-only effects must not "stick" on touch screens */
+@media (hover: none) {
+  .app-table tbody tr:hover { background-color: transparent; }
+}
+
+/* Very large monitors: keep content readable instead of stretching edge to edge */
+@media (min-width: 1800px) {
+  .content-area > * { max-width: 1680px; margin-inline: auto; }
+}
+
+/* Small phones (<= 360px) and landscape phones */
+@media (max-width: 360px) {
+  .auth-card { padding: 20px 16px; }
+  .auth-social { grid-template-columns: 1fr; }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .auth-page { align-items: flex-start; padding-block: 12px; }
+  .mobile-bottom-nav-item span { display: none; }
+}
+
+/* Browsers without `dvh` / `inset` / `:has` keep a sane fallback */
+@supports not (height: 100dvh) {
+  .app-container { min-height: calc(100vh - 42px); }
+}
+
+/* High-contrast / forced-colors users keep visible focus + borders */
+@media (forced-colors: active) {
+  .btn-primary, .btn-secondary, .form-control { border: 1px solid ButtonText; }
+}
+:focus-visible { outline: 2px solid var(--accent-primary, #10b981); outline-offset: 2px; }

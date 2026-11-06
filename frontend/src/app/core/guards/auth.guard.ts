@@ -26,7 +26,7 @@ export const accessGuard: CanActivateFn = route => {
   if (!moduleId || access.can(moduleId, 'read')) {
     return true;
   }
-  state.showToast('Read access to this module was revoked by your society admin.', 'warning');
+  state.showToast('msg.accessRevoked', 'warning');
   return router.createUrlTree(['/dashboard']);
 };
 

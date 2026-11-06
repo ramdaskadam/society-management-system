@@ -438,14 +438,14 @@ export class SocietyStateService {
         this.dataSourceMode.set(LIVE_API ? 'live-api' : 'mock-json-assets');
         this.isLoading.set(false);
         if (notifyUser) {
-          this.showToast(LIVE_API ? 'Data refreshed from server' : 'Reloaded fresh baseline data from /assets/mock-data/*.json', 'info');
+          this.showToast(LIVE_API ? 'msg.dataRefreshed' : 'msg.baselineReloaded', 'info');
         }
       },
       error: err => {
         // Keep whatever data is on screen, but tell the user and allow a retry via hydrateFromApi().
         this.isLoading.set(false);
         this.loadError.set(err?.message || 'Unable to reach the server');
-        this.showToast('Could not load data from the server. Please retry.', 'danger');
+        this.showToast('msg.loadFailed', 'danger');
       }
     });
   }
@@ -483,7 +483,7 @@ export class SocietyStateService {
     this.currentUserRole.set(role);
     this.setView('dashboard');
     document.body.setAttribute('data-role', role);
-    this.showToast(`Switched to ${role === 'admin' ? 'Admin' : 'Member'} Portal`, 'info');
+    this.showToast(role === 'admin' ? 'msg.switchedAdmin' : 'msg.switchedMember', 'info');
   }
 
   setView(view: string): void {
@@ -491,8 +491,9 @@ export class SocietyStateService {
     this.router?.navigate(['/' + view]);
   }
 
-  showToast(message: string, type: ToastMessage['type'] = 'info'): void {
-    this.toastService.showToast(message, type);
+  /** Shows a toast; pass a 'msg.*' dictionary key (+ params) or plain text. */
+  showToast(message: string, type: ToastMessage['type'] = 'info', params?: Record<string, string | number>): void {
+    this.toastService.showToast(message, type, params);
   }
 
   removeToast(id: string): void {
@@ -557,7 +558,7 @@ export class SocietyStateService {
     const updated = this.invoices().find(i => i.id === invoiceId) || null;
     this.selectedReceiptInvoice.set(updated);
     this.logAudit('Billing', `Invoice ${invoiceId} paid via ${paymentMethod} (Txn: ${txnId}).`);
-    this.showToast(`Payment of ₹${amount.toLocaleString('en-IN')} confirmed via ${paymentMethod}! Receipt generated.`, 'success');
+    this.showToast('msg.paymentConfirmed', 'success', { amount: amount.toLocaleString('en-IN'), method: paymentMethod });
   }
 
   // ── Complaints & SLA Management ───────────────────────────────────────────────
@@ -601,7 +602,7 @@ export class SocietyStateService {
     ]);
 
     this.logAudit('Complaints', `Ticket #${tNo} (${data.category}) raised for Unit ${unitNo}.`);
-    this.showToast(`Complaint #${tNo} raised successfully! Tracking on dashboard.`, 'success');
+    this.showToast('msg.complaintRaised', 'success', { no: tNo });
   }
 
   updateComplaintStatus(id: string, newStatus: Complaint['status']): void {
@@ -615,7 +616,7 @@ export class SocietyStateService {
     this.complaintStats.set({ open, inProgress: inProg, resolved, closed, total: this.complaints().length });
     this.metrics.update(m => ({ ...m, openComplaints: open }));
     this.logAudit('Complaints', `Updated complaint #${id} status to ${newStatus}.`);
-    this.showToast(`Complaint #${id} marked as ${newStatus}`, 'info');
+    this.showToast('msg.complaintStatus', 'info', { id, status: newStatus });
   }
 
   // ── Notices & Amenities ───────────────────────────────────────────────────────
@@ -660,7 +661,7 @@ export class SocietyStateService {
     ]);
 
     this.logAudit('Notices', `Published notice "${data.title}" (${data.category}).`);
-    this.showToast('Society Notice published and broadcast to members!', 'success');
+    this.showToast('msg.noticePublished', 'success');
   }
 
   bookAmenity(data: { amenity: string; date: string; time: string; purpose: string }): void {
@@ -693,12 +694,12 @@ export class SocietyStateService {
       ...list
     ]);
 
-    this.showToast(`Amenity reservation confirmed for ${data.amenity}!`, 'success');
+    this.showToast('msg.amenityBooked', 'success', { amenity: data.amenity });
   }
 
   approveBooking(bookingId: string): void {
     this.bookings.update(list => list.map(b => (b.id === bookingId ? { ...b, status: 'Confirmed' } : b)));
-    this.showToast(`Booking #${bookingId} approved!`, 'success');
+    this.showToast('msg.bookingApproved', 'success', { id: bookingId });
   }
 
   // ── Directory & Bulk Operations ───────────────────────────────────────────────
@@ -717,12 +718,12 @@ export class SocietyStateService {
 
     this.members.update(list => [...list, newMember]);
     this.metrics.update(m => ({ ...m, totalMembers: m.totalMembers + 1 }));
-    this.showToast(`Member ${data.name} (${data.unit}) registered!`, 'success');
+    this.showToast('msg.memberAdded', 'success', { name: data.name, unit: data.unit });
   }
 
   addUnit(data: { unitNo: string; wing: string; type: string; area: number; owner: string }): void {
     if (this.units().some(u => u.unitNo.toLowerCase() === data.unitNo.trim().toLowerCase())) {
-      this.showToast(`Unit ${data.unitNo} already exists`, 'danger');
+      this.showToast('msg.unitExists', 'danger', { unit: data.unitNo });
       return;
     }
     const newUnit: Unit = {
@@ -740,7 +741,7 @@ export class SocietyStateService {
 
     this.units.update(list => [...list, newUnit]);
     this.metrics.update(m => ({ ...m, totalUnits: m.totalUnits + 1 }));
-    this.showToast(`Unit ${data.unitNo} added to society database!`, 'success');
+    this.showToast('msg.unitAdded', 'success', { unit: data.unitNo });
   }
 
   generateBulkInvoices(): void {
@@ -765,12 +766,12 @@ export class SocietyStateService {
     ]);
 
     this.logAudit('Billing', `Generated monthly maintenance invoices for ${units.length} units.`);
-    this.showToast(`Successfully issued ${units.length} monthly maintenance invoices!`, 'success');
+    this.showToast('msg.invoicesIssued', 'success', { count: units.length });
   }
 
   markNotificationsAsRead(): void {
     this.notifications.update(list => list.map(n => ({ ...n, read: true })));
-    this.showToast('All notifications marked as read', 'info');
+    this.showToast('msg.notificationsRead', 'info');
   }
 
   exportCsv(type: 'payments' | 'collections' | 'dues' | 'members'): void {
@@ -808,7 +809,7 @@ export class SocietyStateService {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    this.showToast(`Exported ${filename} successfully!`, 'success');
+    this.showToast('msg.exported', 'success', { file: filename });
   }
 
   // ── Visitor & Gate Security Management ────────────────────────────────────────
@@ -850,7 +851,7 @@ export class SocietyStateService {
       ...list
     ]);
     this.logAudit('Security', `Pre-approved visitor ${data.visitorName} (OTP: ${passCode}) for Unit ${newVisitor.unitNo}.`);
-    this.showToast(`Gate Pass OTP #${passCode} generated for ${data.visitorName}!`, 'success');
+    this.showToast('msg.gatePass', 'success', { code: passCode, name: data.visitorName });
     return newVisitor;
   }
 
@@ -868,7 +869,7 @@ export class SocietyStateService {
       })
     );
     this.logAudit('Security', `Updated visitor pass #${id} status to ${status}.`);
-    this.showToast(`Visitor pass ${id} marked as ${status}`, 'info');
+    this.showToast('msg.visitorStatus', 'info', { id, status });
   }
 
   // ── Community Polls & Committee Voting ────────────────────────────────────────
@@ -896,7 +897,7 @@ export class SocietyStateService {
       })
     );
     this.logAudit('Governance', `Cast vote on poll ${pollId} (Option ${optionId}).`);
-    this.showToast('Your society resolution vote has been recorded!', 'success');
+    this.showToast('msg.voteRecorded', 'success');
   }
 
   createPoll(data: {
@@ -925,13 +926,13 @@ export class SocietyStateService {
 
     this.polls.update(list => [newPoll, ...list]);
     this.logAudit('Governance', `Published community poll "${data.title}".`);
-    this.showToast(`Poll "${data.title}" published to all society members!`, 'success');
+    this.showToast('msg.pollPublished', 'success', { title: data.title });
   }
 
   closePoll(pollId: string): void {
     this.polls.update(list => list.map(p => (p.id === pollId ? { ...p, status: 'Closed' } : p)));
     this.logAudit('Governance', `Closed voting for poll ${pollId}.`);
-    this.showToast(`Poll ${pollId} closed and final tally locked.`, 'info');
+    this.showToast('msg.pollClosed', 'info', { id: pollId });
   }
 
   // ── Parking & EV Bay Management ───────────────────────────────────────────────
@@ -960,13 +961,13 @@ export class SocietyStateService {
     };
     this.parkingSlots.update(list => [newSlot, ...list]);
     this.logAudit('Security', `Allocated parking slot ${data.slotNo} & RFID tag for vehicle ${newSlot.vehicleNo} (${data.unitNo}).`);
-    this.showToast(`Vehicle ${newSlot.vehicleNo} registered to slot ${data.slotNo} with RFID!`, 'success');
+    this.showToast('msg.vehicleRegistered', 'success', { vehicle: newSlot.vehicleNo, slot: data.slotNo });
   }
 
   // ── Complaint Rating, Document Upload & Settings ──────────────────────────────
   rateComplaint(complaintId: string, rating: number): void {
     this.complaints.update(list => list.map(c => (c.id === complaintId ? { ...c, rating } : c)));
-    this.showToast(`Thank you! Rated complaint #${complaintId} resolution ${rating}/5 ★`, 'success');
+    this.showToast('msg.complaintRated', 'success', { id: complaintId, rating });
   }
 
   uploadDocument(data: { title: string; category: string; access: string }): void {
@@ -980,13 +981,13 @@ export class SocietyStateService {
     };
     this.documents.update(list => [newDoc, ...list]);
     this.logAudit('Settings', `Uploaded society document "${data.title}" (${data.category}).`);
-    this.showToast(`Document "${data.title}" uploaded to repository!`, 'success');
+    this.showToast('msg.documentUploaded', 'success', { title: data.title });
   }
 
   updateSocietySettings(data: Partial<Society>): void {
     this.society.update(curr => ({ ...curr, ...data }));
     this.logAudit('Settings', 'Updated society billing & configuration parameters.');
-    this.showToast('Society settings and billing rates saved!', 'success');
+    this.showToast('msg.settingsSaved', 'success');
   }
 
   logAudit(module: AuditLogEntry['module'], details: string, action?: string): void {

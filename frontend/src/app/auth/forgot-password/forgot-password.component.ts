@@ -53,7 +53,7 @@ export class ForgotPasswordComponent {
       this.error.set(result.error ?? 'Could not reset password.');
       return;
     }
-    this.state.showToast('Password updated. Please sign in with your new password.', 'success');
+    this.state.showToast('msg.passwordUpdated', 'success');
     this.router.navigateByUrl('/login');
   }
 

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { SocietyStateService } from '../../services/society-state.service';
 import { AuthService, SocialProvider } from '../../core/services/auth.service';
 
 @Component({
@@ -14,6 +15,8 @@ import { AuthService, SocialProvider } from '../../core/services/auth.service';
 export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  /** Society name shown in the brand header comes from the configurable society data. */
+  readonly society = inject(SocietyStateService).society;
 
   username = '';
   password = '';

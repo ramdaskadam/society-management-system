@@ -107,7 +107,7 @@ export class AccessControlService {
   require(moduleId: string, action: AccessAction): boolean {
     const allowed = this.can(moduleId, action);
     if (!allowed) {
-      this.state.showToast(`You don't have ${action} access to this feature. Contact your society admin.`, 'warning');
+      this.state.showToast('msg.noAccess', 'warning', { action });
     }
     return allowed;
   }

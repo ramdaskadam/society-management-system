@@ -1,7 +1,7 @@
 {
   "banner": {
     "adminPortal": "Admin Portal",
-    "memberPortal": "Member Portal (Flat A-101)",
+    "memberPortal": "Member Portal",
     "loggedInAs": "Logged in as:",
     "resetDemo": "Reset Demo"
   },
@@ -73,5 +73,40 @@
     "amenityBookings": "Amenity Bookings",
     "amenityBookingsSub": "Your reserved society amenities",
     "bookAmenity": "Book Amenity"
+  },
+  "msg": {
+    "dataRefreshed": "Data refreshed from server",
+    "baselineReloaded": "Reloaded fresh baseline data from /assets/mock-data/*.json",
+    "loadFailed": "Could not load data from the server. Please retry.",
+    "switchedAdmin": "Switched to Admin Portal",
+    "switchedMember": "Switched to Member Portal",
+    "paymentConfirmed": "Payment of ₹{{amount}} confirmed via {{method}}! Receipt generated.",
+    "complaintRaised": "Complaint #{{no}} raised successfully! Tracking on dashboard.",
+    "complaintStatus": "Complaint #{{id}} marked as {{status}}",
+    "noticePublished": "Society Notice published and broadcast to members!",
+    "amenityBooked": "Amenity reservation confirmed for {{amenity}}!",
+    "bookingApproved": "Booking #{{id}} approved!",
+    "memberAdded": "Member {{name}} ({{unit}}) registered!",
+    "unitExists": "Unit {{unit}} already exists",
+    "unitAdded": "Unit {{unit}} added to society database!",
+    "invoicesIssued": "Successfully issued {{count}} monthly maintenance invoices!",
+    "notificationsRead": "All notifications marked as read",
+    "exported": "Exported {{file}} successfully!",
+    "gatePass": "Gate Pass OTP #{{code}} generated for {{name}}!",
+    "visitorStatus": "Visitor pass {{id}} marked as {{status}}",
+    "voteRecorded": "Your society resolution vote has been recorded!",
+    "pollPublished": "Poll \"{{title}}\" published to all society members!",
+    "pollClosed": "Poll {{id}} closed and final tally locked.",
+    "vehicleRegistered": "Vehicle {{vehicle}} registered to slot {{slot}} with RFID!",
+    "complaintRated": "Thank you! Rated complaint #{{id}} resolution {{rating}}/5 ★",
+    "documentUploaded": "Document \"{{title}}\" uploaded to repository!",
+    "settingsSaved": "Society settings and billing rates saved!",
+    "langSwitched": "Language switched to {{label}} ({{native}})",
+    "noAccess": "You don't have {{action}} access to this feature. Contact your society admin.",
+    "accessRevoked": "Read access to this module was revoked by your society admin.",
+    "roleRestricted": "Access restricted to {{roles}} role.",
+    "passwordUpdated": "Password updated. Please sign in with your new password.",
+    "downloading": "Downloading: {{name}}",
+    "bankImported": "Imported bank statement feed: {{count}} entries reconciled!"
   }
 }

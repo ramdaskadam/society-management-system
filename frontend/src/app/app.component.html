@@ -3,6 +3,8 @@
 <app-role-banner
   [currentRole]="state.currentUserRole()"
   [societyName]="state.society().name"
+  [adminLabel]="state.adminUser().name"
+  [memberLabel]="state.memberUser().name + ' (' + state.currentResidentUnit() + ')'"
   (roleChange)="onRoleChange($event)"
   (resetDemo)="onResetDemo()"
 />

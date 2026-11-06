@@ -20,6 +20,6 @@ export class NoticesViewComponent {
   }
 
   downloadDoc(file: string): void {
-    this.state.showToast(`Downloading: ${file}`, 'info');
+    this.state.showToast('msg.downloading', 'info', { name: file });
   }
 }

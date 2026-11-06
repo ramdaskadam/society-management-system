@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, Injector, inject, signal } from '@angular/core';
+import { I18nService } from './i18n.service';
 import { ToastMessage } from '../../models/society.model';
 
 /**
@@ -11,7 +12,16 @@ import { ToastMessage } from '../../models/society.model';
 export class ToastNotificationService {
   readonly toasts = signal<ToastMessage[]>([]);
 
-  showToast(message: string, type: ToastMessage['type'] = 'info'): void {
+  private readonly injector = inject(Injector);
+
+  /**
+   * Shows a toast. `message` is either a dictionary key (e.g. 'msg.unitAdded', translated into the
+   * active language with `params`) or plain text. Messages live in assets/i18n/*.json.
+   */
+  showToast(messageOrKey: string, type: ToastMessage['type'] = 'info', params?: Record<string, string | number>): void {
+    const message = messageOrKey.startsWith('msg.')
+      ? this.injector.get(I18nService).translate(messageOrKey, params)
+      : messageOrKey;
     const id = `toast-${Date.now()}-${Math.random()}`;
     const newToast: ToastMessage = { id, message, type };
     this.toasts.update(list => [...list, newToast]);

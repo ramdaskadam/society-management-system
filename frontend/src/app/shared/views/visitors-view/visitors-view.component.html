@@ -119,7 +119,7 @@
   <div class="dash-card-header" style="flex-wrap: wrap; gap: 12px;">
     <div>
       <h3 class="dash-card-title">
-        {{ state.currentUserRole() === 'admin' ? 'Live Society Gate Entry Register' : 'My Unit (A-101) Visitor & Delivery Passes' }}
+        {{ state.currentUserRole() === 'admin' ? 'Live Society Gate Entry Register' : 'My Unit (' + state.currentResidentUnit() + ') Visitor & Delivery Passes' }}
       </h3>
       <p class="dash-card-subtitle">Real-time synchronization with Main Gate Security Kiosk</p>
     </div>

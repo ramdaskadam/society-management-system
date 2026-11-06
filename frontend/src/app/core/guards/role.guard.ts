@@ -13,7 +13,7 @@ export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
     if (allowedRoles.includes(activeRole)) {
       return true;
     }
-    state.showToast(`Access restricted to ${allowedRoles.join(', ')} role.`, 'warning');
+    state.showToast('msg.roleRestricted', 'warning', { roles: allowedRoles.join(', ') });
     state.setView('dashboard');
     return false;
   };

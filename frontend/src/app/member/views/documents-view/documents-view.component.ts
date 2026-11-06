@@ -38,6 +38,6 @@ export class DocumentsViewComponent {
   }
 
   download(title: string): void {
-    this.state.showToast(`Downloading: ${title}.pdf`, 'info');
+    this.state.showToast('msg.downloading', 'info', { name: `${title}.pdf` });
   }
 }

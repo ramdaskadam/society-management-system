@@ -54,6 +54,6 @@ export class AdminDashboardComponent {
   }
 
   importPayments(): void {
-    this.state.showToast('Imported bank statement feed: 14 entries reconciled!', 'success');
+    this.state.showToast('msg.bankImported', 'success', { count: 14 });
   }
 }
