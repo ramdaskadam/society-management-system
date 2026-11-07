@@ -2,10 +2,12 @@
 <!-- Top Role Switcher Floating Banner -->
 <app-role-banner
   [currentRole]="state.currentUserRole()"
+  [isTenantSession]="state.isTenantSession()"
   [societyName]="state.society().name"
   [adminLabel]="state.adminUser().name"
   [memberLabel]="state.memberUser().name + ' (' + state.currentResidentUnit() + ')'"
   (roleChange)="onRoleChange($event)"
+  (tenantPortalSelect)="onTenantPortalSelect()"
   (resetDemo)="onResetDemo()"
 />
 

@@ -206,6 +206,8 @@ export class SocietyStateService {
   // Domain State Signals
   readonly society = signal<Society>(societySeed.society as Society);
   readonly currentUserRole = signal<UserRole>('admin');
+  /** True when the logged-in resident is an approved Tenant (grants limited portal access). */
+  readonly isTenantSession = signal<boolean>(false);
   readonly currentView = signal<string>('dashboard');
   readonly adminUser = signal<User>(societySeed.adminUser as User);
   readonly memberUser = signal<User>(societySeed.memberUser as User);

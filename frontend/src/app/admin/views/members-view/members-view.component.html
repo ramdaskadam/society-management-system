@@ -14,6 +14,51 @@
   </div>
 </div>
 
+
+<!-- ── PENDING MEMBER REGISTRATIONS (Admin Confirmation & Approval Queue) ── -->
+@if (auth.pendingMemberAccounts().length > 0) {
+  <div class="dash-card" style="margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+    <div style="margin-bottom: 12px;">
+      <h3 class="dash-card-title" style="margin: 0;">
+        {{ 'approval.pendingMembersTitle' | t }} ({{ auth.pendingMemberAccounts().length }})
+      </h3>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0;">
+        {{ 'approval.pendingMembersSub' | t }}
+      </p>
+    </div>
+
+    <div class="family-grid">
+      @for (acc of auth.pendingMemberAccounts(); track acc.username) {
+        <article class="family-card">
+          <div class="family-card-head">
+            <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
+            <div>
+              <strong>{{ acc.fullName }}</strong>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                <span class="badge badge-info">Flat {{ acc.unitNo || 'A-101' }}</span>
+                <span class="badge badge-pending">Pending Admin Approval</span>
+              </div>
+            </div>
+          </div>
+          <div class="family-meta">
+            @if (acc.mobile) { <span>📱 {{ acc.mobile }}</span> }
+            <span>✉ {{ acc.email }}</span>
+            <span>📅 Registered: {{ acc.registeredOn || 'Today' }}</span>
+          </div>
+          <div class="family-actions">
+            <button type="button" class="btn-primary" (click)="askApproveMember(acc)">
+              ✓ {{ 'approval.approveMemberBtn' | t }}
+            </button>
+            <button type="button" class="btn-secondary" (click)="askRejectMember(acc)">
+              {{ 'approval.rejectBtn' | t }}
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+}
+
 <div class="dash-card">
   <!-- Semantic <search> landmark for filtering the Members Directory -->
   <search class="members-search-bar" aria-label="Search and filter society members">
@@ -143,3 +188,14 @@
     </table>
   </div>
 </div>
+
+<app-confirm-dialog
+  [isOpen]="pendingApprovalAction() !== null"
+  [title]="confirmTitle()"
+  [message]="confirmMessage()"
+  [confirmText]="pendingApprovalAction()?.type === 'approve' ? ('approval.approveMemberBtn' | t) : ('approval.rejectBtn' | t)"
+  [cancelText]="'profile.cancel' | t"
+  [variant]="pendingApprovalAction()?.type === 'approve' ? 'primary' : 'danger'"
+  (confirm)="executeApprovalModal()"
+  (cancel)="cancelApprovalModal()"
+/>

@@ -14,75 +14,114 @@
     </div>
 
     <h1 id="register-title" class="auth-title">Create your account</h1>
-    <p class="auth-subtitle">Register as a resident. Your society admin controls what you can access.</p>
 
-    <form (ngSubmit)="submit()" novalidate>
-      <div class="form-row">
+    @if (submittedForApproval()) {
+      <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; border-radius: 12px; padding: 16px; margin: 14px 0;">
+        <strong style="display: block; margin-bottom: 6px;">✓ Registration Submitted for Approval</strong>
+        @if (accountType === 'tenant') {
+          <p style="margin: 0; font-size: 0.875rem;">
+            Your tenant registration for Flat <strong>{{ unitNo }}</strong> is pending confirmation and approval from the Flat Owner.
+            The flat owner can pull your details by your name, mobile number, or email address and approve your request.
+          </p>
+        } @else {
+          <p style="margin: 0; font-size: 0.875rem;">
+            Your member registration for Flat <strong>{{ unitNo }}</strong> is pending confirmation and approval from the Society Admin.
+            Once approved, you will be able to sign in and access the portal.
+          </p>
+        }
+      </div>
+      <a routerLink="/login" class="btn-primary auth-submit" style="text-decoration: none; display: inline-flex; align-items: center;">
+        Back to Sign In
+      </a>
+    } @else {
+      <p class="auth-subtitle">
+        New Member accounts require Society Admin approval; Tenant accounts require Flat Owner approval.
+      </p>
+
+      <form (ngSubmit)="submit()" novalidate>
+        <fieldset class="auth-fieldset">
+          <legend class="form-label">Registering as</legend>
+          <label class="auth-radio">
+            <input type="radio" name="accountType" value="member" [(ngModel)]="accountType" />
+            Society Member (Flat Owner)
+          </label>
+          <label class="auth-radio">
+            <input type="radio" name="accountType" value="tenant" [(ngModel)]="accountType" />
+            Tenant
+          </label>
+        </fieldset>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="reg-first">First name</label>
+            <input id="reg-first" name="firstName" type="text" class="form-control auth-input" [(ngModel)]="firstName" autocomplete="given-name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-last">Last name</label>
+            <input id="reg-last" name="lastName" type="text" class="form-control auth-input" [(ngModel)]="lastName" autocomplete="family-name" required />
+          </div>
+        </div>
+
         <div class="form-group">
-          <label class="form-label" for="reg-first">First name</label>
-          <input id="reg-first" name="firstName" type="text" class="form-control auth-input" [(ngModel)]="firstName" autocomplete="given-name" required />
+          <label class="form-label" for="reg-unit">Flat / Unit No</label>
+          <input id="reg-unit" name="unitNo" type="text" class="form-control auth-input" [(ngModel)]="unitNo" placeholder="e.g. A-101" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-mobile">Mobile</label>
+          <input id="reg-mobile" name="mobile" type="tel" inputmode="numeric" class="form-control auth-input" [(ngModel)]="mobile" autocomplete="tel-national" placeholder="10-digit number" maxlength="14" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email</label>
+          <input id="reg-email" name="email" type="email" inputmode="email" class="form-control auth-input" [(ngModel)]="email" autocomplete="email" autocapitalize="off" spellcheck="false" required />
+        </div>
+
+        <fieldset class="auth-fieldset">
+          <legend class="form-label">Use as my username (sign in with)</legend>
+          <label class="auth-radio"><input type="radio" name="loginWith" value="email" [(ngModel)]="loginWith" /> Email</label>
+          <label class="auth-radio"><input type="radio" name="loginWith" value="mobile" [(ngModel)]="loginWith" /> Mobile number</label>
+          <p class="auth-help">You can still reset your password using either one.</p>
+        </fieldset>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password</label>
+            <input id="reg-password" name="password" type="password" class="form-control auth-input" [(ngModel)]="password" autocomplete="new-password" minlength="10" aria-describedby="reg-password-help" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-confirm">Confirm password</label>
+            <input id="reg-confirm" name="confirmPassword" type="password" class="form-control auth-input" [(ngModel)]="confirmPassword" autocomplete="new-password" required />
+          </div>
+        </div>
+        <app-password-checklist id="reg-password-help" [password]="password" [personal]="personalInfo" />
+
+        <div class="form-group">
+          <label class="form-label" for="reg-hint-q">Hint question</label>
+          <select id="reg-hint-q" name="hintQuestion" class="form-control auth-input" [(ngModel)]="hintQuestion" required>
+            <option value="" disabled>Choose a question…</option>
+            @for (q of hintQuestions; track q) {
+              <option [value]="q">{{ q }}</option>
+            }
+          </select>
         </div>
         <div class="form-group">
-          <label class="form-label" for="reg-last">Last name</label>
-          <input id="reg-last" name="lastName" type="text" class="form-control auth-input" [(ngModel)]="lastName" autocomplete="family-name" required />
+          <label class="form-label" for="reg-hint-a">Hint answer</label>
+          <input id="reg-hint-a" name="hintAnswer" type="text" class="form-control auth-input" [(ngModel)]="hintAnswer" autocomplete="off" aria-describedby="reg-hint-help" required />
         </div>
-      </div>
+        <p id="reg-hint-help" class="auth-help">You will need this answer if you forget your password.</p>
 
-      <div class="form-group">
-        <label class="form-label" for="reg-mobile">Mobile</label>
-        <input id="reg-mobile" name="mobile" type="tel" inputmode="numeric" class="form-control auth-input" [(ngModel)]="mobile" autocomplete="tel-national" placeholder="10-digit number" maxlength="14" required />
-      </div>
+        @if (error()) {
+          <div class="auth-error" role="alert"><span aria-hidden="true">⚠</span> {{ error() }}</div>
+        }
 
-      <div class="form-group">
-        <label class="form-label" for="reg-email">Email</label>
-        <input id="reg-email" name="email" type="email" inputmode="email" class="form-control auth-input" [(ngModel)]="email" autocomplete="email" autocapitalize="off" spellcheck="false" required />
-      </div>
+        <button type="submit" class="btn-primary auth-submit">Submit Registration</button>
+      </form>
 
-      <fieldset class="auth-fieldset">
-        <legend class="form-label">Use as my username (sign in with)</legend>
-        <label class="auth-radio"><input type="radio" name="loginWith" value="email" [(ngModel)]="loginWith" /> Email</label>
-        <label class="auth-radio"><input type="radio" name="loginWith" value="mobile" [(ngModel)]="loginWith" /> Mobile number</label>
-        <p class="auth-help">You can still reset your password using either one.</p>
-      </fieldset>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="reg-password">Password</label>
-          <input id="reg-password" name="password" type="password" class="form-control auth-input" [(ngModel)]="password" autocomplete="new-password" minlength="10" aria-describedby="reg-password-help" required />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="reg-confirm">Confirm password</label>
-          <input id="reg-confirm" name="confirmPassword" type="password" class="form-control auth-input" [(ngModel)]="confirmPassword" autocomplete="new-password" required />
-        </div>
-      </div>
-      <app-password-checklist id="reg-password-help" [password]="password" [personal]="personalInfo" />
-
-      <div class="form-group">
-        <label class="form-label" for="reg-hint-q">Hint question</label>
-        <select id="reg-hint-q" name="hintQuestion" class="form-control auth-input" [(ngModel)]="hintQuestion" required>
-          <option value="" disabled>Choose a question…</option>
-          @for (q of hintQuestions; track q) {
-            <option [value]="q">{{ q }}</option>
-          }
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="reg-hint-a">Hint answer</label>
-        <input id="reg-hint-a" name="hintAnswer" type="text" class="form-control auth-input" [(ngModel)]="hintAnswer" autocomplete="off" aria-describedby="reg-hint-help" required />
-      </div>
-      <p id="reg-hint-help" class="auth-help">You will need this answer if you forget your password.</p>
-
-      @if (error()) {
-        <div class="auth-error" role="alert"><span aria-hidden="true">⚠</span> {{ error() }}</div>
-      }
-
-      <button type="submit" class="btn-primary auth-submit">Create account</button>
-    </form>
-
-    <p class="auth-footer">
-      Already registered?
-      <a routerLink="/login" class="auth-link">Sign in</a>
-    </p>
+      <p class="auth-footer">
+        Already registered?
+        <a routerLink="/login" class="auth-link">Sign in</a>
+      </p>
+    }
   </section>
 </main>
-

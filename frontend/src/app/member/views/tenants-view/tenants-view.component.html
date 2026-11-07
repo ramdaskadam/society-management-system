@@ -31,6 +31,81 @@
   </div>
 </div>
 
+<!-- ── PULL & APPROVE REGISTERED TENANT (Search by First Name, Last Name, Mobile, or Email) ── -->
+@if (!showHistory()) {
+  <section class="dash-card" style="margin-bottom: 20px; border-left: 4px solid #10b981;" aria-labelledby="tenant-lookup-title">
+    <div style="margin-bottom: 12px;">
+      <h3 id="tenant-lookup-title" class="dash-card-title" style="margin: 0;">
+        {{ 'approval.tenantLookupTitle' | t }}
+      </h3>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0;">
+        {{ 'approval.tenantLookupSub' | t }}
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
+      <input
+        type="search"
+        name="tenantLookup"
+        class="form-control"
+        style="flex: 1; min-width: 240px;"
+        [placeholder]="'approval.tenantSearchPlaceholder' | t"
+        [ngModel]="tenantLookupQuery()"
+        (ngModelChange)="tenantLookupQuery.set($event)"
+        autocomplete="off"
+      />
+      @if (tenantLookupQuery().trim()) {
+        <button type="button" class="btn-secondary" (click)="clearLookup()">
+          {{ 'approval.clearBtn' | t }}
+        </button>
+      }
+    </div>
+
+    @if (pulledTenantAccounts().length === 0) {
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+        {{ 'approval.noTenantMatch' | t }}
+      </p>
+    } @else {
+      <div class="family-grid">
+        @for (acc of pulledTenantAccounts(); track acc.username) {
+          <article class="family-card">
+            <div class="family-card-head">
+              <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
+              <div>
+                <strong>{{ acc.firstName || acc.fullName }} {{ acc.lastName || '' }}</strong>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                  <span class="family-tag">Flat {{ acc.unitNo || state.currentResidentUnit() }}</span>
+                  <span
+                    class="badge"
+                    [ngClass]="acc.approvalStatus === 'Approved' ? 'badge-confirmed' : 'badge-pending'"
+                  >
+                    {{ acc.approvalStatus === 'Approved' ? ('approval.approvedBadge' | t) : ('approval.pendingBadge' | t) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="family-meta">
+              <span>First Name: <strong>{{ acc.firstName || acc.fullName.split(' ')[0] }}</strong> • Last Name: <strong>{{ acc.lastName || acc.fullName.split(' ').slice(1).join(' ') }}</strong></span>
+              @if (acc.mobile) { <span>📱 {{ acc.mobile }}</span> }
+              <span>✉ {{ acc.email }}</span>
+            </div>
+            @if (acc.approvalStatus !== 'Approved') {
+              <div class="family-actions">
+                <button type="button" class="btn-primary" (click)="askApproveRegTenant(acc)">
+                  ✓ {{ 'approval.approveTenantBtn' | t }}
+                </button>
+                <button type="button" class="btn-secondary" (click)="askRejectRegTenant(acc)">
+                  {{ 'approval.rejectBtn' | t }}
+                </button>
+              </div>
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
+}
+
 <!-- ── TENANT HISTORY (Read-Only: Primary Tenant Info + Secondary Family Members Underneath) ── -->
 @if (showHistory() && pastTenants().length > 0) {
   <div style="display: grid; gap: 20px;">

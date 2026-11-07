@@ -15,6 +15,8 @@ export const HINT_QUESTIONS: readonly string[] = [
 ];
 
 export type SocialProvider = 'google' | 'facebook';
+export type AccountType = 'admin' | 'member' | 'tenant';
+export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected';
 
 export interface AuthAccount {
   username: string;
@@ -27,6 +29,13 @@ export interface AuthAccount {
   /** Normalised 10-digit mobile number. */
   mobile?: string;
   role: UserRole;
+  /** Distinguishes a Primary Member / Flat Owner ('member') from a Registered Tenant ('tenant'). */
+  accountType?: AccountType;
+  /** Flat / Unit number associated with the registration (e.g. 'A-101', 'B-204'). */
+  unitNo?: string;
+  /** Approval gate: new members require Admin approval; new tenants require Flat Owner approval. */
+  approvalStatus?: ApprovalStatus;
+  registeredOn?: string;
   /** Security question chosen at registration. */
   hintQuestion?: string;
   /** DEMO ONLY: normalised (trim + lowercase) answer. A real backend must store a salted hash. */
@@ -40,11 +49,15 @@ export interface AuthSession {
   fullName: string;
   email: string;
   role: UserRole;
+  accountType?: AccountType;
+  unitNo?: string;
 }
 
 export interface AuthResult {
   ok: boolean;
   error?: string;
+  /** True when registration succeeded and is awaiting Admin or Member approval. */
+  pendingApproval?: boolean;
   /** Returned by `getHintQuestion()`. */
   question?: string;
 }
@@ -69,24 +82,129 @@ const DEMO_ACCOUNT: AuthAccount = {
   password: 'demo',
   fullName: 'Demo Admin',
   email: 'demo@greenmeadows.in',
-  role: 'admin'
+  role: 'admin',
+  accountType: 'admin',
+  approvalStatus: 'Approved'
 };
 
 /**
- * Dummy client-side authentication. Swap `login()` / `register()` bodies with
- * real REST calls (see `API_ENDPOINTS`) without changing any consumers.
+ * Seeded registrations so the Admin (for new Members) and the Flat Owner (for new Tenants)
+ * can immediately test searching, confirming, and approving registrations.
+ */
+const DEFAULT_SEEDED_ACCOUNTS: AuthAccount[] = [
+  {
+    username: 'kiran.patil@example.com',
+    password: 'Member@2026!',
+    fullName: 'Kiran Patil',
+    firstName: 'Kiran',
+    lastName: 'Patil',
+    email: 'kiran.patil@example.com',
+    mobile: '9820112233',
+    role: 'member',
+    accountType: 'member',
+    unitNo: 'B-204',
+    approvalStatus: 'Pending',
+    registeredOn: 'Today',
+    hintQuestion: HINT_QUESTIONS[0],
+    hintAnswer: 'bruno'
+  },
+  {
+    username: 'meera.kulkarni@example.com',
+    password: 'Member@2026!',
+    fullName: 'Meera Kulkarni',
+    firstName: 'Meera',
+    lastName: 'Kulkarni',
+    email: 'meera.kulkarni@example.com',
+    mobile: '9820334455',
+    role: 'member',
+    accountType: 'member',
+    unitNo: 'C-302',
+    approvalStatus: 'Pending',
+    registeredOn: 'Today',
+    hintQuestion: HINT_QUESTIONS[3],
+    hintAnswer: 'pune'
+  },
+  {
+    username: 'amit.verma@example.com',
+    password: 'Tenant@2026!',
+    fullName: 'Amit Verma',
+    firstName: 'Amit',
+    lastName: 'Verma',
+    email: 'amit.verma@example.com',
+    mobile: '9820998877',
+    role: 'member',
+    accountType: 'tenant',
+    unitNo: 'A-101',
+    approvalStatus: 'Pending',
+    registeredOn: 'Today',
+    hintQuestion: HINT_QUESTIONS[0],
+    hintAnswer: 'max'
+  },
+  {
+    username: 'sneha.nair@example.com',
+    password: 'Tenant@2026!',
+    fullName: 'Sneha Nair',
+    firstName: 'Sneha',
+    lastName: 'Nair',
+    email: 'sneha.nair@example.com',
+    mobile: '9820554433',
+    role: 'member',
+    accountType: 'tenant',
+    unitNo: 'A-101',
+    approvalStatus: 'Pending',
+    registeredOn: 'Today',
+    hintQuestion: HINT_QUESTIONS[3],
+    hintAnswer: 'kochi'
+  },
+  {
+    username: 'rohan.joshi@example.com',
+    password: 'Tenant@2026!',
+    fullName: 'Rohan Joshi',
+    firstName: 'Rohan',
+    lastName: 'Joshi',
+    email: 'rohan.joshi@example.com',
+    mobile: '9820778899',
+    role: 'member',
+    accountType: 'tenant',
+    unitNo: 'A-101',
+    approvalStatus: 'Approved',
+    registeredOn: '01 Jun 2024',
+    hintQuestion: HINT_QUESTIONS[3],
+    hintAnswer: 'mumbai'
+  }
+];
+
+/**
+ * Authentication & Registration Approval Service.
+ * - New Member registrations require Society Admin approval before login is allowed.
+ * - New Tenant registrations can be pulled by the Flat Owner (using First Name, Last Name,
+ *   Mobile Number, or Email Address) and approved before the tenant can log in with limited access.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly router = inject(Router);
   private readonly state = inject(SocietyStateService);
 
+  readonly accounts = signal<AuthAccount[]>(this.initAccounts());
   readonly session = signal<AuthSession | null>(this.readSession());
   readonly isAuthenticated = computed(() => this.session() !== null);
+
+  /** Newly registered Flat Owners / Members awaiting Admin confirmation & approval. */
+  readonly pendingMemberAccounts = computed(() =>
+    this.accounts().filter(
+      a => (a.accountType ?? 'member') === 'member' && a.approvalStatus === 'Pending'
+    )
+  );
+
+  /** All registered Tenant accounts (Pending or Approved). */
+  readonly registeredTenantAccounts = computed(() =>
+    this.accounts().filter(a => a.accountType === 'tenant')
+  );
 
   constructor() {
     const s = this.session();
     if (s) {
+      this.state.isTenantSession.set(s.accountType === 'tenant');
       this.applyRole(s.role);
     }
   }
@@ -98,11 +216,21 @@ export class AuthService {
       return { ok: false, error: 'Enter both username and password.' };
     }
 
-    const account = [DEMO_ACCOUNT, ...this.readAccounts()].find(
-      a => (a.username.toLowerCase() === name || a.email.toLowerCase() === name || (!!a.mobile && MOBILE_RE.test(asMobile) && a.mobile === asMobile)) && !!a.password && a.password === password
+    const account = [DEMO_ACCOUNT, ...this.accounts()].find(
+      a =>
+        (a.username.toLowerCase() === name ||
+          a.email.toLowerCase() === name ||
+          (!!a.mobile && MOBILE_RE.test(asMobile) && a.mobile === asMobile)) &&
+        !!a.password &&
+        a.password === password
     );
     if (!account) {
       return { ok: false, error: 'Invalid username or password.' };
+    }
+
+    const gateError = this.checkApprovalGate(account);
+    if (gateError) {
+      return { ok: false, error: gateError };
     }
 
     this.startSession(account);
@@ -111,10 +239,6 @@ export class AuthService {
 
   /**
    * Social sign-in (Gmail / Facebook).
-   * - Live backend: redirects the browser to the server OAuth endpoint (`/auth/oauth/<provider>`),
-   *   which returns to the app with a session token.
-   * - Mock mode: simulates the provider consent screen using the email the user typed,
-   *   then signs in (or creates) a resident account linked to that email.
    */
   loginWithProvider(provider: SocialProvider, email: string): AuthResult {
     if (!environment.useMockApi) {
@@ -129,19 +253,35 @@ export class AuthService {
       return { ok: false, error: 'Please use your Gmail address (name@gmail.com).' };
     }
 
-    const accounts = this.readAccounts();
-    let account = accounts.find(a => a.email.toLowerCase() === mail);
+    const list = this.accounts();
+    const account = list.find(a => a.email.toLowerCase() === mail);
     if (!account) {
-      account = {
+      const pending: AuthAccount = {
         username: mail,
         password: '',
         fullName: mail.split('@')[0],
+        firstName: mail.split('@')[0],
+        lastName: '',
         email: mail,
         role: 'member',
+        accountType: 'member',
+        unitNo: 'A-101',
+        approvalStatus: 'Pending',
+        registeredOn: 'Today',
         provider
       };
-      this.writeAccounts([...accounts, account]);
+      this.saveAccounts([...list, pending]);
+      return {
+        ok: false,
+        error: 'Account registered and awaiting Society Admin approval before you can sign in.'
+      };
     }
+
+    const gateError = this.checkApprovalGate(account);
+    if (gateError) {
+      return { ok: false, error: gateError };
+    }
+
     this.startSession(account);
     return { ok: true };
   }
@@ -153,7 +293,10 @@ export class AuthService {
       return { ok: false, error: 'No account found with that username or email.' };
     }
     if (account.provider) {
-      return { ok: false, error: `This account signs in with ${account.provider === 'google' ? 'Google' : 'Facebook'}. No password to reset.` };
+      return {
+        ok: false,
+        error: `This account signs in with ${account.provider === 'google' ? 'Google' : 'Facebook'}. No password to reset.`
+      };
     }
     if (!account.hintQuestion) {
       return { ok: false, error: 'No hint question is set for this account. Contact your society admin.' };
@@ -174,22 +317,24 @@ export class AuthService {
     if (policyError) {
       return { ok: false, error: policyError };
     }
-    this.writeAccounts(
-      this.readAccounts().map(a => (a.username === account.username ? { ...a, password: newPassword } : a))
+    this.saveAccounts(
+      this.accounts().map(a => (a.username === account.username ? { ...a, password: newPassword } : a))
     );
     return { ok: true };
   }
 
   /**
-   * Registration. The user picks whether their login id (username) is their email or mobile.
-   * The other value is still stored and can also be used to sign in / reset the password.
+   * Registration.
+   * New Member accounts require Admin approval; new Tenant accounts require Flat Owner approval.
    */
   register(data: {
     firstName: string;
-      lastName: string;
+    lastName: string;
     mobile: string;
     email: string;
     loginWith: 'email' | 'mobile';
+    accountType?: 'member' | 'tenant';
+    unitNo?: string;
     password: string;
     hintQuestion: string;
     hintAnswer: string;
@@ -198,6 +343,8 @@ export class AuthService {
     const lastName = data.lastName.trim();
     const email = data.email.trim().toLowerCase();
     const mobile = normalizeMobile(data.mobile);
+    const accountType: AccountType = data.accountType === 'tenant' ? 'tenant' : 'member';
+    const unitNo = (data.unitNo ?? 'A-101').trim().toUpperCase() || 'A-101';
 
     if (!firstName || !lastName) {
       return { ok: false, error: 'First name and last name are required.' };
@@ -217,10 +364,16 @@ export class AuthService {
       return { ok: false, error: 'Choose a hint question and provide an answer.' };
     }
 
-    // Username = whichever identifier the user chose to sign in with
     const username = data.loginWith === 'email' ? email : mobile;
-    const existing = [DEMO_ACCOUNT, ...this.readAccounts()];
-    if (existing.some(a => a.username.toLowerCase() === username || a.email.toLowerCase() === email || (!!a.mobile && a.mobile === mobile))) {
+    const existing = [DEMO_ACCOUNT, ...this.accounts()];
+    if (
+      existing.some(
+        a =>
+          a.username.toLowerCase() === username ||
+          a.email.toLowerCase() === email ||
+          (!!a.mobile && a.mobile === mobile)
+      )
+    ) {
       return { ok: false, error: 'An account with this email or mobile already exists.' };
     }
 
@@ -233,30 +386,175 @@ export class AuthService {
       email,
       mobile,
       role: 'member',
+      accountType,
+      unitNo,
+      approvalStatus: 'Pending',
+      registeredOn: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       hintQuestion: data.hintQuestion,
       hintAnswer: normalizeAnswer(data.hintAnswer)
     };
-    this.writeAccounts([...this.readAccounts(), account]);
-    return this.login(username, data.password);
+    this.saveAccounts([account, ...this.accounts()]);
+    this.state.showToast(
+      accountType === 'tenant' ? 'msg.regSubmittedTenant' : 'msg.regSubmittedMember',
+      'info'
+    );
+    return { ok: true, pendingApproval: true };
+  }
+
+  /**
+   * Admin confirms and approves a newly registered Member.
+   * Once approved, the member is added to the society directory and can sign in to the Member Portal.
+   */
+  approveMemberAccount(username: string): void {
+    const target = this.accounts().find(a => a.username === username);
+    if (!target) return;
+
+    this.saveAccounts(
+      this.accounts().map(a => (a.username === username ? { ...a, approvalStatus: 'Approved' } : a))
+    );
+
+    const unit = target.unitNo || 'A-101';
+    const alreadyInDirectory = this.state
+      .members()
+      .some(m => m.email.toLowerCase() === target.email.toLowerCase());
+    if (!alreadyInDirectory) {
+      this.state.addMember({
+        name: target.fullName,
+        unit,
+        role: 'Owner',
+        email: target.email,
+        phone: target.mobile || ''
+      });
+    }
+    this.state.logAudit('Security', `Admin approved member registration for ${target.fullName} (${unit}).`);
+    this.state.showToast('msg.memberApproved', 'success', { name: target.fullName, unit });
+  }
+
+  /**
+   * Member pulls registered tenant info using Last Name, First Name, Mobile Number, or Email Address.
+   */
+  searchRegisteredTenants(query: string, flatUnit?: string): AuthAccount[] {
+    const q = query.trim().toLowerCase();
+    const digits = normalizeMobile(query);
+    const list = this.registeredTenantAccounts().filter(a => a.approvalStatus !== 'Rejected');
+
+    if (!q) {
+      // When no search query is typed, show pending tenant requests for this flat
+      return flatUnit
+        ? list.filter(a => !a.unitNo || a.unitNo.toUpperCase() === flatUnit.toUpperCase())
+        : list;
+    }
+
+    return list.filter(a => {
+      const first = (a.firstName ?? a.fullName.split(' ')[0] ?? '').toLowerCase();
+      const last = (a.lastName ?? a.fullName.split(' ').slice(1).join(' ') ?? '').toLowerCase();
+      const full = a.fullName.toLowerCase();
+      const mail = a.email.toLowerCase();
+      const mob = a.mobile ?? '';
+      return (
+        first.includes(q) ||
+        last.includes(q) ||
+        full.includes(q) ||
+        mail.includes(q) ||
+        (digits.length >= 3 && mob.includes(digits))
+      );
+    });
+  }
+
+  /**
+   * Primary Member confirms and approves a registered Tenant for their flat.
+   * Once approved, the tenant can log in with limited tenant access and appears in the flat's Active Tenants.
+   */
+  approveTenantAccount(username: string, unitNo: string): void {
+    const target = this.accounts().find(a => a.username === username);
+    if (!target) return;
+
+    this.saveAccounts(
+      this.accounts().map(a =>
+        a.username === username ? { ...a, approvalStatus: 'Approved', unitNo } : a
+      )
+    );
+
+    // Ensure the approved tenant is also listed in the flat's active tenants
+    const alreadyTenant = this.state
+      .tenants()
+      .some(t => t.unitNo === unitNo && t.email?.toLowerCase() === target.email.toLowerCase() && t.status === 'Active');
+
+    if (!alreadyTenant) {
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const nextYearIso = `${new Date().getFullYear() + 1}-${todayIso.slice(5)}`;
+      this.state.addTenant(
+        {
+          firstName: target.firstName || target.fullName.split(' ')[0] || target.fullName,
+          middleName: '',
+          lastName: target.lastName || target.fullName.split(' ').slice(1).join(' ') || '',
+          dob: '1992-01-01',
+          gender: 'Other',
+          qualification: '',
+          mobile: target.mobile || '',
+          email: target.email,
+          hasDisability: false,
+          disabilityDetails: ''
+        },
+        {
+          leaseStart: todayIso,
+          leaseEnd: nextYearIso,
+          policeVerified: true,
+          status: 'Active'
+        }
+      );
+    }
+
+    this.state.logAudit('Security', `Member approved tenant ${target.fullName} for Flat ${unitNo}.`);
+    this.state.showToast('msg.tenantApproved', 'success', { name: target.fullName, unit: unitNo });
+  }
+
+  /** Admin or Member declines a pending registration request. */
+  rejectAccount(username: string): void {
+    const target = this.accounts().find(a => a.username === username);
+    if (!target) return;
+    this.saveAccounts(
+      this.accounts().map(a => (a.username === username ? { ...a, approvalStatus: 'Rejected' } : a))
+    );
+    this.state.logAudit('Security', `Declined registration request for ${target.fullName}.`);
+    this.state.showToast('msg.accountRejected', 'warning', { name: target.fullName });
+  }
+
+  private checkApprovalGate(account: AuthAccount): string | null {
+    if (account.approvalStatus === 'Pending') {
+      return account.accountType === 'tenant'
+        ? `Your tenant account is pending approval from the Flat Owner (${account.unitNo || 'your unit'}).`
+        : 'Your member registration is pending confirmation and approval by the Society Admin.';
+    }
+    if (account.approvalStatus === 'Rejected') {
+      return 'Your registration request was declined. Please contact the society office.';
+    }
+    return null;
   }
 
   /** Creates + persists the session for an account (shared by password and social login). */
   private startSession(account: AuthAccount): void {
+    const accountType: AccountType = account.accountType ?? (account.role === 'admin' ? 'admin' : 'member');
     const session: AuthSession = {
       username: account.username,
       fullName: account.fullName,
       email: account.email,
-      role: account.role
+      role: account.role,
+      accountType,
+      unitNo: account.unitNo
     };
     this.session.set(session);
     this.persistSession(session);
+    this.state.isTenantSession.set(accountType === 'tenant');
+
     if (account.role === 'member') {
-      // Sync signed-in resident's identity into the active member profile
       this.state.memberUser.update(u => ({
         ...u,
         name: account.fullName || u.name,
         email: account.email || u.email,
-        phone: account.mobile || u.phone
+        phone: account.mobile || u.phone,
+        unit: account.unitNo || u.unit,
+        role: accountType === 'tenant' ? 'Registered Tenant (Limited Access)' : 'Flat Owner'
       }));
     }
     this.applyRole(session.role);
@@ -266,7 +564,7 @@ export class AuthService {
     const key = identifier.trim().toLowerCase();
     if (!key) return undefined;
     const mobile = normalizeMobile(identifier);
-    return this.readAccounts().find(
+    return this.accounts().find(
       a =>
         a.username.toLowerCase() === key ||
         a.email.toLowerCase() === key ||
@@ -276,6 +574,7 @@ export class AuthService {
 
   logout(): void {
     this.session.set(null);
+    this.state.isTenantSession.set(false);
     try {
       localStorage.removeItem(SESSION_KEY);
     } catch {
@@ -306,16 +605,28 @@ export class AuthService {
     }
   }
 
-  private readAccounts(): AuthAccount[] {
+  private initAccounts(): AuthAccount[] {
     try {
       const raw = localStorage.getItem(ACCOUNTS_KEY);
-      return raw ? (JSON.parse(raw) as AuthAccount[]) : [];
+      if (!raw) {
+        localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(DEFAULT_SEEDED_ACCOUNTS));
+        return DEFAULT_SEEDED_ACCOUNTS;
+      }
+      const parsed = JSON.parse(raw) as AuthAccount[];
+      // Merge any missing seeded demo accounts so pending approvals are always testable
+      const existingEmails = new Set(parsed.map(a => a.email.toLowerCase()));
+      const merged = [
+        ...parsed,
+        ...DEFAULT_SEEDED_ACCOUNTS.filter(d => !existingEmails.has(d.email.toLowerCase()))
+      ];
+      return merged;
     } catch {
-      return [];
+      return DEFAULT_SEEDED_ACCOUNTS;
     }
   }
 
-  private writeAccounts(list: AuthAccount[]): void {
+  private saveAccounts(list: AuthAccount[]): void {
+    this.accounts.set(list);
     try {
       localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(list));
     } catch {
@@ -323,4 +634,3 @@ export class AuthService {
     }
   }
 }
-

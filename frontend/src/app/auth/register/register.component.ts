@@ -22,6 +22,9 @@ export class RegisterComponent {
   lastName = '';
   mobile = '';
   email = '';
+  /** Whether the user is registering as a Primary Member / Flat Owner ('member') or a Tenant ('tenant'). */
+  accountType: 'member' | 'tenant' = 'member';
+  unitNo = 'A-101';
   /** Which identifier the user will sign in with (becomes the username). */
   loginWith: 'email' | 'mobile' = 'email';
   password = '';
@@ -30,7 +33,10 @@ export class RegisterComponent {
   readonly hintQuestions = HINT_QUESTIONS;
   hintQuestion = '';
   hintAnswer = '';
+
   readonly error = signal('');
+  /** Set to true once registration is submitted and awaiting Admin or Member approval. */
+  readonly submittedForApproval = signal(false);
 
   /** Values the password must not contain (fed to the live checklist). */
   get personalInfo(): string[] {
@@ -47,6 +53,8 @@ export class RegisterComponent {
       lastName: this.lastName,
       mobile: this.mobile,
       email: this.email,
+      accountType: this.accountType,
+      unitNo: this.unitNo,
       loginWith: this.loginWith,
       password: this.password,
       hintQuestion: this.hintQuestion,
@@ -57,7 +65,10 @@ export class RegisterComponent {
       return;
     }
     this.error.set('');
+    if (result.pendingApproval) {
+      this.submittedForApproval.set(true);
+      return;
+    }
     this.router.navigateByUrl('/dashboard');
   }
 }
-

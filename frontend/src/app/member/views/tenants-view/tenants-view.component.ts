@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { SocietyStateService } from '../../../services/society-state.service';
 import { FamilyMember, PersonDetails, TenantRecord } from '../../../models/society.model';
 import {
@@ -10,34 +11,46 @@ import {
 import { ConfirmDialogComponent } from '../../../shared/dialogs/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
+import { AuthAccount, AuthService } from '../../../core/services/auth.service';
 
 interface PendingConfirmAction {
-  type: 'delete-tenant' | 'delete-family' | 'end-lease';
-  tenant: TenantRecord;
+  type: 'delete-tenant' | 'delete-family' | 'end-lease' | 'approve-reg-tenant' | 'reject-reg-tenant';
+  tenant?: TenantRecord;
   family?: FamilyMember;
+  regAccount?: AuthAccount;
 }
 
 /**
  * Tenants & Sub-Tenants Management View.
  * - Shows Active Tenants by default whenever present.
+ * - Allows the Member (Flat Owner) to pull registered tenant info by First Name, Last Name,
+ *   Mobile Number, or Email Address and approve them for their flat (granting limited tenant login access).
  * - Shows "+ Add Tenant" before "Tenant History" (which is only visible when pastTenants().length > 0).
- * - Does not render an empty dash-card when there are no active tenants.
  * - Past tenant history (both primary tenant and secondary family members) is strictly read-only.
- * - Uses the reusable <app-confirm-dialog> modal for Remove / Move Out actions.
+ * - Uses the reusable <app-confirm-dialog> modal for Approve / Remove / Move Out actions.
  */
 @Component({
   selector: 'app-tenants-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, PersonDialogComponent, ConfirmDialogComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, PersonDialogComponent, ConfirmDialogComponent, TranslatePipe],
   templateUrl: './tenants-view.component.html'
 })
 export class TenantsViewComponent {
   readonly state = inject(SocietyStateService);
+  readonly auth = inject(AuthService);
   private readonly i18n = inject(I18nService);
 
   /** Always defaults to false so Active Tenants are shown by default. */
   readonly showHistory = signal(false);
+
+  /** Search query to pull registered tenant accounts by First Name, Last Name, Mobile Number, or Email. */
+  readonly tenantLookupQuery = signal('');
+
+  /** Registered tenant accounts matching the lookup query (or pending requests for this flat). */
+  readonly pulledTenantAccounts = computed(() =>
+    this.auth.searchRegisteredTenants(this.tenantLookupQuery(), this.state.currentResidentUnit())
+  );
 
   /** Active tenants currently residing in the flat. */
   readonly activeTenants = computed(() =>
@@ -68,12 +81,14 @@ export class TenantsViewComponent {
   /** Family member of `activeTenant` being edited (null = adding new family member). */
   readonly editingFamily = signal<FamilyMember | null>(null);
 
-  /** Modal confirmation state for Remove Tenant / Remove Family Member / End Lease. */
+  /** Modal confirmation state for Approve / Remove / End Lease. */
   readonly pendingConfirm = signal<PendingConfirmAction | null>(null);
 
   readonly confirmTitle = computed(() => {
     const p = this.pendingConfirm();
     if (!p) return '';
+    if (p.type === 'approve-reg-tenant') return this.i18n.translate('approval.approveTenantConfirmTitle');
+    if (p.type === 'reject-reg-tenant') return this.i18n.translate('approval.rejectBtn');
     if (p.type === 'delete-tenant') return this.i18n.translate('confirm.removeTenantTitle');
     if (p.type === 'delete-family') return this.i18n.translate('confirm.removeFamilyTitle');
     return this.i18n.translate('confirm.endLeaseTitle');
@@ -82,26 +97,38 @@ export class TenantsViewComponent {
   readonly confirmMessage = computed(() => {
     const p = this.pendingConfirm();
     if (!p) return '';
-    if (p.type === 'delete-tenant') {
+    const unit = this.state.currentResidentUnit();
+    if (p.type === 'approve-reg-tenant' && p.regAccount) {
+      return this.i18n.translate('approval.approveTenantConfirmMsg', { name: p.regAccount.fullName, unit });
+    }
+    if (p.type === 'reject-reg-tenant' && p.regAccount) {
+      return `Decline tenant registration request from ${p.regAccount.fullName}?`;
+    }
+    if (p.type === 'delete-tenant' && p.tenant) {
       return this.i18n.translate('confirm.removeTenantMsg', { name: this.fullName(p.tenant) });
     }
     if (p.type === 'delete-family' && p.family) {
       return this.i18n.translate('confirm.removeFamilyMsg', { name: this.fullName(p.family) });
     }
-    return this.i18n.translate('confirm.endLeaseMsg', { name: this.fullName(p.tenant) });
+    if (p.tenant) {
+      return this.i18n.translate('confirm.endLeaseMsg', { name: this.fullName(p.tenant) });
+    }
+    return '';
   });
 
   readonly confirmButtonText = computed(() => {
     const p = this.pendingConfirm();
     if (!p) return '';
-    return p.type === 'end-lease'
-      ? this.i18n.translate('confirm.yesEndLease')
-      : this.i18n.translate('confirm.yesRemove');
+    if (p.type === 'approve-reg-tenant') return this.i18n.translate('approval.approveTenantBtn');
+    if (p.type === 'reject-reg-tenant') return this.i18n.translate('approval.rejectBtn');
+    if (p.type === 'end-lease') return this.i18n.translate('confirm.yesEndLease');
+    return this.i18n.translate('confirm.yesRemove');
   });
 
-  readonly confirmVariant = computed<'danger' | 'primary'>(() =>
-    this.pendingConfirm()?.type === 'end-lease' ? 'primary' : 'danger'
-  );
+  readonly confirmVariant = computed<'danger' | 'primary'>(() => {
+    const t = this.pendingConfirm()?.type;
+    return t === 'end-lease' || t === 'approve-reg-tenant' ? 'primary' : 'danger';
+  });
 
   readonly dialogTitle = computed(() => {
     if (this.dialogMode() === 'tenant') {
@@ -123,6 +150,18 @@ export class TenantsViewComponent {
 
   toggleHistory(): void {
     this.showHistory.update(v => !v);
+  }
+
+  clearLookup(): void {
+    this.tenantLookupQuery.set('');
+  }
+
+  askApproveRegTenant(regAccount: AuthAccount): void {
+    this.pendingConfirm.set({ type: 'approve-reg-tenant', regAccount });
+  }
+
+  askRejectRegTenant(regAccount: AuthAccount): void {
+    this.pendingConfirm.set({ type: 'reject-reg-tenant', regAccount });
   }
 
   openAddTenant(): void {
@@ -201,11 +240,15 @@ export class TenantsViewComponent {
   executeConfirm(): void {
     const p = this.pendingConfirm();
     if (!p) return;
-    if (p.type === 'delete-tenant') {
+    if (p.type === 'approve-reg-tenant' && p.regAccount) {
+      this.auth.approveTenantAccount(p.regAccount.username, this.state.currentResidentUnit());
+    } else if (p.type === 'reject-reg-tenant' && p.regAccount) {
+      this.auth.rejectAccount(p.regAccount.username);
+    } else if (p.type === 'delete-tenant' && p.tenant) {
       this.state.deleteTenant(p.tenant.id);
-    } else if (p.type === 'delete-family' && p.family) {
+    } else if (p.type === 'delete-family' && p.tenant && p.family) {
       this.state.removeTenantFamilyMember(p.tenant.id, p.family.id);
-    } else if (p.type === 'end-lease') {
+    } else if (p.type === 'end-lease' && p.tenant) {
       this.state.endTenancy(p.tenant.id);
     }
     this.pendingConfirm.set(null);

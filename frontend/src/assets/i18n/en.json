@@ -116,7 +116,12 @@
     "tenantAdded": "Tenant {{name}} registered successfully.",
     "tenantUpdated": "Tenant {{name}} details updated.",
     "tenantRemoved": "Tenant {{name}} removed from your unit.",
-    "tenantEnded": "Lease for {{name}} marked as completed and saved to Tenant History."
+    "tenantEnded": "Lease for {{name}} marked as completed and saved to Tenant History.",
+    "regSubmittedMember": "Registration submitted! Once the Society Admin approves your account, you can sign in.",
+    "regSubmittedTenant": "Registration submitted! Once the Flat Owner approves your request, you can sign in.",
+    "memberApproved": "Member {{name}} ({{unit}}) approved! They can now sign in to the portal.",
+    "tenantApproved": "Tenant {{name}} approved for Flat {{unit}}! They can now sign in with limited access.",
+    "accountRejected": "Registration request for {{name}} has been declined."
   },
   "profile": {
     "title": "Resident Profile & Household",
@@ -190,5 +195,26 @@
     "yesRemove": "Yes, Remove",
     "yesEndLease": "Yes, End Lease",
     "yesReset": "Yes, Reset"
+  },
+  "approval": {
+    "pendingMembersTitle": "Pending Member Registrations (Admin Approval Required)",
+    "pendingMembersSub": "Confirm and approve newly registered flat owners to grant them portal access",
+    "approveMemberBtn": "Approve Member",
+    "rejectBtn": "Decline",
+    "approveMemberConfirmTitle": "Approve Registered Member",
+    "approveMemberConfirmMsg": "Confirm and approve {{name}} ({{unit}}) so they can sign in and access the Member Portal?",
+    "tenantLookupTitle": "Pull & Approve Registered Tenant",
+    "tenantLookupSub": "Search registered tenants by First Name, Last Name, Mobile Number, or Email Address to approve portal access for your flat",
+    "tenantSearchPlaceholder": "Enter first name, last name, mobile number, or email address...",
+    "searchBtn": "Pull Tenant Info",
+    "clearBtn": "Clear",
+    "noTenantMatch": "No registered tenant found matching your search.",
+    "approveTenantBtn": "Approve Tenant",
+    "approvedBadge": "Approved (Can Login)",
+    "pendingBadge": "Pending Owner Approval",
+    "rejectedBadge": "Declined",
+    "approveTenantConfirmTitle": "Approve Registered Tenant",
+    "approveTenantConfirmMsg": "Approve {{name}} for Flat {{unit}}? Once approved, this tenant can log in with limited tenant access.",
+    "limitedAccessBadge": "Tenant Portal (Limited Access)"
   }
 }

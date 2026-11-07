@@ -38,6 +38,7 @@ export const ACCESS_ACTIONS: { id: AccessAction; label: string; hint: string }[]
 export const VIEW_TO_MODULE: Record<string, string> = {
   units: 'units',
   'my-unit': 'units',
+  tenants: 'tenants',
   maintenance: 'payments',
   payments: 'payments',
   complaints: 'complaints',
@@ -100,6 +101,15 @@ export class AccessControlService {
   /** Permission check for the signed-in user. Admins are always allowed. */
   can(moduleId: string, action: AccessAction): boolean {
     if (this.state.currentUserRole() === 'admin') return true;
+    // Approved Tenants have limited portal access compared to Flat Owners / Primary Members:
+    //  - Cannot access Tenants & Lease management ('tenants')
+    //  - Cannot access or vote in Society Governance Polls ('polls')
+    //  - Cannot modify Units ('units' write) or allocate Parking Bays ('parking' write)
+    if (this.state.isTenantSession()) {
+      if (moduleId === 'tenants' || moduleId === 'polls') return false;
+      if ((moduleId === 'units' || moduleId === 'parking') && action !== 'read') return false;
+    }
+    if (moduleId === 'tenants') return true;
     return this.flags(this.activeMemberId(), moduleId)[action];
   }
 

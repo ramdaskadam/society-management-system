@@ -105,9 +105,28 @@ export class AppComponent implements OnInit {
   }
 
   onRoleChange(role: UserRole): void {
+    this.state.isTenantSession.set(false);
+    if (role === 'member') {
+      this.state.memberUser.update(u => ({ ...u, role: 'Flat Owner' }));
+    }
     this.state.setRole(role);
     this.mobileMenuOpen.set(false);
     document.body.setAttribute('data-role', role);
+  }
+
+  onTenantPortalSelect(): void {
+    this.state.isTenantSession.set(true);
+    const activeTen = this.state.tenants().find(t => t.status === 'Active');
+    this.state.memberUser.update(u => ({
+      ...u,
+      name: activeTen ? `${activeTen.firstName} ${activeTen.lastName}` : u.name,
+      email: activeTen?.email || u.email,
+      phone: activeTen?.mobile || u.phone,
+      role: 'Registered Tenant (Limited Access)'
+    }));
+    this.state.setRole('member');
+    this.mobileMenuOpen.set(false);
+    document.body.setAttribute('data-role', 'member');
   }
 
   onResetDemo(): void {
