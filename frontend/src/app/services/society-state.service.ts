@@ -62,6 +62,60 @@ export interface GlobalSearchResultItem {
 
 const DEFAULT_TENANTS: TenantRecord[] = [
   {
+    id: 'TEN-ACT-01',
+    unitNo: 'A-101',
+    firstName: 'Rohan',
+    middleName: 'Anil',
+    lastName: 'Joshi',
+    dob: '1991-07-19',
+    gender: 'Male',
+    qualification: 'Post Graduate',
+    mobile: '9820778899',
+    email: 'rohan.joshi@example.com',
+    hasDisability: false,
+    disabilityDetails: '',
+    leaseStart: '2024-06-01',
+    leaseEnd: '2025-05-31',
+    monthlyRent: 28000,
+    policeVerified: true,
+    status: 'Active',
+    addedOn: '01 Jun 2024',
+    familyMembers: [
+      {
+        id: 'TFAM-ACT-01',
+        unitNo: 'A-101',
+        firstName: 'Priya',
+        middleName: '',
+        lastName: 'Joshi',
+        dob: '1993-03-12',
+        gender: 'Female',
+        relation: 'Spouse',
+        qualification: 'Graduate',
+        mobile: '9820778800',
+        email: 'priya.joshi@example.com',
+        hasDisability: false,
+        disabilityDetails: '',
+        addedOn: '01 Jun 2024'
+      },
+      {
+        id: 'TFAM-ACT-02',
+        unitNo: 'A-101',
+        firstName: 'Aarav',
+        middleName: 'Rohan',
+        lastName: 'Joshi',
+        dob: '2019-10-05',
+        gender: 'Male',
+        relation: 'Son',
+        qualification: 'Primary School',
+        mobile: '',
+        email: '',
+        hasDisability: false,
+        disabilityDetails: '',
+        addedOn: '01 Jun 2024'
+      }
+    ]
+  },
+  {
     id: 'TEN-HIST-01',
     unitNo: 'A-101',
     firstName: 'Vikram',
@@ -757,7 +811,7 @@ export class SocietyStateService {
     let unitNo = this.currentResidentUnit();
     this.tenants.update(list =>
       list.map(t => {
-        if (t.id !== id) return t;
+        if (t.id !== id || t.status === 'Past') return t;
         unitNo = t.unitNo;
         return { ...t, ...d, ...lease };
       })
@@ -802,7 +856,7 @@ export class SocietyStateService {
       addedOn: todayLabel()
     };
     this.tenants.update(list =>
-      list.map(t => (t.id === tenantId ? { ...t, familyMembers: [...t.familyMembers, member] } : t))
+      list.map(t => (t.id === tenantId && t.status === 'Active' ? { ...t, familyMembers: [...t.familyMembers, member] } : t))
     );
     const updated = this.tenants().find(t => t.id === tenantId);
     if (LIVE_API && updated) { this.apiService?.updateTenant(tenantId, { familyMembers: updated.familyMembers }).subscribe(); }
@@ -813,7 +867,7 @@ export class SocietyStateService {
   updateTenantFamilyMember(tenantId: string, familyId: string, d: PersonDetails, relation: string): void {
     this.tenants.update(list =>
       list.map(t =>
-        t.id === tenantId
+        t.id === tenantId && t.status === 'Active'
           ? {
               ...t,
               familyMembers: t.familyMembers.map(f => (f.id === familyId ? { ...f, ...d, relation } : f))
@@ -831,7 +885,7 @@ export class SocietyStateService {
     let removedName = '';
     this.tenants.update(list =>
       list.map(t => {
-        if (t.id !== tenantId) return t;
+        if (t.id !== tenantId || t.status === 'Past') return t;
         const target = t.familyMembers.find(f => f.id === familyId);
         if (target) removedName = target.firstName;
         return { ...t, familyMembers: t.familyMembers.filter(f => f.id !== familyId) };
@@ -1377,7 +1431,10 @@ export class SocietyStateService {
       if (data.auditLogs) this.auditLogs.set(data.auditLogs);
       if (data.familyMembers) this.familyMembers.set(data.familyMembers);
       if (data.primaryExtras) this.primaryExtras.set(data.primaryExtras);
-      if (data.tenants && data.tenants.length) this.tenants.set(data.tenants);
+      if (data.tenants && data.tenants.length) {
+        const hasActiveSeed = data.tenants.some((t: TenantRecord) => t.id === 'TEN-ACT-01' || t.status === 'Active');
+        this.tenants.set(hasActiveSeed ? data.tenants : [DEFAULT_TENANTS[0], ...data.tenants]);
+      }
       if (data.memberUser) this.memberUser.set(data.memberUser);
       this.dataSourceMode.set('local-storage-cache');
       return true;

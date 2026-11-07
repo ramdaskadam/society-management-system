@@ -74,14 +74,8 @@
           @if (m.hasDisability) { <span>♿ {{ m.disabilityDetails }}</span> }
         </div>
         <div class="family-actions">
-          @if (confirmRemoveId() === m.id) {
-            <span style="font-size: 0.8rem;">Remove {{ m.firstName }}?</span>
-            <button type="button" class="btn-primary" (click)="confirmRemove(m.id)">Yes, remove</button>
-            <button type="button" class="btn-secondary" (click)="cancelRemove()">Cancel</button>
-          } @else {
-            <button type="button" class="btn-secondary" (click)="openEditFamily(m)">{{ 'profile.edit' | t }}</button>
-            <button type="button" class="btn-secondary" (click)="askRemove(m.id)">{{ 'profile.remove' | t }}</button>
-          }
+          <button type="button" class="btn-secondary" (click)="openEditFamily(m)">{{ 'profile.edit' | t }}</button>
+          <button type="button" class="btn-secondary" (click)="askRemove(m)">{{ 'profile.remove' | t }}</button>
         </div>
       </article>
     }
@@ -95,4 +89,15 @@
   [person]="dialogPerson()"
   (close)="closeDialog()"
   (save)="onSave($event)"
+/>
+
+<app-confirm-dialog
+  [isOpen]="pendingRemoveMember() !== null"
+  [title]="'confirm.removeFamilyTitle' | t"
+  [message]="removeConfirmMessage()"
+  [confirmText]="'confirm.yesRemove' | t"
+  [cancelText]="'profile.cancel' | t"
+  variant="danger"
+  (confirm)="confirmRemove()"
+  (cancel)="cancelRemove()"
 />

@@ -169,3 +169,14 @@
 
 <!-- Toast Notifications Component -->
 <app-toast-container [toasts]="state.toasts()" />
+
+<app-confirm-dialog
+  [isOpen]="showResetConfirm()"
+  [title]="'confirm.resetDemoTitle' | t"
+  [message]="'confirm.resetDemoMsg' | t"
+  [confirmText]="'confirm.yesReset' | t"
+  [cancelText]="'profile.cancel' | t"
+  variant="danger"
+  (confirm)="confirmResetDemo()"
+  (cancel)="showResetConfirm.set(false)"
+/>

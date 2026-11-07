@@ -177,5 +177,18 @@
     "noHistory": "No past tenant history recorded for Flat {{unit}}.",
     "endTenancy": "Move Out / End Lease",
     "movedOutMsg": "Lease ended and moved to Tenant History."
+  },
+  "confirm": {
+    "removeFamilyTitle": "Remove Family Member",
+    "removeFamilyMsg": "Are you sure you want to remove {{name}} from your household?",
+    "removeTenantTitle": "Remove Tenant",
+    "removeTenantMsg": "Are you sure you want to permanently remove tenant {{name}} and all associated family records?",
+    "endLeaseTitle": "End Tenancy / Move Out",
+    "endLeaseMsg": "Mark lease for {{name}} as completed and move this record to read-only Tenant History?",
+    "resetDemoTitle": "Reset Demo Data",
+    "resetDemoMsg": "Are you sure you want to reset all society data back to the initial baseline?",
+    "yesRemove": "Yes, Remove",
+    "yesEndLease": "Yes, End Lease",
+    "yesReset": "Yes, Reset"
   }
 }

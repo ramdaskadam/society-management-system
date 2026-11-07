@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { SocietyStateService } from '../../../services/society-state.service';
 import { FamilyMember } from '../../../models/society.model';
 import { PersonDialogComponent, PersonFormResult } from '../../../shared/dialogs/person-dialog/person-dialog.component';
+import { ConfirmDialogComponent } from '../../../shared/dialogs/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
 
 /**
  * Resident profile + household.
  * Flow: primary member edits own details (dialog, 'primary' mode) and manages family
- * (dialog, 'family' mode: add / edit / remove). All writes go through SocietyStateService,
- * so swapping its methods for REST calls is the only change needed when the backend lands.
+ * (dialog, 'family' mode: add / edit / remove with reusable <app-confirm-dialog>).
  */
 @Component({
   templateUrl: './profile-view.component.html',
@@ -17,7 +17,7 @@ import { I18nService } from '../../../core/services/i18n.service';
   selector: 'app-profile-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PersonDialogComponent, TranslatePipe]
+  imports: [PersonDialogComponent, ConfirmDialogComponent, TranslatePipe]
 })
 export class ProfileViewComponent {
   readonly state = inject(SocietyStateService);
@@ -28,15 +28,24 @@ export class ProfileViewComponent {
   readonly dialog = signal<'none' | 'primary' | 'family'>('none');
   /** Family member being edited (null = adding a new one). */
   readonly editing = signal<FamilyMember | null>(null);
-  /** Family member awaiting remove confirmation. */
-  readonly confirmRemoveId = signal<string | null>(null);
+  /** Family member awaiting modal confirmation before removal. */
+  readonly pendingRemoveMember = signal<FamilyMember | null>(null);
 
   readonly dialogTitle = computed(() =>
-    this.dialog() === 'primary' ? this.i18n.translate('profile.updateMyDetails') : this.editing() ? this.i18n.translate('profile.editFamilyMember') : this.i18n.translate('profile.addFamilyMember')
+    this.dialog() === 'primary'
+      ? this.i18n.translate('profile.updateMyDetails')
+      : this.editing()
+        ? this.i18n.translate('profile.editFamilyMember')
+        : this.i18n.translate('profile.addFamilyMember')
   );
   readonly dialogPerson = computed(() =>
     this.dialog() === 'primary' ? this.state.primaryProfile() : this.editing()
   );
+
+  readonly removeConfirmMessage = computed(() => {
+    const m = this.pendingRemoveMember();
+    return m ? this.i18n.translate('confirm.removeFamilyMsg', { name: this.fullName(m) }) : '';
+  });
 
   openPrimary(): void { this.dialog.set('primary'); }
   openAddFamily(): void { this.editing.set(null); this.dialog.set('family'); }
@@ -54,11 +63,20 @@ export class ProfileViewComponent {
     this.closeDialog();
   }
 
-  askRemove(id: string): void { this.confirmRemoveId.set(id); }
-  cancelRemove(): void { this.confirmRemoveId.set(null); }
-  confirmRemove(id: string): void {
-    this.state.removeFamilyMember(id);
-    this.confirmRemoveId.set(null);
+  askRemove(m: FamilyMember): void {
+    this.pendingRemoveMember.set(m);
+  }
+
+  cancelRemove(): void {
+    this.pendingRemoveMember.set(null);
+  }
+
+  confirmRemove(): void {
+    const m = this.pendingRemoveMember();
+    if (m) {
+      this.state.removeFamilyMember(m.id);
+    }
+    this.pendingRemoveMember.set(null);
   }
 
   /** Age in whole years from an ISO date of birth. */

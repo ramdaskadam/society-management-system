@@ -8,111 +8,35 @@
     </p>
   </div>
   <div class="page-header-actions">
-    <button
-      type="button"
-      class="btn-secondary"
-      (click)="toggleHistory()"
-      [attr.aria-pressed]="showHistory()"
-    >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"></circle>
-        <polyline points="12 6 12 12 16 14"></polyline>
-      </svg>
-      {{ showHistory() ? ('tenant.backToActive' | t) + ' (' + activeTenants().length + ')' : ('tenant.viewHistory' | t) + ' (' + allFlatHistory().length + ')' }}
-    </button>
+    <!-- 1. Add Tenant button shown BEFORE Tenant History -->
     <button type="button" class="btn-primary" (click)="openAddTenant()">
       {{ 'tenant.addTenant' | t }}
     </button>
+
+    <!-- 2. Tenant History button shown ONLY when there are past tenants -->
+    @if (pastTenants().length > 0) {
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="toggleHistory()"
+        [attr.aria-pressed]="showHistory()"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        {{ showHistory() ? ('tenant.backToActive' | t) : ('tenant.viewHistory' | t) + ' (' + pastTenants().length + ')' }}
+      </button>
+    }
   </div>
 </div>
 
-@if (showHistory()) {
-  <!-- ── TENANT HISTORY FOR THIS FLAT ────────────────────────────────────────── -->
-  <div class="dash-card" style="margin-bottom: 20px;">
-    <app-data-table
-      [columns]="historyColumns"
-      [rows]="allFlatHistory()"
-      [loading]="state.isLoading()"
-      [emptyMessage]="'tenant.noHistory' | t:{ unit: state.currentResidentUnit() }"
-      (rowClick)="openEditTenant($event)"
-    />
-  </div>
-
-  <!-- Detailed History Cards (including each past/current tenant's family members) -->
-  <div style="display: grid; gap: 16px;">
-    @for (t of allFlatHistory(); track t.id) {
-      <section class="dash-card" [attr.aria-label]="fullName(t)">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
-          <div class="family-card-head">
-            @if (t.photo) {
-              <img [src]="t.photo" [alt]="fullName(t)" class="person-photo" />
-            } @else {
-              <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
-            }
-            <div>
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <h2 style="font-size: 1.05rem; font-weight: 700; margin: 0;">{{ fullName(t) }}</h2>
-                <span class="badge" [ngClass]="t.status === 'Active' ? 'badge-active' : 'badge-closed'">
-                  {{ t.status === 'Active' ? ('tenant.active' | t) : ('tenant.past' | t) }}
-                </span>
-                <span class="badge" [ngClass]="t.policeVerified ? 'badge-confirmed' : 'badge-pending'">
-                  {{ t.policeVerified ? ('tenant.verified' | t) : ('tenant.pendingVerification' | t) }}
-                </span>
-                <span class="family-tag">Flat {{ t.unitNo }}</span>
-              </div>
-              <div class="family-meta" style="margin-top: 6px; grid-template-columns: repeat(auto-fit, minmax(180px, auto)); gap: 6px 18px;">
-                <span>📅 {{ 'tenant.leasePeriod' | t }}: <strong>{{ t.leaseStart }} → {{ t.leaseEnd }}</strong></span>
-                @if (t.monthlyRent) { <span>₹ {{ 'tenant.rent' | t }}: <strong>₹{{ t.monthlyRent.toLocaleString('en-IN') }}/mo</strong></span> }
-                <span>{{ t.gender }} • {{ age(t.dob) }} yrs (DOB {{ t.dob }})</span>
-                @if (t.mobile) { <span>📱 {{ t.mobile }}</span> }
-                @if (t.email) { <span>✉ {{ t.email }}</span> }
-                @if (t.qualification) { <span>🎓 {{ t.qualification }}</span> }
-              </div>
-            </div>
-          </div>
-          <div class="family-actions">
-            <button type="button" class="btn-secondary" (click)="openEditTenant(t)">{{ 'profile.edit' | t }}</button>
-            <button type="button" class="btn-secondary" (click)="askDeleteTenant(t.id)">{{ 'profile.remove' | t }}</button>
-          </div>
-        </div>
-
-        @if (t.familyMembers.length > 0) {
-          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
-            <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 8px;">
-              {{ 'tenant.familySection' | t }} ({{ t.familyMembers.length }})
-            </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              @for (m of t.familyMembers; track m.id) {
-                <span class="badge badge-info">
-                  {{ fullName(m) }} ({{ m.relation }} • {{ age(m.dob) }} yrs)
-                </span>
-              }
-            </div>
-          </div>
-        }
-      </section>
-    }
-  </div>
-} @else {
-  <!-- ── ACTIVE TENANTS FOR THIS FLAT ────────────────────────────────────────── -->
-  @if (activeTenants().length === 0) {
-    <div class="dash-card" style="text-align: center; padding: 36px 20px;">
-      <p style="color: var(--text-muted); margin-bottom: 14px;">{{ 'tenant.noTenants' | t }}</p>
-      <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-        <button type="button" class="btn-primary" (click)="openAddTenant()">{{ 'tenant.addTenant' | t }}</button>
-        @if (pastTenants().length > 0) {
-          <button type="button" class="btn-secondary" (click)="toggleHistory()">
-            {{ 'tenant.viewHistory' | t }} ({{ pastTenants().length }})
-          </button>
-        }
-      </div>
-    </div>
-  }
-
+<!-- ── TENANT HISTORY (Read-Only: Primary Tenant Info + Secondary Family Members Underneath) ── -->
+@if (showHistory() && pastTenants().length > 0) {
   <div style="display: grid; gap: 20px;">
-    @for (t of activeTenants(); track t.id) {
+    @for (t of pastTenants(); track t.id) {
       <section class="dash-card" [attr.aria-label]="fullName(t)">
-        <!-- Tenant Header & Primary Details -->
+        <!-- Primary Tenant Info (Read-Only) -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
           <div class="family-card-head">
             @if (t.photo) {
@@ -123,9 +47,86 @@
             <div>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0;">{{ fullName(t) }}</h2>
-                <span class="badge" [ngClass]="t.status === 'Active' ? 'badge-active' : 'badge-closed'">
-                  {{ t.status === 'Active' ? ('tenant.active' | t) : ('tenant.past' | t) }}
+                <span class="family-tag">Primary Tenant</span>
+                <span class="badge badge-closed">{{ 'tenant.past' | t }}</span>
+                <span class="badge" [ngClass]="t.policeVerified ? 'badge-confirmed' : 'badge-pending'">
+                  {{ t.policeVerified ? ('tenant.verified' | t) : ('tenant.pendingVerification' | t) }}
                 </span>
+                <span class="family-tag">Flat {{ t.unitNo }}</span>
+                <span class="family-tag">Read Only</span>
+              </div>
+              <div class="family-meta" style="margin-top: 6px; grid-template-columns: repeat(auto-fit, minmax(180px, auto)); gap: 6px 18px;">
+                <span>{{ t.gender }} • {{ age(t.dob) }} yrs (DOB {{ t.dob }})</span>
+                @if (t.mobile) { <span>📱 {{ t.mobile }}</span> }
+                @if (t.email) { <span>✉ {{ t.email }}</span> }
+                @if (t.qualification) { <span>🎓 {{ t.qualification }}</span> }
+                <span>📅 {{ 'tenant.leasePeriod' | t }}: <strong>{{ t.leaseStart }} → {{ t.leaseEnd }}</strong></span>
+                @if (t.monthlyRent) { <span>₹ {{ 'tenant.rent' | t }}: <strong>₹{{ t.monthlyRent.toLocaleString('en-IN') }}/mo</strong></span> }
+                @if (t.hasDisability) { <span>♿ {{ t.disabilityDetails }}</span> }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Family Members under Primary Tenant (Read-Only) -->
+        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+          <h3 style="font-size: 0.9rem; font-weight: 700; margin: 0 0 12px;">
+            {{ 'tenant.familySection' | t }} ({{ t.familyMembers.length }})
+          </h3>
+
+          @if (t.familyMembers.length === 0) {
+            <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0;">{{ 'tenant.noFamily' | t }}</p>
+          } @else {
+            <div class="family-grid">
+              @for (m of t.familyMembers; track m.id) {
+                <article class="family-card">
+                  <div class="family-card-head">
+                    @if (m.photo) {
+                      <img [src]="m.photo" [alt]="fullName(m)" class="person-photo" />
+                    } @else {
+                      <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
+                    }
+                    <div>
+                      <strong>{{ fullName(m) }}</strong>
+                      <div>
+                        <span class="family-tag">{{ m.relation }}</span>
+                        <span class="family-tag">{{ 'profile.secondaryTag' | t }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="family-meta">
+                    <span>{{ m.gender }} • {{ age(m.dob) }} yrs (DOB {{ m.dob }})</span>
+                    @if (m.qualification) { <span>🎓 {{ m.qualification }}</span> }
+                    @if (m.mobile) { <span>📱 {{ m.mobile }}</span> }
+                    @if (m.email) { <span>✉ {{ m.email }}</span> }
+                    @if (m.hasDisability) { <span>♿ {{ m.disabilityDetails }}</span> }
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+} @else if (activeTenants().length > 0) {
+  <!-- ── ACTIVE TENANTS FOR THIS FLAT (shown by default when present) ── -->
+  <div style="display: grid; gap: 20px;">
+    @for (t of activeTenants(); track t.id) {
+      <section class="dash-card" [attr.aria-label]="fullName(t)">
+        <!-- Primary Tenant Info -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+          <div class="family-card-head">
+            @if (t.photo) {
+              <img [src]="t.photo" [alt]="fullName(t)" class="person-photo" />
+            } @else {
+              <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
+            }
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0;">{{ fullName(t) }}</h2>
+                <span class="family-tag">Primary Tenant</span>
+                <span class="badge badge-active">{{ 'tenant.active' | t }}</span>
                 <span class="badge" [ngClass]="t.policeVerified ? 'badge-confirmed' : 'badge-pending'">
                   {{ t.policeVerified ? ('tenant.verified' | t) : ('tenant.pendingVerification' | t) }}
                 </span>
@@ -143,24 +144,15 @@
             </div>
           </div>
 
-          <!-- Tenant Actions (Add Family / Edit / Move Out to History / Delete) -->
           <div class="family-actions">
-            @if (confirmDeleteTenantId() === t.id) {
-              <span style="font-size: 0.8rem; color: var(--danger, #dc2626);">
-                {{ 'tenant.confirmDeleteTenant' | t:{ name: t.firstName } }}
-              </span>
-              <button type="button" class="btn-primary" (click)="confirmDeleteTenant(t.id)">{{ 'tenant.yesDelete' | t }}</button>
-              <button type="button" class="btn-secondary" (click)="cancelDeleteTenant()">{{ 'profile.cancel' | t }}</button>
-            } @else {
-              <button type="button" class="btn-primary" (click)="openAddFamily(t)">{{ 'tenant.addFamily' | t }}</button>
-              <button type="button" class="btn-secondary" (click)="openEditTenant(t)">{{ 'profile.edit' | t }}</button>
-              <button type="button" class="btn-secondary" (click)="endLease(t.id)">{{ 'tenant.endTenancy' | t }}</button>
-              <button type="button" class="btn-secondary" (click)="askDeleteTenant(t.id)">{{ 'profile.remove' | t }}</button>
-            }
+            <button type="button" class="btn-primary" (click)="openAddFamily(t)">{{ 'tenant.addFamily' | t }}</button>
+            <button type="button" class="btn-secondary" (click)="openEditTenant(t)">{{ 'profile.edit' | t }}</button>
+            <button type="button" class="btn-secondary" (click)="askEndLease(t)">{{ 'tenant.endTenancy' | t }}</button>
+            <button type="button" class="btn-secondary" (click)="askDeleteTenant(t)">{{ 'profile.remove' | t }}</button>
           </div>
         </div>
 
-        <!-- Tenant's Family Members Section -->
+        <!-- Secondary Family Members under Primary Tenant -->
         <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
           <h3 style="font-size: 0.9rem; font-weight: 700; margin: 0 0 12px;">
             {{ 'tenant.familySection' | t }} ({{ t.familyMembers.length }})
@@ -194,14 +186,8 @@
                     @if (m.hasDisability) { <span>♿ {{ m.disabilityDetails }}</span> }
                   </div>
                   <div class="family-actions">
-                    @if (confirmDeleteFamilyKey() === familyKey(t.id, m.id)) {
-                      <span style="font-size: 0.8rem;">Remove {{ m.firstName }}?</span>
-                      <button type="button" class="btn-primary" (click)="confirmDeleteFamily(t.id, m.id)">{{ 'tenant.yesDelete' | t }}</button>
-                      <button type="button" class="btn-secondary" (click)="cancelDeleteFamily()">{{ 'profile.cancel' | t }}</button>
-                    } @else {
-                      <button type="button" class="btn-secondary" (click)="openEditFamily(t, m)">{{ 'profile.edit' | t }}</button>
-                      <button type="button" class="btn-secondary" (click)="askDeleteFamily(t.id, m.id)">{{ 'profile.remove' | t }}</button>
-                    }
+                    <button type="button" class="btn-secondary" (click)="openEditFamily(t, m)">{{ 'profile.edit' | t }}</button>
+                    <button type="button" class="btn-secondary" (click)="askDeleteFamily(t, m)">{{ 'profile.remove' | t }}</button>
                   </div>
                 </article>
               }
@@ -220,4 +206,15 @@
   [person]="dialogPerson()"
   (close)="closeDialog()"
   (save)="onSave($event)"
+/>
+
+<app-confirm-dialog
+  [isOpen]="pendingConfirm() !== null"
+  [title]="confirmTitle()"
+  [message]="confirmMessage()"
+  [confirmText]="confirmButtonText()"
+  [cancelText]="'profile.cancel' | t"
+  [variant]="confirmVariant()"
+  (confirm)="executeConfirm()"
+  (cancel)="cancelConfirm()"
 />

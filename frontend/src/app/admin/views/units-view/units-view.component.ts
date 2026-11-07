@@ -32,6 +32,10 @@ export class UnitsViewComponent {
   );
 
   /** Wings are derived from data instead of being hardcoded (e.g. "A, B, C, D"). */
+  readonly pastTenantsCount = computed(() =>
+    this.state.activeUnitTenants().filter(t => t.status === 'Past').length
+  );
+
   readonly wingSummary = computed(() => {
     const wings = [...new Set(this.state.units().map(u => u.wing))].sort();
     return wings.length ? wings.join(', ') : '-';

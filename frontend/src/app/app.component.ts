@@ -17,6 +17,7 @@ import { ToastContainerComponent } from './shared/components/toast-container/toa
 
 // ── Shared Dialogs ────────────────────────────────────────────────────────────
 import { ReceiptDialogComponent } from './shared/dialogs/receipt-dialog/receipt-dialog.component';
+import { ConfirmDialogComponent } from './shared/dialogs/confirm-dialog/confirm-dialog.component';
 import { NotificationsDialogComponent } from './shared/dialogs/notifications-dialog/notifications-dialog.component';
 
 // ── Admin Dialogs ─────────────────────────────────────────────────────────────
@@ -45,6 +46,7 @@ import { BookAmenityDialogComponent } from './member/dialogs/book-amenity-dialog
     ToastContainerComponent,
     // Shared dialogs
     ReceiptDialogComponent,
+    ConfirmDialogComponent,
     NotificationsDialogComponent,
     // Admin dialogs
     AddMemberDialogComponent,
@@ -63,6 +65,7 @@ export class AppComponent implements OnInit {
   readonly state = inject(SocietyStateService);
   readonly dialogs = inject(DialogModalService);
   readonly mobileMenuOpen = signal(false);
+  readonly showResetConfirm = signal(false);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
 
@@ -108,9 +111,12 @@ export class AppComponent implements OnInit {
   }
 
   onResetDemo(): void {
-    if (confirm('Reset all demo data back to baseline?')) {
-      this.state.resetToBaseline();
-    }
+    this.showResetConfirm.set(true);
+  }
+
+  confirmResetDemo(): void {
+    this.showResetConfirm.set(false);
+    this.state.resetToBaseline();
   }
 
   onNavSelect(viewId: string): void {

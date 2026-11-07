@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
 import { SocietyStateService } from '../../../services/society-state.service';
 import { FamilyMember, PersonDetails, TenantRecord } from '../../../models/society.model';
 import {
@@ -8,31 +7,37 @@ import {
   PersonDialogData,
   PersonFormResult
 } from '../../../shared/dialogs/person-dialog/person-dialog.component';
-import { DataColumn, DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+import { ConfirmDialogComponent } from '../../../shared/dialogs/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { I18nService } from '../../../core/services/i18n.service';
 
+interface PendingConfirmAction {
+  type: 'delete-tenant' | 'delete-family' | 'end-lease';
+  tenant: TenantRecord;
+  family?: FamilyMember;
+}
+
 /**
  * Tenants & Sub-Tenants Management View.
- * Allows flat owners / residents to:
- *  - Add, update, move-out, and delete tenants for their unit
- *  - Add, update, and delete each tenant's family members (secondary occupants)
- *  - View complete Tenant History for the same flat via the "Tenant History" button
+ * - Shows Active Tenants by default whenever present.
+ * - Shows "+ Add Tenant" before "Tenant History" (which is only visible when pastTenants().length > 0).
+ * - Does not render an empty dash-card when there are no active tenants.
+ * - Past tenant history (both primary tenant and secondary family members) is strictly read-only.
+ * - Uses the reusable <app-confirm-dialog> modal for Remove / Move Out actions.
  */
 @Component({
   selector: 'app-tenants-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, PersonDialogComponent, DataTableComponent, TranslatePipe],
+  imports: [CommonModule, PersonDialogComponent, ConfirmDialogComponent, TranslatePipe],
   templateUrl: './tenants-view.component.html'
 })
 export class TenantsViewComponent {
   readonly state = inject(SocietyStateService);
   private readonly i18n = inject(I18nService);
 
-  /** Toggles between Active Tenants view (false) and Flat Tenant History view (true). */
-  private readonly route = inject(ActivatedRoute);
-  readonly showHistory = signal(this.route.snapshot.queryParamMap.get('history') === '1');
+  /** Always defaults to false so Active Tenants are shown by default. */
+  readonly showHistory = signal(false);
 
   /** Active tenants currently residing in the flat. */
   readonly activeTenants = computed(() =>
@@ -46,37 +51,15 @@ export class TenantsViewComponent {
     )
   );
 
-  /** Complete chronological tenant history for the flat (active + past). */
-  readonly allFlatHistory = computed(() =>
-    [...this.state.activeUnitTenants()].sort((a, b) => b.leaseStart.localeCompare(a.leaseStart))
+  /** Automatically exit history mode if there are no past tenants. */
+  private readonly autoCloseEmptyHistory = effect(
+    () => {
+      if (this.showHistory() && this.pastTenants().length === 0) {
+        this.showHistory.set(false);
+      }
+    },
+    { allowSignalWrites: true }
   );
-
-  /** Columns for the dynamic Tenant History summary table (<app-data-table>). */
-  readonly historyColumns: DataColumn<TenantRecord>[] = [
-    { key: 'firstName', label: 'Tenant Name', bold: true, value: t => this.fullName(t) },
-    { key: 'unitNo', label: 'Flat', prefix: 'Flat ' },
-    { key: 'leaseStart', label: 'Lease Period', value: t => `${t.leaseStart} → ${t.leaseEnd}` },
-    { key: 'monthlyRent', label: 'Monthly Rent', type: 'currency' },
-    { key: 'mobile', label: 'Mobile' },
-    {
-      key: 'familyMembers',
-      label: 'Family Members',
-      value: t => (t.familyMembers.length ? `${t.familyMembers.length} (${t.familyMembers.map(f => f.firstName).join(', ')})` : 'None')
-    },
-    {
-      key: 'policeVerified',
-      label: 'Verification',
-      type: 'badge',
-      value: t => (t.policeVerified ? 'Verified' : 'Pending'),
-      badgeClass: t => (t.policeVerified ? 'badge-confirmed' : 'badge-pending')
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      type: 'badge',
-      badgeClass: t => (t.status === 'Active' ? 'badge-active' : 'badge-closed')
-    }
-  ];
 
   /** Which dialog mode is open: 'none' | 'tenant' | 'family'. */
   readonly dialogMode = signal<'none' | 'tenant' | 'family'>('none');
@@ -85,9 +68,40 @@ export class TenantsViewComponent {
   /** Family member of `activeTenant` being edited (null = adding new family member). */
   readonly editingFamily = signal<FamilyMember | null>(null);
 
-  /** Inline delete confirmation states. */
-  readonly confirmDeleteTenantId = signal<string | null>(null);
-  readonly confirmDeleteFamilyKey = signal<string | null>(null);
+  /** Modal confirmation state for Remove Tenant / Remove Family Member / End Lease. */
+  readonly pendingConfirm = signal<PendingConfirmAction | null>(null);
+
+  readonly confirmTitle = computed(() => {
+    const p = this.pendingConfirm();
+    if (!p) return '';
+    if (p.type === 'delete-tenant') return this.i18n.translate('confirm.removeTenantTitle');
+    if (p.type === 'delete-family') return this.i18n.translate('confirm.removeFamilyTitle');
+    return this.i18n.translate('confirm.endLeaseTitle');
+  });
+
+  readonly confirmMessage = computed(() => {
+    const p = this.pendingConfirm();
+    if (!p) return '';
+    if (p.type === 'delete-tenant') {
+      return this.i18n.translate('confirm.removeTenantMsg', { name: this.fullName(p.tenant) });
+    }
+    if (p.type === 'delete-family' && p.family) {
+      return this.i18n.translate('confirm.removeFamilyMsg', { name: this.fullName(p.family) });
+    }
+    return this.i18n.translate('confirm.endLeaseMsg', { name: this.fullName(p.tenant) });
+  });
+
+  readonly confirmButtonText = computed(() => {
+    const p = this.pendingConfirm();
+    if (!p) return '';
+    return p.type === 'end-lease'
+      ? this.i18n.translate('confirm.yesEndLease')
+      : this.i18n.translate('confirm.yesRemove');
+  });
+
+  readonly confirmVariant = computed<'danger' | 'primary'>(() =>
+    this.pendingConfirm()?.type === 'end-lease' ? 'primary' : 'danger'
+  );
 
   readonly dialogTitle = computed(() => {
     if (this.dialogMode() === 'tenant') {
@@ -118,18 +132,21 @@ export class TenantsViewComponent {
   }
 
   openEditTenant(t: TenantRecord): void {
+    if (t.status === 'Past') return; // Past tenant records are read-only
     this.activeTenant.set(t);
     this.editingFamily.set(null);
     this.dialogMode.set('tenant');
   }
 
   openAddFamily(t: TenantRecord): void {
+    if (t.status === 'Past') return; // Past tenant records are read-only
     this.activeTenant.set(t);
     this.editingFamily.set(null);
     this.dialogMode.set('family');
   }
 
   openEditFamily(t: TenantRecord, f: FamilyMember): void {
+    if (t.status === 'Past') return; // Past tenant records are read-only
     this.activeTenant.set(t);
     this.editingFamily.set(f);
     this.dialogMode.set('family');
@@ -145,13 +162,15 @@ export class TenantsViewComponent {
     if (this.dialogMode() === 'tenant' && res.lease) {
       const existing = this.activeTenant();
       if (existing) {
+        if (existing.status === 'Past') return;
         this.state.updateTenant(existing.id, res.details, res.lease);
       } else {
         this.state.addTenant(res.details, res.lease);
+        this.showHistory.set(false);
       }
     } else if (this.dialogMode() === 'family') {
       const tenant = this.activeTenant();
-      if (tenant) {
+      if (tenant && tenant.status === 'Active') {
         const fam = this.editingFamily();
         if (fam) {
           this.state.updateTenantFamilyMember(tenant.id, fam.id, res.details, res.relation);
@@ -163,38 +182,33 @@ export class TenantsViewComponent {
     this.closeDialog();
   }
 
-  endLease(id: string): void {
-    this.state.endTenancy(id);
+  askEndLease(tenant: TenantRecord): void {
+    this.pendingConfirm.set({ type: 'end-lease', tenant });
   }
 
-  askDeleteTenant(id: string): void {
-    this.confirmDeleteTenantId.set(id);
+  askDeleteTenant(tenant: TenantRecord): void {
+    this.pendingConfirm.set({ type: 'delete-tenant', tenant });
   }
 
-  cancelDeleteTenant(): void {
-    this.confirmDeleteTenantId.set(null);
+  askDeleteFamily(tenant: TenantRecord, family: FamilyMember): void {
+    this.pendingConfirm.set({ type: 'delete-family', tenant, family });
   }
 
-  confirmDeleteTenant(id: string): void {
-    this.state.deleteTenant(id);
-    this.confirmDeleteTenantId.set(null);
+  cancelConfirm(): void {
+    this.pendingConfirm.set(null);
   }
 
-  familyKey(tenantId: string, familyId: string): string {
-    return `${tenantId}:${familyId}`;
-  }
-
-  askDeleteFamily(tenantId: string, familyId: string): void {
-    this.confirmDeleteFamilyKey.set(this.familyKey(tenantId, familyId));
-  }
-
-  cancelDeleteFamily(): void {
-    this.confirmDeleteFamilyKey.set(null);
-  }
-
-  confirmDeleteFamily(tenantId: string, familyId: string): void {
-    this.state.removeTenantFamilyMember(tenantId, familyId);
-    this.confirmDeleteFamilyKey.set(null);
+  executeConfirm(): void {
+    const p = this.pendingConfirm();
+    if (!p) return;
+    if (p.type === 'delete-tenant') {
+      this.state.deleteTenant(p.tenant.id);
+    } else if (p.type === 'delete-family' && p.family) {
+      this.state.removeTenantFamilyMember(p.tenant.id, p.family.id);
+    } else if (p.type === 'end-lease') {
+      this.state.endTenancy(p.tenant.id);
+    }
+    this.pendingConfirm.set(null);
   }
 
   fullName(p: PersonDetails): string {
