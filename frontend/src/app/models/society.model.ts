@@ -79,6 +79,15 @@ export interface Member {
   dues: number;
 }
 
+export interface PastOwnerRecord {
+  id: string;
+  ownerName: string;
+  email?: string;
+  phone?: string;
+  fromDate: string;
+  toDate: string;
+}
+
 export interface Unit {
   id: string;
   unitNo: string;
@@ -87,9 +96,11 @@ export interface Unit {
   type: string;
   area: number;
   owner: string;
+  ownerSince?: string;
   tenant?: string;
   occupancy: string;
   dues: number;
+  pastOwners?: PastOwnerRecord[];
 }
 
 export interface Invoice {

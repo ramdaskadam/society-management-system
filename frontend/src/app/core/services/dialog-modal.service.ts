@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Invoice } from '../../models/society.model';
+import { Invoice, Unit } from '../../models/society.model';
 
 /**
  * Strongly-Typed Reactive Dialog & Modal Orchestration Service
@@ -24,6 +24,7 @@ export class DialogModalService {
 
   readonly showAddMemberModal = signal<boolean>(false);
   readonly showAddUnitModal = signal<boolean>(false);
+  readonly activeEditUnit = signal<Unit | null>(null);
   readonly showBulkInvoiceModal = signal<boolean>(false);
   readonly showNotificationsModal = signal<boolean>(false);
 
@@ -78,12 +79,14 @@ export class DialogModalService {
     this.showAddMemberModal.set(false);
   }
 
-  openAddUnitModal(): void {
+  openAddUnitModal(unit: Unit | null = null): void {
+    this.activeEditUnit.set(unit);
     this.showAddUnitModal.set(true);
   }
 
   closeAddUnitModal(): void {
     this.showAddUnitModal.set(false);
+    this.activeEditUnit.set(null);
   }
 
   openBulkInvoiceModal(): void {

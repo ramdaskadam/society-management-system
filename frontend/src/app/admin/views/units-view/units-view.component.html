@@ -1,32 +1,103 @@
 <div class="page-header">
   <div class="page-title-group">
-    <h1>Units &amp; Apartment Registry</h1>
-    <p>Wings {{ wingSummary() }}, occupancy records, and square footage details</p>
+    <h1>
+      {{ showPastOwners() ? 'Past Flat Owners History' : 'Units & Apartment Registry' }}
+    </h1>
+    <p>
+      {{
+        showPastOwners()
+          ? 'Read-only historical ownership records for society flats'
+          : 'Wings ' + wingSummary() + ', occupancy records, and square footage details (Click any unit row to update info or assign owner)'
+      }}
+    </p>
   </div>
-  <div class="page-header-actions">
-    @if (pastTenantsCount() > 0) {
-      <button type="button" class="btn-secondary" (click)="viewTenantHistory()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        {{ 'tenant.viewHistory' | t }} ({{ pastTenantsCount() }})
-      </button>
-    }
-    @if (state.currentUserRole() === 'admin') {
+  @if (state.currentUserRole() === 'admin') {
+    <div class="page-header-actions">
       <button type="button" class="btn-primary" (click)="openAddUnit()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         Add Unit
       </button>
-    }
-  </div>
+
+      @if (totalPastOwnersCount() > 0) {
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="togglePastOwners()"
+          [attr.aria-pressed]="showPastOwners()"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          {{ showPastOwners() ? 'Back to Units Registry' : 'Past Owners (' + totalPastOwnersCount() + ')' }}
+        </button>
+      }
+    </div>
+  }
 </div>
 
-<div class="dash-card">
-  <app-data-table
-    [columns]="columns"
-    [rows]="visibleUnits()"
-    [loading]="state.isLoading()"
-    emptyMessage="No units found"
-  />
-</div>
+@if (showPastOwners() && unitsWithPastOwners().length > 0) {
+  <!-- ── PAST OWNERS HISTORY (Grouped by Flat: Current Owner + Past Owners Underneath) ── -->
+  <div style="display: grid; gap: 20px;">
+    @for (u of unitsWithPastOwners(); track u.id) {
+      <section class="dash-card" [attr.aria-label]="'Flat ' + u.unitNo">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0;">
+                Flat {{ u.unitNo }} (Wing {{ u.wing }}, Floor {{ u.floor }})
+              </h2>
+              <span class="badge badge-info">{{ u.type }} • {{ u.area }} sq.ft</span>
+              <span class="badge badge-confirmed">Current Owner: {{ u.owner }}</span>
+              @if (u.ownerSince) {
+                <span class="family-tag">Since {{ u.ownerSince }}</span>
+              }
+            </div>
+          </div>
+          @if (state.currentUserRole() === 'admin') {
+            <button type="button" class="btn-secondary" (click)="onUnitRowClick(u)">
+              Update Unit / Assign Owner
+            </button>
+          }
+        </div>
+
+        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">
+          <h3 style="font-size: 0.9rem; font-weight: 700; margin: 0 0 12px;">
+            Past Owners ({{ u.pastOwners!.length }})
+          </h3>
+          <div class="family-grid">
+            @for (po of u.pastOwners!; track po.id) {
+              <article class="family-card">
+                <div class="family-card-head">
+                  <div class="person-photo person-photo-empty" aria-hidden="true">👤</div>
+                  <div>
+                    <strong>{{ po.ownerName }}</strong>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                      <span class="badge badge-closed">Past Owner</span>
+                      <span class="family-tag">Read Only</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="family-meta">
+                  <span>📅 Ownership Period: <strong>{{ po.fromDate }} → {{ po.toDate }}</strong></span>
+                  @if (po.phone) { <span>📱 {{ po.phone }}</span> }
+                  @if (po.email) { <span>✉ {{ po.email }}</span> }
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+} @else {
+  <div class="dash-card">
+    <app-data-table
+      [columns]="columns"
+      [rows]="visibleUnits()"
+      [loading]="state.isLoading()"
+      emptyMessage="No units found"
+      (rowClick)="onUnitRowClick($event)"
+    />
+  </div>
+}

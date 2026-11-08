@@ -138,6 +138,8 @@
 
 <app-add-unit-dialog
   [isOpen]="dialogs.showAddUnitModal()"
+  [editUnit]="dialogs.activeEditUnit()"
+  [owners]="state.availableOwnerNames()"
   (close)="dialogs.closeAddUnitModal()"
   (submit)="onAddUnit($event)"
 />

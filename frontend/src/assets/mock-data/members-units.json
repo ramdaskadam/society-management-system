@@ -1,22 +1,218 @@
 {
   "members": [
-    { "id": "M-101", "name": "Rahul Sharma", "unit": "A-101", "wing": "A", "role": "Owner", "email": "rahul.sharma@example.com", "phone": "+91 98201 44521", "status": "Active", "dues": 7500 },
-    { "id": "M-102", "name": "Priya Iyer", "unit": "A-102", "wing": "A", "role": "Owner", "email": "priya.iyer@example.com", "phone": "+91 98203 12908", "status": "Active", "dues": 0 },
-    { "id": "M-103", "name": "Vikram Malhotra", "unit": "A-201", "wing": "A", "role": "Tenant", "email": "v.malhotra@example.com", "phone": "+91 98199 55412", "status": "Active", "dues": 5000 },
-    { "id": "M-104", "name": "Ananya Deshmukh", "unit": "B-101", "wing": "B", "role": "Owner", "email": "ananya.d@example.com", "phone": "+91 98210 98765", "status": "Active", "dues": 0 },
-    { "id": "M-105", "name": "Suresh Patel", "unit": "B-202", "wing": "B", "role": "Owner", "email": "suresh.patel@example.com", "phone": "+91 97654 32109", "status": "Active", "dues": 12500 },
-    { "id": "M-106", "name": "Farhan Qureshi", "unit": "C-301", "wing": "C", "role": "Owner", "email": "farhan.q@example.com", "phone": "+91 98334 11223", "status": "Active", "dues": 0 },
-    { "id": "M-107", "name": "Deepika Nair", "unit": "C-402", "wing": "C", "role": "Tenant", "email": "deepika.nair@example.com", "phone": "+91 98450 67890", "status": "Active", "dues": 6000 },
-    { "id": "M-108", "name": "Amitabh Sengupta", "unit": "D-101", "wing": "D", "role": "Owner", "email": "a.sengupta@example.com", "phone": "+91 98765 43210", "status": "Active", "dues": 0 }
+    {
+      "id": "M-101",
+      "name": "Rahul Sharma",
+      "unit": "A-101",
+      "wing": "A",
+      "role": "Owner",
+      "email": "rahul.sharma@example.com",
+      "phone": "+91 98201 44521",
+      "status": "Active",
+      "dues": 7500
+    },
+    {
+      "id": "M-102",
+      "name": "Priya Iyer",
+      "unit": "A-102",
+      "wing": "A",
+      "role": "Owner",
+      "email": "priya.iyer@example.com",
+      "phone": "+91 98203 12908",
+      "status": "Active",
+      "dues": 0
+    },
+    {
+      "id": "M-103",
+      "name": "Vikram Malhotra",
+      "unit": "A-201",
+      "wing": "A",
+      "role": "Tenant",
+      "email": "v.malhotra@example.com",
+      "phone": "+91 98199 55412",
+      "status": "Active",
+      "dues": 5000
+    },
+    {
+      "id": "M-104",
+      "name": "Ananya Deshmukh",
+      "unit": "B-101",
+      "wing": "B",
+      "role": "Owner",
+      "email": "ananya.d@example.com",
+      "phone": "+91 98210 98765",
+      "status": "Active",
+      "dues": 0
+    },
+    {
+      "id": "M-105",
+      "name": "Suresh Patel",
+      "unit": "B-202",
+      "wing": "B",
+      "role": "Owner",
+      "email": "suresh.patel@example.com",
+      "phone": "+91 97654 32109",
+      "status": "Active",
+      "dues": 12500
+    },
+    {
+      "id": "M-106",
+      "name": "Farhan Qureshi",
+      "unit": "C-301",
+      "wing": "C",
+      "role": "Owner",
+      "email": "farhan.q@example.com",
+      "phone": "+91 98334 11223",
+      "status": "Active",
+      "dues": 0
+    },
+    {
+      "id": "M-107",
+      "name": "Deepika Nair",
+      "unit": "C-402",
+      "wing": "C",
+      "role": "Tenant",
+      "email": "deepika.nair@example.com",
+      "phone": "+91 98450 67890",
+      "status": "Active",
+      "dues": 6000
+    },
+    {
+      "id": "M-108",
+      "name": "Amitabh Sengupta",
+      "unit": "D-101",
+      "wing": "D",
+      "role": "Owner",
+      "email": "a.sengupta@example.com",
+      "phone": "+91 98765 43210",
+      "status": "Active",
+      "dues": 0
+    }
   ],
   "units": [
-    { "id": "U-A101", "unitNo": "A-101", "wing": "A", "floor": 1, "type": "3 BHK", "area": 1450, "owner": "Rahul Sharma", "occupancy": "Owner Occupied", "dues": 7500 },
-    { "id": "U-A102", "unitNo": "A-102", "wing": "A", "floor": 1, "type": "2 BHK", "area": 1150, "owner": "Priya Iyer", "occupancy": "Owner Occupied", "dues": 0 },
-    { "id": "U-A201", "unitNo": "A-201", "wing": "A", "floor": 2, "type": "3 BHK", "area": 1450, "owner": "Rajesh Kulkarni", "tenant": "Vikram Malhotra", "occupancy": "Rented", "dues": 5000 },
-    { "id": "U-B101", "unitNo": "B-101", "wing": "B", "floor": 1, "type": "3 BHK", "area": 1520, "owner": "Ananya Deshmukh", "occupancy": "Owner Occupied", "dues": 0 },
-    { "id": "U-B202", "unitNo": "B-202", "wing": "B", "floor": 2, "type": "4 BHK", "area": 1850, "owner": "Suresh Patel", "occupancy": "Owner Occupied", "dues": 12500 },
-    { "id": "U-C301", "unitNo": "C-301", "wing": "C", "floor": 3, "type": "2 BHK", "area": 1150, "owner": "Farhan Qureshi", "occupancy": "Owner Occupied", "dues": 0 },
-    { "id": "U-C402", "unitNo": "C-402", "wing": "C", "floor": 4, "type": "3 BHK", "area": 1450, "owner": "Meera Rao", "tenant": "Deepika Nair", "occupancy": "Rented", "dues": 6000 },
-    { "id": "U-D101", "unitNo": "D-101", "wing": "D", "floor": 1, "type": "3 BHK", "area": 1450, "owner": "Amitabh Sengupta", "occupancy": "Owner Occupied", "dues": 0 }
+    {
+      "id": "U-A101",
+      "unitNo": "A-101",
+      "wing": "A",
+      "floor": 1,
+      "type": "3 BHK",
+      "area": 1450,
+      "owner": "Rahul Sharma",
+      "occupancy": "Owner Occupied",
+      "dues": 7500,
+      "ownerSince": "15 Mar 2021",
+      "pastOwners": [
+        {
+          "id": "PO-101-1",
+          "ownerName": "Arvind Deshmukh",
+          "email": "arvind.deshmukh@example.com",
+          "phone": "+91 98200 11223",
+          "fromDate": "10 Jan 2016",
+          "toDate": "14 Mar 2021"
+        }
+      ]
+    },
+    {
+      "id": "U-A102",
+      "unitNo": "A-102",
+      "wing": "A",
+      "floor": 1,
+      "type": "2 BHK",
+      "area": 1150,
+      "owner": "Priya Iyer",
+      "occupancy": "Owner Occupied",
+      "dues": 0,
+      "ownerSince": "01 Jan 2020",
+      "pastOwners": []
+    },
+    {
+      "id": "U-A201",
+      "unitNo": "A-201",
+      "wing": "A",
+      "floor": 2,
+      "type": "3 BHK",
+      "area": 1450,
+      "owner": "Rajesh Kulkarni",
+      "tenant": "Vikram Malhotra",
+      "occupancy": "Rented",
+      "dues": 5000,
+      "ownerSince": "01 Jan 2020",
+      "pastOwners": []
+    },
+    {
+      "id": "U-B101",
+      "unitNo": "B-101",
+      "wing": "B",
+      "floor": 1,
+      "type": "3 BHK",
+      "area": 1520,
+      "owner": "Ananya Deshmukh",
+      "occupancy": "Owner Occupied",
+      "dues": 0,
+      "ownerSince": "01 Jan 2020",
+      "pastOwners": []
+    },
+    {
+      "id": "U-B202",
+      "unitNo": "B-202",
+      "wing": "B",
+      "floor": 2,
+      "type": "4 BHK",
+      "area": 1850,
+      "owner": "Suresh Patel",
+      "occupancy": "Owner Occupied",
+      "dues": 12500,
+      "ownerSince": "01 Aug 2022",
+      "pastOwners": [
+        {
+          "id": "PO-202-1",
+          "ownerName": "Nandini Gokhale",
+          "email": "nandini.g@example.com",
+          "phone": "+91 98190 44556",
+          "fromDate": "05 May 2018",
+          "toDate": "31 Jul 2022"
+        }
+      ]
+    },
+    {
+      "id": "U-C301",
+      "unitNo": "C-301",
+      "wing": "C",
+      "floor": 3,
+      "type": "2 BHK",
+      "area": 1150,
+      "owner": "Farhan Qureshi",
+      "occupancy": "Owner Occupied",
+      "dues": 0,
+      "ownerSince": "01 Jan 2020",
+      "pastOwners": []
+    },
+    {
+      "id": "U-C402",
+      "unitNo": "C-402",
+      "wing": "C",
+      "floor": 4,
+      "type": "3 BHK",
+      "area": 1450,
+      "owner": "Meera Rao",
+      "tenant": "Deepika Nair",
+      "occupancy": "Rented",
+      "dues": 6000,
+      "ownerSince": "01 Jan 2020",
+      "pastOwners": []
+    },
+    {
+      "id": "U-D101",
+      "unitNo": "D-101",
+      "wing": "D",
+      "floor": 1,
+      "type": "3 BHK",
+      "area": 1450,
+      "owner": "Amitabh Sengupta",
+      "occupancy": "Owner Occupied",
+      "dues": 0,
+      "ownerSince": "01 Jan 2020",
+      "pastOwners": []
+    }
   ]
 }

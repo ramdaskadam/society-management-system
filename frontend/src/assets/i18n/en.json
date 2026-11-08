@@ -121,7 +121,8 @@
     "regSubmittedTenant": "Registration submitted! Once the Flat Owner approves your request, you can sign in.",
     "memberApproved": "Member {{name}} ({{unit}}) approved! They can now sign in to the portal.",
     "tenantApproved": "Tenant {{name}} approved for Flat {{unit}}! They can now sign in with limited access.",
-    "accountRejected": "Registration request for {{name}} has been declined."
+    "accountRejected": "Registration request for {{name}} has been declined.",
+    "unitUpdated": "Unit {{unit}} updated (Owner: {{owner}})."
   },
   "profile": {
     "title": "Resident Profile & Household",

@@ -1,49 +1,111 @@
 @if (isOpen) {
-      <div class="modal-backdrop">
-        <div class="app-dialog modal-card">
-          <div class="dialog-header">
-            <h3 class="dialog-title">Add Unit to Society Registry</h3>
-            <button class="dialog-close-btn" (click)="close.emit()">✕</button>
+  <div class="modal-backdrop" (click)="close.emit()">
+    <div class="app-dialog modal-card" role="dialog" aria-modal="true" aria-labelledby="unit-dlg-title" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h3 id="unit-dlg-title" class="dialog-title">
+          {{ editUnit ? 'Update Unit & Assign Owner (' + editUnit.unitNo + ')' : 'Add Unit to Society Registry' }}
+        </h3>
+        <button type="button" class="dialog-close-btn" aria-label="Close" (click)="close.emit()">✕</button>
+      </div>
+
+      <div class="dialog-body" style="overflow-y: auto; max-height: 72dvh;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="u-no">Unit Number *</label>
+            <input id="u-no" type="text" class="form-control" [(ngModel)]="unitNo" placeholder="e.g. D-204" />
           </div>
-          <div class="dialog-body">
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Unit Number *</label>
-                <input type="text" class="form-control" [(ngModel)]="unitNo" placeholder="e.g. D-204" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Wing</label>
-                <select class="form-control" [(ngModel)]="wing">
-                  <option value="A">Wing A</option>
-                  <option value="B">Wing B</option>
-                  <option value="C">Wing C</option>
-                  <option value="D">Wing D</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Apartment Type</label>
-                <select class="form-control" [(ngModel)]="type">
-                  <option value="2 BHK">2 BHK</option>
-                  <option value="3 BHK">3 BHK</option>
-                  <option value="4 BHK">4 BHK Penthouse</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Area (sq.ft) *</label>
-                <input type="number" class="form-control" [(ngModel)]="area" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Owner Name *</label>
-              <input type="text" class="form-control" [(ngModel)]="owner" placeholder="Owner full name" />
-            </div>
-          </div>
-          <div class="dialog-footer">
-            <button class="btn-secondary" (click)="close.emit()">Cancel</button>
-            <button class="btn-primary" (click)="submitUnit()">Save Unit</button>
+          <div class="form-group">
+            <label class="form-label" for="u-wing">Wing</label>
+            <select id="u-wing" class="form-control" [(ngModel)]="wing">
+              <option value="A">Wing A</option>
+              <option value="B">Wing B</option>
+              <option value="C">Wing C</option>
+              <option value="D">Wing D</option>
+            </select>
           </div>
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="u-floor">Floor</label>
+            <input id="u-floor" type="number" min="0" class="form-control" [(ngModel)]="floor" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="u-type">Apartment Type</label>
+            <select id="u-type" class="form-control" [(ngModel)]="type">
+              <option value="1 BHK">1 BHK</option>
+              <option value="2 BHK">2 BHK</option>
+              <option value="3 BHK">3 BHK</option>
+              <option value="4 BHK">4 BHK Penthouse</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="u-area">Carpet Area (sq.ft) *</label>
+            <input id="u-area" type="number" min="100" class="form-control" [(ngModel)]="area" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="u-occ">Occupancy Status</label>
+            <select id="u-occ" class="form-control" [(ngModel)]="occupancy">
+              <option value="Owner Occupied">Owner Occupied</option>
+              <option value="Rented">Rented / Tenant Occupied</option>
+              <option value="Vacant">Vacant</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Owner selected from dropdown instead of free-text input -->
+        <div class="form-group">
+          <label class="form-label" for="u-owner">Assign Flat to Owner *</label>
+          <select id="u-owner" class="form-control" [(ngModel)]="owner">
+            <option value="" disabled>Select owner from directory…</option>
+            @for (o of owners; track o) {
+              <option [value]="o">{{ o }}</option>
+            }
+          </select>
+          @if (editUnit && editUnit.owner !== owner) {
+            <p class="auth-help" style="margin-top: 6px; color: #059669;">
+              Changing owner from <strong>{{ editUnit.owner }}</strong> to <strong>{{ owner }}</strong> will automatically archive {{ editUnit.owner }} in Past Owner History.
+            </p>
+          }
+        </div>
+
+        <!-- Past Owner Details (Read-Only) if any exist for this unit -->
+        @if (editUnit?.pastOwners?.length) {
+          <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">
+            <h4 style="font-size: 0.85rem; font-weight: 700; margin: 0 0 10px;">
+              Past Owner History ({{ editUnit!.pastOwners!.length }})
+            </h4>
+            <div style="display: grid; gap: 8px;">
+              @for (po of editUnit!.pastOwners!; track po.id) {
+                <div class="family-card" style="padding: 10px 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <strong>{{ po.ownerName }}</strong>
+                    <span class="badge badge-closed">{{ po.fromDate }} → {{ po.toDate }}</span>
+                  </div>
+                  <div class="family-meta">
+                    @if (po.phone) { <span>📱 {{ po.phone }}</span> }
+                    @if (po.email) { <span>✉ {{ po.email }}</span> }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (error()) {
+          <div class="auth-error" role="alert"><span aria-hidden="true">⚠</span> {{ error() }}</div>
+        }
       </div>
-    }
+
+      <div class="dialog-footer">
+        <button type="button" class="btn-secondary" (click)="close.emit()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="submitUnit()">
+          {{ editUnit ? 'Update Unit & Owner' : 'Save Unit' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -22,7 +22,7 @@ import { NotificationsDialogComponent } from './shared/dialogs/notifications-dia
 
 // ── Admin Dialogs ─────────────────────────────────────────────────────────────
 import { AddMemberDialogComponent } from './admin/dialogs/add-member-dialog/add-member-dialog.component';
-import { AddUnitDialogComponent } from './admin/dialogs/add-unit-dialog/add-unit-dialog.component';
+import { AddUnitDialogComponent, UnitFormSubmitPayload } from './admin/dialogs/add-unit-dialog/add-unit-dialog.component';
 import { CreateNoticeDialogComponent } from './admin/dialogs/create-notice-dialog/create-notice-dialog.component';
 import { BulkInvoiceDialogComponent } from './admin/dialogs/bulk-invoice-dialog/bulk-invoice-dialog.component';
 
@@ -171,8 +171,12 @@ export class AppComponent implements OnInit {
     this.state.addMember(data);
   }
 
-  onAddUnit(data: { unitNo: string; wing: string; type: string; area: number; owner: string }): void {
-    this.state.addUnit(data);
+  onAddUnit(data: UnitFormSubmitPayload): void {
+    if (data.editId) {
+      this.state.updateUnit(data.editId, data);
+    } else {
+      this.state.addUnit(data);
+    }
   }
 
   onBulkInvoiceConfirm(): void {

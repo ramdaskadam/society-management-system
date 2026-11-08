@@ -247,6 +247,18 @@ export class SocietyStateService {
   readonly globalSearchQuery = signal<string>('');
 
   // ── Dynamic Computed Selectors (No Hardcoded Unit IDs) ────────────────────────
+  /** Deduplicated list of registered owners for the Admin Add/Update Unit owner dropdown. */
+  readonly availableOwnerNames = computed<string[]>(() => {
+    const names = new Set<string>();
+    this.members().forEach(m => {
+      if (m.name?.trim()) names.add(m.name.trim());
+    });
+    this.units().forEach(u => {
+      if (u.owner?.trim() && u.owner !== 'Unassigned') names.add(u.owner.trim());
+    });
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  });
+
   readonly activeUser = computed(() => {
     return this.currentUserRole() === 'admin' ? this.adminUser() : this.memberUser();
   });
@@ -1059,27 +1071,99 @@ export class SocietyStateService {
     this.showToast('msg.memberAdded', 'success', { name: data.name, unit: data.unit });
   }
 
-  addUnit(data: { unitNo: string; wing: string; type: string; area: number; owner: string }): void {
+  addUnit(data: { unitNo: string; wing: string; type: string; area: number; owner: string; occupancy?: string }): void {
     if (this.units().some(u => u.unitNo.toLowerCase() === data.unitNo.trim().toLowerCase())) {
       this.showToast('msg.unitExists', 'danger', { unit: data.unitNo });
       return;
     }
+    const unitNo = data.unitNo.trim().toUpperCase();
     const newUnit: Unit = {
-      id: `U-${data.unitNo}`,
-      unitNo: data.unitNo,
+      id: `U-${unitNo}`,
+      unitNo,
       wing: data.wing,
       // Floor from the numeric part of the unit no: A-101 -> 1, B-1204 -> 12
-      floor: Math.floor((parseInt(data.unitNo.replace(/\D/g, ''), 10) || 100) / 100) || 1,
+      floor: Math.floor((parseInt(unitNo.replace(/\D/g, ''), 10) || 100) / 100) || 1,
       type: data.type,
-      area: data.area,
+      area: Number(data.area) || 1200,
       owner: data.owner,
-      occupancy: 'Owner Occupied',
-      dues: 0
+      ownerSince: todayLabel(),
+      occupancy: data.occupancy || 'Owner Occupied',
+      dues: 0,
+      pastOwners: []
     };
 
     this.units.update(list => [...list, newUnit]);
+    // Assign flat to respective owner in members directory if present
+    this.members.update(list =>
+      list.map(m => (m.name === data.owner ? { ...m, unit: unitNo, wing: data.wing } : m))
+    );
     this.metrics.update(m => ({ ...m, totalUnits: m.totalUnits + 1 }));
-    this.showToast('msg.unitAdded', 'success', { unit: data.unitNo });
+    this.logAudit('Settings', `Added unit ${unitNo} assigned to owner ${data.owner}.`);
+    this.showToast('msg.unitAdded', 'success', { unit: unitNo });
+  }
+
+  /**
+   * Updates unit info and assigns the flat to the selected owner.
+   * When the owner changes, the previous owner is automatically recorded in `unit.pastOwners`.
+   */
+  updateUnit(
+    id: string,
+    data: { unitNo: string; wing: string; floor?: number; type: string; area: number; owner: string; occupancy: string }
+  ): void {
+    const existing = this.units().find(u => u.id === id);
+    if (!existing) return;
+
+    const unitNo = data.unitNo.trim().toUpperCase();
+    const computedFloor =
+      data.floor && data.floor > 0
+        ? Number(data.floor)
+        : Math.floor((parseInt(unitNo.replace(/\D/g, ''), 10) || 100) / 100) || existing.floor;
+
+    let pastOwners = [...(existing.pastOwners ?? [])];
+    let ownerSince = existing.ownerSince || '01 Jan 2020';
+
+    if (existing.owner && existing.owner !== 'Unassigned' && existing.owner !== data.owner) {
+      const prevMember = this.members().find(m => m.name.toLowerCase() === existing.owner.toLowerCase());
+      pastOwners = [
+        {
+          id: uid('PO'),
+          ownerName: existing.owner,
+          email: prevMember?.email,
+          phone: prevMember?.phone,
+          fromDate: ownerSince,
+          toDate: todayLabel()
+        },
+        ...pastOwners
+      ];
+      ownerSince = todayLabel();
+    }
+
+    this.units.update(list =>
+      list.map(u =>
+        u.id === id
+          ? {
+              ...u,
+              unitNo,
+              wing: data.wing,
+              floor: computedFloor,
+              type: data.type,
+              area: Number(data.area) || u.area,
+              owner: data.owner,
+              ownerSince,
+              occupancy: data.occupancy,
+              pastOwners
+            }
+          : u
+      )
+    );
+
+    // Sync assigned flat with the owner's record in the Members directory
+    this.members.update(list =>
+      list.map(m => (m.name === data.owner ? { ...m, unit: unitNo, wing: data.wing } : m))
+    );
+
+    this.logAudit('Settings', `Updated unit ${unitNo} (Assigned Owner: ${data.owner}).`);
+    this.showToast('msg.unitUpdated', 'success', { unit: unitNo, owner: data.owner });
   }
 
   generateBulkInvoices(): void {
@@ -1418,7 +1502,16 @@ export class SocietyStateService {
       if (data.complaintStats) this.complaintStats.set(data.complaintStats);
       if (data.recentActivities) this.recentActivities.set(data.recentActivities);
       if (data.members) this.members.set(data.members);
-      if (data.units) this.units.set(data.units);
+      if (data.units) {
+        const seedMap = new Map((membersUnitsSeed.units as Unit[]).map(u => [u.unitNo, u]));
+        this.units.set(
+          (data.units as Unit[]).map(u => ({
+            ...u,
+            ownerSince: u.ownerSince ?? seedMap.get(u.unitNo)?.ownerSince ?? '01 Jan 2020',
+            pastOwners: u.pastOwners?.length ? u.pastOwners : (seedMap.get(u.unitNo)?.pastOwners ?? [])
+          }))
+        );
+      }
       if (data.invoices) this.invoices.set(data.invoices);
       if (data.paymentHistory) this.paymentHistory.set(data.paymentHistory);
       if (data.complaints) this.complaints.set(data.complaints);
