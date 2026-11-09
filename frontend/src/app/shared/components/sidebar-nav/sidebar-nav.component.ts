@@ -4,6 +4,7 @@ import { User, UserRole } from '../../../models/society.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 import { AccessControlService, VIEW_TO_MODULE } from '../../../core/services/access-control.service';
+import { ApprovalWorkflowService } from '../../../core/services/approval-workflow.service';
 
 interface NavItem {
   id: string;
@@ -22,6 +23,7 @@ interface NavItem {
 export class SidebarNavComponent {
   readonly auth = inject(AuthService);
   private readonly access = inject(AccessControlService);
+  private readonly workflow = inject(ApprovalWorkflowService);
 
   @Input() role: UserRole = 'admin';
   @Input() currentView: string = 'dashboard';
@@ -45,6 +47,7 @@ export class SidebarNavComponent {
         { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'grid', badge: null },
         { id: 'members', labelKey: 'nav.members', icon: 'users', badge: null },
         { id: 'access-control', labelKey: 'nav.accessControl', icon: 'shield', badge: null },
+        { id: 'approvals', labelKey: 'nav.approvals', icon: 'check-square', badge: this.workflow.pendingCount() || null },
         { id: 'units', labelKey: 'nav.units', icon: 'building', badge: null },
         { id: 'maintenance', labelKey: 'nav.maintenance', icon: 'tool', badge: null },
         { id: 'payments', labelKey: 'nav.payments', icon: 'credit-card', badge: null },

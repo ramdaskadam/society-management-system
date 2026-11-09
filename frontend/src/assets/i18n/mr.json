@@ -33,7 +33,8 @@
     "settings": "सेटिंग्ज व ऑडिट",
     "help": "मदत व आपत्कालीन संपर्क",
     "accessControl": "प्रवेश नियंत्रण",
-    "tenants": "भाडेकरू (Tenants)"
+    "tenants": "भाडेकरू (Tenants)",
+    "approvals": "मंजुरी आणि कार्यप्रणाली (Approvals)"
   },
   "topbar": {
     "searchPlaceholder": "सभासद, सदनिका, पाहुणे, मतदान, सूचना शोधा...",
@@ -122,7 +123,13 @@
     "memberApproved": "सदस्य {{name}} ({{unit}}) मंजूर! आता ते पोर्टलवर लॉग इन करू शकतात.",
     "tenantApproved": "भाडेकरू {{name}} सदनिका {{unit}} साठी मंजूर! आता ते मर्यादित प्रवेशासह लॉग इन करू शकतात.",
     "accountRejected": "{{name}} यांची नोंदणी विनंती नाकारण्यात आली.",
-    "unitUpdated": "युनिट {{unit}} अद्यतनित झाले (मालक: {{owner}})."
+    "unitUpdated": "युनिट {{unit}} अद्यतनित झाले (मालक: {{owner}}).",
+    "approvalRecorded": "{{admin}} द्वारे समिती मंजुरी नोंदवली गेली.",
+    "approvalExecuted": "कोरम पूर्ण! विनंती \"{{title}}\" मंजूर आणि कार्यान्वित केली.",
+    "approvalRejected": "{{admin}} द्वारे विनंती \"{{title}}\" नाकारण्यात आली.",
+    "approvalCreated": "विनंती \"{{title}}\" समिती अ‍ॅडमिन मंजुरीसाठी सादर केली.",
+    "policyUpdated": "{{process}} साठी मंजुरी धोरण अद्यतनित केले.",
+    "committeeUpdated": "समिती अ‍ॅडमिन यादी अद्यतनित केली."
   },
   "profile": {
     "title": "रहिवासी प्रोफाइल आणि कुटुंब",

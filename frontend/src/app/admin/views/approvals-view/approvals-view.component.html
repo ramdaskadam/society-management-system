@@ -1,0 +1,574 @@
+<div class="page-header">
+  <div class="page-title-group">
+    <h1>Multi-Admin Governance &amp; Process Approvals</h1>
+    <p>
+      Configurable committee quorum workflows for apartment ownership transfers, expense sanctions, sensitive data sharing, and legal notices
+    </p>
+  </div>
+  <div class="page-header-actions">
+    <button type="button" class="btn-primary" (click)="openNewRequest()">
+      + Initiate Process / Request
+    </button>
+    <button
+      type="button"
+      [class]="activeTab() === 'queue' ? 'btn-primary' : 'btn-secondary'"
+      (click)="setTab('queue')"
+    >
+      Approval Queue ({{ workflow.pendingCount() }} Pending)
+    </button>
+    <button
+      type="button"
+      [class]="activeTab() === 'policies' ? 'btn-primary' : 'btn-secondary'"
+      (click)="setTab('policies')"
+    >
+      Configure Process Policies ({{ workflow.processConfigs().length }})
+    </button>
+  </div>
+</div>
+
+<!-- ── ACTING COMMITTEE ADMIN SELECTOR BAR ─────────────────────────────────── -->
+<section class="dash-card" style="margin-bottom: 18px; padding: 14px 18px; border-left: 4px solid var(--accent-primary, #10b981);">
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <div>
+      <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">
+        Acting Committee Admin (Society Member with Admin Approval Authority)
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-main); margin-top: 2px;">
+        Switch between Committee Admins below to simulate multi-member quorum sign-offs on pending processes:
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      @for (ca of workflow.committeeAdmins(); track ca.id) {
+        <button
+          type="button"
+          [class]="workflow.activeAdminId() === ca.id ? 'btn-primary' : 'btn-secondary'"
+          style="padding: 6px 12px; font-size: 0.8rem;"
+          (click)="workflow.activeAdminId.set(ca.id)"
+        >
+          {{ ca.name }} ({{ ca.designation }} • {{ ca.unit }})
+        </button>
+      }
+    </div>
+  </div>
+</section>
+
+@if (activeTab() === 'policies') {
+  <!-- ── TAB 2: CONFIGURE PROCESS APPROVAL POLICIES & COMMITTEE ROSTER ───────── -->
+  <div class="dash-card" style="margin-bottom: 20px;">
+    <div style="margin-bottom: 14px;">
+      <h2 class="dash-card-title" style="margin: 0;">Process Approval Policy Matrix</h2>
+      <p style="font-size: 0.84rem; color: var(--text-muted); margin: 4px 0 0;">
+        Configure which society processes require multi-admin committee approval and how many admin sign-offs (quorum) are required before automatic execution.
+      </p>
+    </div>
+
+    <div class="table-responsive">
+      <table class="app-table stack-mobile">
+        <thead>
+          <tr>
+            <th>Process / Use Case</th>
+            <th>Category</th>
+            <th>Requires Multi-Admin Approval?</th>
+            <th>Required Admin Quorum</th>
+            <th>Target SLA</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cfg of workflow.processConfigs(); track cfg.processType) {
+            <tr>
+              <td data-label="Process / Use Case">
+                <strong style="display: block;">{{ cfg.title }}</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">{{ cfg.description }}</span>
+              </td>
+              <td data-label="Category">
+                <span class="badge badge-info">{{ cfg.categoryBadge }}</span>
+              </td>
+              <td data-label="Requires Multi-Admin Approval?">
+                <label class="auth-radio" style="font-weight: 600;">
+                  <input
+                    type="checkbox"
+                    [ngModel]="cfg.requiresApproval"
+                    (ngModelChange)="togglePolicyRequiresApproval(cfg, $event)"
+                  />
+                  <span [style.color]="cfg.requiresApproval ? '#059669' : '#64748b'">
+                    {{ cfg.requiresApproval ? 'Approval Required' : 'Direct Execution (No Quorum)' }}
+                  </span>
+                </label>
+              </td>
+              <td data-label="Required Admin Quorum">
+                <select
+                  class="card-select-filter"
+                  [disabled]="!cfg.requiresApproval"
+                  [ngModel]="cfg.requiredApprovals"
+                  (ngModelChange)="changePolicyQuorum(cfg, $event)"
+                  aria-label="Required committee admin approvals"
+                >
+                  @for (n of [1, 2, 3, 4]; track n) {
+                    @if (n <= workflow.committeeAdmins().length) {
+                      <option [ngValue]="n">{{ n }} of {{ workflow.committeeAdmins().length }} Committee Admins</option>
+                    }
+                  }
+                </select>
+              </td>
+              <td data-label="Target SLA">{{ cfg.slaHours }} hrs</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Managing Committee Admins Roster (Society Members who are also Admins) -->
+  <div class="dash-card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 14px;">
+      <div>
+        <h3 class="dash-card-title" style="margin: 0;">
+          Designated Committee Admins ({{ workflow.committeeAdmins().length }} Society Members)
+        </h3>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0;">
+          Society members who hold administrative sign-off authority for multi-admin governance workflows
+        </p>
+      </div>
+
+      @if (eligibleMembersForAdmin().length > 0) {
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <select class="form-control" style="width: auto; min-width: 180px;" [(ngModel)]="selectedMemberForAdmin">
+            <option value="" disabled>Select society member…</option>
+            @for (name of eligibleMembersForAdmin(); track name) {
+              <option [value]="name">{{ name }}</option>
+            }
+          </select>
+          <select class="form-control" style="width: auto;" [(ngModel)]="selectedDesignation">
+            <option value="Committee Admin">Committee Admin</option>
+            <option value="Chairman">Chairman</option>
+            <option value="Hon. Secretary">Hon. Secretary</option>
+            <option value="Hon. Treasurer">Hon. Treasurer</option>
+            <option value="Vigilance & Legal Admin">Vigilance &amp; Legal Admin</option>
+          </select>
+          <button type="button" class="btn-primary" (click)="addSelectedMemberAsAdmin()">
+            + Add as Committee Admin
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="family-grid">
+      @for (ca of workflow.committeeAdmins(); track ca.id) {
+        <article class="family-card">
+          <div class="family-card-head">
+            <div class="person-photo person-photo-empty" aria-hidden="true">🛡️</div>
+            <div>
+              <strong>{{ ca.name }}</strong>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                <span class="badge badge-confirmed">{{ ca.designation }}</span>
+                <span class="family-tag">Flat {{ ca.unit }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="family-meta">
+            <span>✉ {{ ca.email }}</span>
+          </div>
+          @if (workflow.committeeAdmins().length > 2) {
+            <div class="family-actions">
+              <button type="button" class="btn-secondary" (click)="workflow.removeCommitteeAdmin(ca.id)">
+                Remove Admin Role
+              </button>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  </div>
+} @else {
+  <!-- ── TAB 1: MULTI-ADMIN APPROVAL QUEUE ───────────────────────────────────── -->
+  <div class="dash-card" style="margin-bottom: 18px; padding: 12px 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+        @for (st of ['All', 'Pending', 'Approved', 'Rejected']; track st) {
+          <button
+            type="button"
+            [class]="statusFilter() === st ? 'btn-primary' : 'btn-secondary'"
+            style="padding: 6px 12px; font-size: 0.8rem;"
+            (click)="statusFilter.set($any(st))"
+          >
+            {{ st }}
+          </button>
+        }
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <label for="proc-type-filter" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+          Process Type:
+        </label>
+        <select
+          id="proc-type-filter"
+          class="card-select-filter"
+          [ngModel]="processFilter()"
+          (ngModelChange)="processFilter.set($event)"
+        >
+          <option value="All">All Processes</option>
+          @for (cfg of workflow.processConfigs(); track cfg.processType) {
+            <option [value]="cfg.processType">{{ cfg.title }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; gap: 18px;">
+    @for (req of filteredRequests(); track req.id) {
+      <section class="dash-card" [attr.aria-label]="req.title">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 260px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+              <span style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--accent-primary);">
+                {{ req.id }}
+              </span>
+              <span class="badge badge-info">{{ processLabel(req.processType) }}</span>
+              <span
+                class="badge"
+                [ngClass]="
+                  req.priority === 'Critical'
+                    ? 'badge-high'
+                    : req.priority === 'High'
+                      ? 'badge-pending'
+                      : 'badge-info'
+                "
+              >
+                {{ req.priority }} Priority
+              </span>
+              <span
+                class="badge"
+                [ngClass]="
+                  req.status === 'Approved'
+                    ? 'badge-confirmed'
+                    : req.status === 'Rejected'
+                      ? 'badge-unpaid'
+                      : 'badge-pending'
+                "
+              >
+                {{
+                  req.status === 'Approved'
+                    ? 'Approved & Executed'
+                    : req.status === 'Rejected'
+                      ? 'Rejected'
+                      : 'Awaiting Committee Quorum (' + approvedCount(req) + '/' + req.requiredApprovals + ')'
+                }}
+              </span>
+            </div>
+
+            <h2 style="font-size: 1.08rem; font-weight: 700; margin: 0 0 6px;">{{ req.title }}</h2>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0 0 10px; line-height: 1.5;">
+              {{ req.summary }}
+            </p>
+
+            <!-- Process-Specific Metadata Pills -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.8rem;">
+              <span class="family-tag">Initiated by: {{ req.requestedBy }} (Flat {{ req.requestedByUnit }}) • {{ req.requestedOn }}</span>
+              @if (req.metadata?.unitNo) {
+                <span class="family-tag">🏢 Flat: <strong>{{ req.metadata!.unitNo }}</strong></span>
+              }
+              @if (req.metadata?.previousOwner && req.metadata?.newOwner) {
+                <span class="family-tag">
+                  🔄 Transfer: <strong>{{ req.metadata!.previousOwner }} → {{ req.metadata!.newOwner }}</strong>
+                </span>
+              }
+              @if (req.metadata?.amount) {
+                <span class="family-tag">
+                  ₹ Sanction Amount: <strong>₹{{ req.metadata!.amount!.toLocaleString('en-IN') }}</strong>
+                </span>
+              }
+              @if (req.metadata?.vendorName) {
+                <span class="family-tag">🛠 Vendor: <strong>{{ req.metadata!.vendorName }}</strong></span>
+              }
+              @if (req.metadata?.documentTitle) {
+                <span class="family-tag">📄 Document: <strong>{{ req.metadata!.documentTitle }}</strong></span>
+              }
+              @if (req.metadata?.recipientScope) {
+                <span class="family-tag">🔒 Recipient: <strong>{{ req.metadata!.recipientScope }}</strong></span>
+              }
+              @if (req.metadata?.legalRef) {
+                <span class="family-tag">⚖️ Legal Ref: <strong>{{ req.metadata!.legalRef }}</strong></span>
+              }
+              @if (req.executedOn) {
+                <span class="badge badge-confirmed">✓ Auto-Executed on {{ req.executedOn }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Quorum Progress Box & Action Buttons -->
+          <div style="min-width: 250px; background: var(--bg-subtle); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; margin-bottom: 6px;">
+              <span>Committee Quorum</span>
+              <span>{{ approvedCount(req) }} / {{ req.requiredApprovals }} Admins Approved</span>
+            </div>
+            <div style="height: 8px; background: var(--border-subtle); border-radius: 999px; overflow: hidden; margin-bottom: 10px;">
+              <div
+                style="height: 100%; background: #10b981; transition: width 0.25s ease;"
+                [style.width.%]="progressPercent(req)"
+              ></div>
+            </div>
+
+            @if (req.status === 'Pending') {
+              @if (hasCurrentAdminSigned(req)) {
+                <div style="font-size: 0.78rem; color: #059669; font-weight: 600;">
+                  ✓ {{ workflow.activeCommitteeAdmin().name }} has already signed off on this request. Switch to another Committee Admin above to complete quorum.
+                </div>
+              } @else {
+                <input
+                  type="text"
+                  class="form-control"
+                  style="margin-bottom: 8px; font-size: 0.8rem;"
+                  placeholder="Optional committee remark…"
+                  [(ngModel)]="signOffRemark"
+                />
+                <div class="family-actions">
+                  <button
+                    type="button"
+                    class="btn-primary"
+                    (click)="askDecision(req, 'Approved')"
+                  >
+                    ✓ Approve ({{ workflow.activeCommitteeAdmin().name.split(' ')[0] }})
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    (click)="askDecision(req, 'Rejected')"
+                  >
+                    Reject
+                  </button>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Committee Admin Sign-Off Audit Trail -->
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">
+            COMMITTEE ADMIN SIGN-OFF TRAIL ({{ req.decisions.length }})
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;">
+            @for (dec of req.decisions; track dec.adminId) {
+              <div class="family-card" style="padding: 10px 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+                  <strong>{{ dec.adminName }}</strong>
+                  <span
+                    class="badge"
+                    [ngClass]="dec.decision === 'Approved' ? 'badge-confirmed' : 'badge-unpaid'"
+                  >
+                    {{ dec.decision }}
+                  </span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                  {{ dec.designation }} • Flat {{ dec.unit }} • {{ dec.timestamp }}
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-main);">"{{ dec.remark }}"</div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+}
+
+<!-- ── MODAL: INITIATE NEW GOVERNANCE PROCESS / APPROVAL REQUEST ─────────────── -->
+@if (showNewRequestModal()) {
+  <div class="modal-backdrop" (click)="closeNewRequest()">
+    <div
+      class="app-dialog modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="new-apr-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="dialog-header">
+        <h3 id="new-apr-title" class="dialog-title">Initiate Society Process / Approval Request</h3>
+        <button type="button" class="dialog-close-btn" aria-label="Close" (click)="closeNewRequest()">✕</button>
+      </div>
+
+      <div class="dialog-body" style="overflow-y: auto; max-height: 74dvh;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="apr-proc">Process / Use Case *</label>
+            <select
+              id="apr-proc"
+              class="form-control"
+              [ngModel]="newProcessType"
+              (ngModelChange)="onProcessTypeChange($event)"
+            >
+              @for (cfg of workflow.processConfigs(); track cfg.processType) {
+                <option [value]="cfg.processType">{{ cfg.title }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="apr-prio">Priority</label>
+            <select id="apr-prio" class="form-control" [(ngModel)]="newPriority">
+              <option value="Normal">Normal</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Configurable per-request approval toggle -->
+        <div
+          style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;"
+        >
+          <label class="auth-radio" style="font-weight: 600;">
+            <input type="checkbox" [(ngModel)]="newRequiresApproval" />
+            <span>Require Multi-Admin Committee Approval before execution</span>
+          </label>
+          @if (newRequiresApproval) {
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="apr-quorum" style="font-size: 0.8rem; font-weight: 600;">Quorum:</label>
+              <select id="apr-quorum" class="card-select-filter" [(ngModel)]="newRequiredApprovals">
+                @for (n of [2, 3, 4]; track n) {
+                  @if (n <= workflow.committeeAdmins().length) {
+                    <option [ngValue]="n">{{ n }} Committee Admins</option>
+                  }
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        <!-- Process-specific dynamic fields -->
+        @if (newProcessType === 'UNIT_OWNERSHIP_TRANSFER') {
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="apr-unit">Select Flat / Unit *</label>
+              <select id="apr-unit" class="form-control" [(ngModel)]="newUnitNo">
+                @for (u of state.units(); track u.id) {
+                  <option [value]="u.unitNo">{{ u.unitNo }} (Current Owner: {{ u.owner }})</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="apr-new-owner">Assign / Transfer to Owner *</label>
+              <select id="apr-new-owner" class="form-control" [(ngModel)]="newOwnerName">
+                @for (o of state.availableOwnerNames(); track o) {
+                  <option [value]="o">{{ o }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
+        @if (newProcessType === 'EXPENSE_SANCTION' || newProcessType === 'EMERGENCY_REPAIR_CONTRACT') {
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="apr-amt">Sanction Amount (₹) *</label>
+              <input id="apr-amt" type="number" min="0" class="form-control" [(ngModel)]="newAmount" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="apr-vendor">Vendor / Payee Name *</label>
+              <input
+                id="apr-vendor"
+                type="text"
+                class="form-control"
+                [(ngModel)]="newVendorName"
+                placeholder="e.g. Apex Civil Contractors"
+              />
+            </div>
+          </div>
+        }
+
+        @if (newProcessType === 'SENSITIVE_DOC_SHARING') {
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="apr-doc">Document / Account Record Title *</label>
+              <input
+                id="apr-doc"
+                type="text"
+                class="form-control"
+                [(ngModel)]="newDocumentTitle"
+                placeholder="e.g. FY26 Bank Statements & Ledger"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="apr-rec">Recipient / Access Scope *</label>
+              <input
+                id="apr-rec"
+                type="text"
+                class="form-control"
+                [(ngModel)]="newRecipientScope"
+                placeholder="e.g. Statutory Auditor / Legal Counsel"
+              />
+            </div>
+          </div>
+        }
+
+        @if (newProcessType === 'LEGAL_NOTICE_CASCADE') {
+          <div class="form-group">
+            <label class="form-label" for="apr-lref">Legal Reference / Section *</label>
+            <input
+              id="apr-lref"
+              type="text"
+              class="form-control"
+              [(ngModel)]="newLegalRef"
+              placeholder="e.g. MCS-ACT-SEC-101/2026"
+            />
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label" for="apr-title">Request Title *</label>
+          <input
+            id="apr-title"
+            type="text"
+            class="form-control"
+            [(ngModel)]="newTitle"
+            placeholder="Brief title of the process or resolution"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="apr-sum">Detailed Justification &amp; Scope *</label>
+          <textarea
+            id="apr-sum"
+            rows="3"
+            class="form-control"
+            [(ngModel)]="newSummary"
+            placeholder="Provide background, verification details, and financial/legal justification for committee review…"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="apr-rem">Proposer Sign-Off Remark</label>
+          <input
+            id="apr-rem"
+            type="text"
+            class="form-control"
+            [(ngModel)]="newRemark"
+            placeholder="e.g. Documents verified; submitting for committee quorum."
+          />
+        </div>
+
+        @if (formError()) {
+          <div class="auth-error" role="alert"><span aria-hidden="true">⚠</span> {{ formError() }}</div>
+        }
+      </div>
+
+      <div class="dialog-footer">
+        <button type="button" class="btn-secondary" (click)="closeNewRequest()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="submitNewRequest()">
+          {{ newRequiresApproval ? 'Submit for Multi-Admin Approval' : 'Execute Process Immediately' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<app-confirm-dialog
+  [isOpen]="pendingSignOff() !== null"
+  [title]="confirmModalTitle()"
+  [message]="confirmModalMessage()"
+  [confirmText]="pendingSignOff()?.decision === 'Approved' ? 'Confirm Approval' : 'Confirm Rejection'"
+  cancelText="Cancel"
+  [variant]="pendingSignOff()?.decision === 'Approved' ? 'primary' : 'danger'"
+  (confirm)="confirmDecision()"
+  (cancel)="cancelDecision()"
+/>

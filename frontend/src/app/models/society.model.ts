@@ -309,3 +309,67 @@ export interface TenantRecord extends PersonDetails {
   addedOn: string;
   familyMembers: FamilyMember[];
 }
+
+// ── Multi-Admin Governance & Process Approval Models ──────────────────────────
+export type ApprovalProcessType =
+  | 'UNIT_OWNERSHIP_TRANSFER'
+  | 'EXPENSE_SANCTION'
+  | 'SENSITIVE_DOC_SHARING'
+  | 'LEGAL_NOTICE_CASCADE'
+  | 'EMERGENCY_REPAIR_CONTRACT'
+  | 'BYLAW_RATE_REVISION';
+
+export interface CommitteeAdminMember {
+  id: string;
+  name: string;
+  unit: string;
+  designation: 'Chairman' | 'Hon. Secretary' | 'Hon. Treasurer' | 'Committee Admin' | 'Vigilance & Legal Admin';
+  email: string;
+}
+
+export interface ApprovalProcessConfig {
+  processType: ApprovalProcessType;
+  title: string;
+  description: string;
+  categoryBadge: string;
+  /** Configurable: whether initiating this process requires multi-admin committee quorum. */
+  requiresApproval: boolean;
+  /** Number of distinct committee admin approvals required to execute. */
+  requiredApprovals: number;
+  slaHours: number;
+}
+
+export interface ApprovalDecision {
+  adminId: string;
+  adminName: string;
+  designation: string;
+  unit: string;
+  decision: 'Approved' | 'Rejected';
+  remark: string;
+  timestamp: string;
+}
+
+export interface GovernanceApprovalRequest {
+  id: string;
+  processType: ApprovalProcessType;
+  title: string;
+  summary: string;
+  priority: 'Normal' | 'High' | 'Critical';
+  requestedBy: string;
+  requestedByUnit: string;
+  requestedOn: string;
+  requiredApprovals: number;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  metadata?: {
+    unitNo?: string;
+    newOwner?: string;
+    previousOwner?: string;
+    amount?: number;
+    vendorName?: string;
+    documentTitle?: string;
+    recipientScope?: string;
+    legalRef?: string;
+  };
+  decisions: ApprovalDecision[];
+  executedOn?: string;
+}

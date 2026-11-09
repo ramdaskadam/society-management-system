@@ -6,6 +6,7 @@ import { filter, map } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
 import { SocietyStateService } from './services/society-state.service';
 import { DialogModalService } from './core/services/dialog-modal.service';
+import { ApprovalWorkflowService } from './core/services/approval-workflow.service';
 import { UserRole } from './models/society.model';
 import { TranslatePipe } from './shared/pipes/translate.pipe';
 
@@ -64,6 +65,7 @@ import { BookAmenityDialogComponent } from './member/dialogs/book-amenity-dialog
 export class AppComponent implements OnInit {
   readonly state = inject(SocietyStateService);
   readonly dialogs = inject(DialogModalService);
+  readonly workflow = inject(ApprovalWorkflowService);
   readonly mobileMenuOpen = signal(false);
   readonly showResetConfirm = signal(false);
   private readonly router = inject(Router);
@@ -173,6 +175,27 @@ export class AppComponent implements OnInit {
 
   onAddUnit(data: UnitFormSubmitPayload): void {
     if (data.editId) {
+      const existing = this.state.units().find(u => u.id === data.editId);
+      const transferPolicy = this.workflow.getConfig('UNIT_OWNERSHIP_TRANSFER');
+      if (existing && existing.owner !== data.owner && transferPolicy.requiresApproval) {
+        // Update non-ownership unit metadata immediately while routing ownership transfer through multi-admin quorum
+        this.state.updateUnit(data.editId, {
+          ...data,
+          owner: existing.owner
+        });
+        this.workflow.submitRequest({
+          processType: 'UNIT_OWNERSHIP_TRANSFER',
+          title: `Assign Flat ${data.unitNo} to ${data.owner}`,
+          summary: `Ownership transfer request for Flat ${data.unitNo} (${data.wing} Wing, ${data.type}) from ${existing.owner} to ${data.owner}.`,
+          priority: 'High',
+          metadata: {
+            unitNo: data.unitNo,
+            previousOwner: existing.owner,
+            newOwner: data.owner
+          }
+        });
+        return;
+      }
       this.state.updateUnit(data.editId, data);
     } else {
       this.state.addUnit(data);

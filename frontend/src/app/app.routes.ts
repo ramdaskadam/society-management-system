@@ -51,6 +51,14 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'approvals',
+        canActivate: [roleGuard(['admin'])],
+        loadComponent: () =>
+          import('./admin/views/approvals-view/approvals-view.component').then(
+            m => m.ApprovalsViewComponent
+          )
+      },
+      {
         path: 'units',
         loadComponent: () =>
           import('./admin/views/units-view/units-view.component').then(m => m.UnitsViewComponent)

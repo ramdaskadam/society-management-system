@@ -75,7 +75,15 @@ export class AccessControlService {
 
   readonly modules = ACCESS_MODULES;
   readonly actions = ACCESS_ACTIONS;
+  /** Persisted permission grants (used by route guards and runtime `can()` checks). */
   readonly grants = signal<GrantMap>(this.load());
+  /** Staged permission grants edited in the Access Control view before clicking Save. */
+  readonly draftGrants = signal<GrantMap>(this.cloneMap(this.grants()));
+
+  /** True when the admin has modified permissions in the Access Control matrix that are not yet saved. */
+  readonly hasUnsavedChanges = computed(
+    () => JSON.stringify(this.grants()) !== JSON.stringify(this.draftGrants())
+  );
 
   /** Member id of the resident currently using the Member Portal. */
   readonly activeMemberId = computed(() => {
@@ -94,7 +102,13 @@ export class AccessControlService {
     });
   }
 
+  /** Returns staged flags for display/editing in the Access Control matrix. */
   flags(memberId: string, moduleId: string): AccessFlags {
+    return this.draftGrants()[memberId]?.[moduleId] ?? defaultFlags(moduleId);
+  }
+
+  /** Returns persisted flags for live permission enforcement. */
+  persistedFlags(memberId: string, moduleId: string): AccessFlags {
     return this.grants()[memberId]?.[moduleId] ?? defaultFlags(moduleId);
   }
 
@@ -110,7 +124,7 @@ export class AccessControlService {
       if ((moduleId === 'units' || moduleId === 'parking') && action !== 'read') return false;
     }
     if (moduleId === 'tenants') return true;
-    return this.flags(this.activeMemberId(), moduleId)[action];
+    return this.persistedFlags(this.activeMemberId(), moduleId)[action];
   }
 
   /** Like `can()` but shows a toast when denied. */
@@ -122,42 +136,57 @@ export class AccessControlService {
     return allowed;
   }
 
-  set(memberId: string, moduleId: string, action: AccessAction, value: boolean, audit = true): void {
-    this.grants.update(map => {
+  set(memberId: string, moduleId: string, action: AccessAction, value: boolean): void {
+    this.draftGrants.update(map => {
       const current = map[memberId]?.[moduleId] ?? defaultFlags(moduleId);
       return {
         ...map,
         [memberId]: { ...map[memberId], [moduleId]: { ...current, [action]: value } }
       };
     });
-    if (audit) {
-      this.audit(memberId, `${value ? 'Granted' : 'Revoked'} ${action} access on "${moduleId}" for ${memberId}.`);
-    }
   }
 
-  /** Grant/revoke one action across every module for a resident. */
+  /** Grant/revoke one action across every module for a resident (staged until Save). */
   setColumn(memberId: string, action: AccessAction, value: boolean): void {
-    this.modules.forEach(m => this.set(memberId, m.id, action, value, false));
-    this.audit(memberId, `${value ? 'Granted' : 'Revoked'} ${action} access on all modules for ${memberId}.`);
+    this.modules.forEach(m => this.set(memberId, m.id, action, value));
   }
 
-  /** Grant/revoke every action on one module for a resident. */
+  /** Grant/revoke every action on one module for a resident (staged until Save). */
   setRow(memberId: string, moduleId: string, value: boolean): void {
-    this.actions.forEach(a => this.set(memberId, moduleId, a.id, value, false));
-    this.audit(memberId, `${value ? 'Granted' : 'Revoked'} full access on "${moduleId}" for ${memberId}.`);
+    this.actions.forEach(a => this.set(memberId, moduleId, a.id, value));
   }
 
   setAll(memberId: string, value: boolean): void {
-    this.modules.forEach(m => this.actions.forEach(a => this.set(memberId, m.id, a.id, value, false)));
-    this.audit(memberId, `${value ? 'Granted' : 'Revoked'} all access for ${memberId}.`);
+    this.modules.forEach(m => this.actions.forEach(a => this.set(memberId, m.id, a.id, value)));
   }
 
   resetMember(memberId: string): void {
-    this.grants.update(map => {
+    this.draftGrants.update(map => {
       const { [memberId]: _removed, ...rest } = map;
       return rest;
     });
-    this.audit(memberId, `Reset access to defaults for ${memberId}.`);
+  }
+
+  /** Persists staged `draftGrants` into live `grants` and localStorage, logging an audit entry. */
+  saveChanges(targetSummary?: string): void {
+    const committed = this.cloneMap(this.draftGrants());
+    this.grants.set(committed);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(committed));
+    } catch {
+      /* ignore */
+    }
+    const details = targetSummary
+      ? `Saved access control permissions for ${targetSummary}.`
+      : 'Saved access control permission matrix changes.';
+    this.state.logAudit('Security', details, 'Access control updated');
+    this.state.showToast(details, 'success');
+  }
+
+  /** Discards unsaved staged changes and restores `draftGrants` from persisted `grants`. */
+  discardChanges(): void {
+    this.draftGrants.set(this.cloneMap(this.grants()));
+    this.state.showToast('Discarded unsaved access control changes.', 'info');
   }
 
   countGranted(memberId: string): number {
@@ -166,9 +195,8 @@ export class AccessControlService {
     return n;
   }
 
-  private audit(memberId: string, details: string): void {
-    this.state.logAudit('Security', details, 'Access control updated');
-    this.state.showToast(details, 'info');
+  private cloneMap(map: GrantMap): GrantMap {
+    return JSON.parse(JSON.stringify(map || {})) as GrantMap;
   }
 
   private load(): GrantMap {

@@ -3,6 +3,26 @@
     <h1>Access Control</h1>
     <p>Grant or revoke Read, Write and Execute access per resident and module</p>
   </div>
+  <div class="page-actions" style="display: flex; align-items: center; gap: 10px;">
+    @if (access.hasUnsavedChanges()) {
+      <span class="badge badge-warning">Unsaved changes</span>
+      <button type="button" class="btn-secondary" (click)="access.discardChanges()">
+        Discard
+      </button>
+    }
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="openSaveConfirm()"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Save Changes
+    </button>
+  </div>
 </div>
 
 <div class="access-layout">
@@ -112,4 +132,15 @@
     }
   </section>
 </div>
+
+<app-confirm-dialog
+  [isOpen]="showSaveConfirm()"
+  title="Save Access Control Permissions"
+  [message]="saveConfirmMessage()"
+  confirmText="Save Permissions"
+  cancelText="Cancel"
+  variant="primary"
+  (confirm)="confirmSave()"
+  (cancel)="cancelSave()"
+></app-confirm-dialog>
 
