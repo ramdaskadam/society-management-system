@@ -4,15 +4,10 @@ import { UserRole } from '../../models/society.model';
 import { SocietyStateService } from '../../services/society-state.service';
 import { environment } from '../../../environments/environment';
 import { validatePassword } from '../utils/password-policy';
+import governanceSeed from '../../../assets/mock-data/governance.json';
 
-/** Security questions offered at registration; the answer is used by "Forgot password". */
-export const HINT_QUESTIONS: readonly string[] = [
-  'What was the name of your first pet?',
-  'What is your mother\'s maiden name?',
-  'What was the name of your first school?',
-  'In which city were you born?',
-  'What is your favourite childhood food?'
-];
+/** Security questions offered at registration (loaded from `governance.json`). */
+export const HINT_QUESTIONS: readonly string[] = governanceSeed.hintQuestions;
 
 export type SocialProvider = 'google' | 'facebook';
 export type AccountType = 'admin' | 'member' | 'tenant';
@@ -76,103 +71,14 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SESSION_KEY = 'sms_auth_session_v1';
 const ACCOUNTS_KEY = 'sms_auth_accounts_v1';
 
-/** Built-in dummy account: username `demo` / password `demo` (Admin). */
-const DEMO_ACCOUNT: AuthAccount = {
-  username: 'demo',
-  password: 'demo',
-  fullName: 'Demo Admin',
-  email: 'demo@greenmeadows.in',
-  role: 'admin',
-  accountType: 'admin',
-  approvalStatus: 'Approved'
-};
+/** Built-in dummy account loaded from `governance.json`. */
+const DEMO_ACCOUNT: AuthAccount = governanceSeed.demoAccount as AuthAccount;
 
 /**
- * Seeded registrations so the Admin (for new Members) and the Flat Owner (for new Tenants)
- * can immediately test searching, confirming, and approving registrations.
+ * Seeded registrations loaded from `governance.json` so the Admin (for new Members)
+ * and the Flat Owner (for new Tenants) can immediately test searching, confirming, and approving registrations.
  */
-const DEFAULT_SEEDED_ACCOUNTS: AuthAccount[] = [
-  {
-    username: 'kiran.patil@example.com',
-    password: 'Member@2026!',
-    fullName: 'Kiran Patil',
-    firstName: 'Kiran',
-    lastName: 'Patil',
-    email: 'kiran.patil@example.com',
-    mobile: '9820112233',
-    role: 'member',
-    accountType: 'member',
-    unitNo: 'B-204',
-    approvalStatus: 'Pending',
-    registeredOn: 'Today',
-    hintQuestion: HINT_QUESTIONS[0],
-    hintAnswer: 'bruno'
-  },
-  {
-    username: 'meera.kulkarni@example.com',
-    password: 'Member@2026!',
-    fullName: 'Meera Kulkarni',
-    firstName: 'Meera',
-    lastName: 'Kulkarni',
-    email: 'meera.kulkarni@example.com',
-    mobile: '9820334455',
-    role: 'member',
-    accountType: 'member',
-    unitNo: 'C-302',
-    approvalStatus: 'Pending',
-    registeredOn: 'Today',
-    hintQuestion: HINT_QUESTIONS[3],
-    hintAnswer: 'pune'
-  },
-  {
-    username: 'amit.verma@example.com',
-    password: 'Tenant@2026!',
-    fullName: 'Amit Verma',
-    firstName: 'Amit',
-    lastName: 'Verma',
-    email: 'amit.verma@example.com',
-    mobile: '9820998877',
-    role: 'member',
-    accountType: 'tenant',
-    unitNo: 'A-101',
-    approvalStatus: 'Pending',
-    registeredOn: 'Today',
-    hintQuestion: HINT_QUESTIONS[0],
-    hintAnswer: 'max'
-  },
-  {
-    username: 'sneha.nair@example.com',
-    password: 'Tenant@2026!',
-    fullName: 'Sneha Nair',
-    firstName: 'Sneha',
-    lastName: 'Nair',
-    email: 'sneha.nair@example.com',
-    mobile: '9820554433',
-    role: 'member',
-    accountType: 'tenant',
-    unitNo: 'A-101',
-    approvalStatus: 'Pending',
-    registeredOn: 'Today',
-    hintQuestion: HINT_QUESTIONS[3],
-    hintAnswer: 'kochi'
-  },
-  {
-    username: 'rohan.joshi@example.com',
-    password: 'Tenant@2026!',
-    fullName: 'Rohan Joshi',
-    firstName: 'Rohan',
-    lastName: 'Joshi',
-    email: 'rohan.joshi@example.com',
-    mobile: '9820778899',
-    role: 'member',
-    accountType: 'tenant',
-    unitNo: 'A-101',
-    approvalStatus: 'Approved',
-    registeredOn: '01 Jun 2024',
-    hintQuestion: HINT_QUESTIONS[3],
-    hintAnswer: 'mumbai'
-  }
-];
+const DEFAULT_SEEDED_ACCOUNTS: AuthAccount[] = governanceSeed.seededAccounts as AuthAccount[];
 
 /**
  * Authentication & Registration Approval Service.

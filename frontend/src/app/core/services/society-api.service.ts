@@ -25,7 +25,10 @@ import {
   AuditLogEntry,
   FamilyMember,
   PersonDetails,
-  TenantRecord
+  TenantRecord,
+  CommitteeAdminMember,
+  ApprovalProcessConfig,
+  GovernanceApprovalRequest
 } from '../../models/society.model';
 
 export interface SocietyOverviewResponse {
@@ -40,6 +43,8 @@ export interface SocietyOverviewResponse {
 export interface MembersUnitsResponse {
   members: Member[];
   units: Unit[];
+  familyMembers?: FamilyMember[];
+  tenants?: TenantRecord[];
 }
 
 export interface BillingResponse {
@@ -65,6 +70,19 @@ export interface OperationsResponse {
   polls: SocietyPoll[];
   parkingSlots: ParkingSlot[];
   auditLogs: AuditLogEntry[];
+}
+
+export interface GovernanceResponse {
+  committeeAdmins: CommitteeAdminMember[];
+  processConfigs: ApprovalProcessConfig[];
+  approvalRequests: GovernanceApprovalRequest[];
+  accessModules: { id: string; label: string; description: string }[];
+  accessActions: { id: 'read' | 'write' | 'execute'; label: string; hint: string }[];
+  defaultWriteModules: string[];
+  defaultExecuteModules: string[];
+  hintQuestions: string[];
+  demoAccount: Record<string, unknown>;
+  seededAccounts: Record<string, unknown>[];
 }
 
 export interface SocietyBootstrapPayload {
@@ -109,6 +127,10 @@ export class SocietyApiService {
 
   getOperationsData(): Observable<OperationsResponse> {
     return this.http.get<OperationsResponse>(API_ENDPOINTS.operations());
+  }
+
+  getGovernanceData(): Observable<GovernanceResponse> {
+    return this.http.get<GovernanceResponse>(API_ENDPOINTS.governance());
   }
 
   /**

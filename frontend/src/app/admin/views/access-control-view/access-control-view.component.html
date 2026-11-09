@@ -76,7 +76,7 @@
       </div>
 
       <div tabindex="0" role="region" aria-label="Access permission matrix" class="table-responsive">
-        <table class="app-table access-table">
+        <table class="app-table access-table stack-mobile">
           <thead>
             <tr>
               <th scope="col">Module</th>
@@ -96,12 +96,12 @@
           <tbody>
             @for (mod of access.modules; track mod.id) {
               <tr>
-                <th scope="row" class="access-row-head">
+                <th scope="row" class="access-row-head" data-label="Module">
                   <div class="access-module-name">{{ mod.label }}</div>
                   <div class="access-module-desc">{{ mod.description }}</div>
                 </th>
                 @for (a of access.actions; track a.id) {
-                  <td class="access-col">
+                  <td class="access-col" [attr.data-label]="a.label">
                     <input
                       type="checkbox"
                       class="access-check"
@@ -111,7 +111,7 @@
                     />
                   </td>
                 }
-                <td class="access-col">
+                <td class="access-col" data-label="All">
                   <button type="button" class="table-btn-view" (click)="access.setRow(member.id, mod.id, true)">Grant</button>
                   <span aria-hidden="true">·</span>
                   <button type="button" class="table-btn-view" (click)="access.setRow(member.id, mod.id, false)">Revoke</button>

@@ -1,5 +1,6 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { SocietyStateService } from '../../services/society-state.service';
+import governanceSeed from '../../../assets/mock-data/governance.json';
 
 export type AccessAction = 'read' | 'write' | 'execute';
 
@@ -15,24 +16,11 @@ export interface AccessModule {
   description: string;
 }
 
-/** Modules whose access an admin can grant/revoke per resident. */
-export const ACCESS_MODULES: AccessModule[] = [
-  { id: 'units', label: 'Units', description: 'View unit & apartment records' },
-  { id: 'payments', label: 'Invoices & Payments', description: 'View bills · Execute: pay dues' },
-  { id: 'complaints', label: 'Complaints', description: 'View tickets · Write: raise tickets' },
-  { id: 'visitors', label: 'Visitors & Gate', description: 'View logs · Execute: pre-approve OTP' },
-  { id: 'parking', label: 'Parking & EV', description: 'View bays · Write: register vehicle' },
-  { id: 'polls', label: 'Polls & Voting', description: 'View polls · Execute: cast vote' },
-  { id: 'notices', label: 'Notices', description: 'View society notices' },
-  { id: 'amenities', label: 'Amenities', description: 'View amenities · Execute: book' },
-  { id: 'documents', label: 'Documents', description: 'View society documents' }
-];
+/** Modules whose access an admin can grant/revoke per resident (loaded from `governance.json`). */
+export const ACCESS_MODULES: AccessModule[] = governanceSeed.accessModules as AccessModule[];
 
-export const ACCESS_ACTIONS: { id: AccessAction; label: string; hint: string }[] = [
-  { id: 'read', label: 'Read', hint: 'View the module' },
-  { id: 'write', label: 'Write', hint: 'Create or edit records' },
-  { id: 'execute', label: 'Execute', hint: 'Run actions (pay, book, approve)' }
-];
+export const ACCESS_ACTIONS: { id: AccessAction; label: string; hint: string }[] =
+  governanceSeed.accessActions as { id: AccessAction; label: string; hint: string }[];
 
 /** Route / nav view id → access module id. */
 export const VIEW_TO_MODULE: Record<string, string> = {
@@ -54,10 +42,10 @@ const STORAGE_KEY = 'sms_access_grants_v1';
 
 type GrantMap = Record<string, Record<string, AccessFlags>>;
 
-/** Default permissions for a resident before an admin customises anything. */
+/** Default permissions for a resident before an admin customises anything (loaded from `governance.json`). */
 function defaultFlags(moduleId: string): AccessFlags {
-  const writeDefaults = ['complaints', 'parking', 'amenities'];
-  const executeDefaults = ['payments', 'visitors', 'polls', 'amenities'];
+  const writeDefaults: string[] = governanceSeed.defaultWriteModules;
+  const executeDefaults: string[] = governanceSeed.defaultExecuteModules;
   return {
     read: true,
     write: writeDefaults.includes(moduleId),

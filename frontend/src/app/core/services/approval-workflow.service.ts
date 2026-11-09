@@ -6,277 +6,26 @@ import {
   GovernanceApprovalRequest
 } from '../../models/society.model';
 import { SocietyStateService } from '../../services/society-state.service';
+import { SocietyApiService } from './society-api.service';
+import governanceSeed from '../../../assets/mock-data/governance.json';
 
 const STORAGE_KEY = 'sms_governance_approvals_v1';
 
-const DEFAULT_COMMITTEE_ADMINS: CommitteeAdminMember[] = [
-  {
-    id: 'CA-01',
-    name: 'Rahul Sharma',
-    unit: 'A-101',
-    designation: 'Hon. Secretary',
-    email: 'rahul.sharma@example.com'
-  },
-  {
-    id: 'CA-02',
-    name: 'Suresh Patel',
-    unit: 'B-202',
-    designation: 'Hon. Treasurer',
-    email: 'suresh.patel@example.com'
-  },
-  {
-    id: 'CA-03',
-    name: 'Ananya Deshmukh',
-    unit: 'B-101',
-    designation: 'Chairman',
-    email: 'ananya.d@example.com'
-  },
-  {
-    id: 'CA-04',
-    name: 'Amitabh Sengupta',
-    unit: 'D-101',
-    designation: 'Vigilance & Legal Admin',
-    email: 'a.sengupta@example.com'
-  }
-];
-
-const DEFAULT_PROCESS_CONFIGS: ApprovalProcessConfig[] = [
-  {
-    processType: 'UNIT_OWNERSHIP_TRANSFER',
-    title: 'Apartment Assignment & Ownership Transfer',
-    description: 'Assigning a flat to a respective owner, NOC issuance, or share certificate transfer.',
-    categoryBadge: 'Ownership & Transfer',
-    requiresApproval: true,
-    requiredApprovals: 2,
-    slaHours: 48
-  },
-  {
-    processType: 'EXPENSE_SANCTION',
-    title: 'Society Expense & Vendor Payout Sanction',
-    description: 'Approving vendor bills, sinking fund withdrawals, and capital/operational expenditures.',
-    categoryBadge: 'Finance & Expense',
-    requiresApproval: true,
-    requiredApprovals: 3,
-    slaHours: 24
-  },
-  {
-    processType: 'SENSITIVE_DOC_SHARING',
-    title: 'Sharing Sensitive Documents & Account Details',
-    description: 'Releasing statutory audit reports, bank statements, or confidential member/account records.',
-    categoryBadge: 'Data & Compliance',
-    requiresApproval: true,
-    requiredApprovals: 2,
-    slaHours: 24
-  },
-  {
-    processType: 'LEGAL_NOTICE_CASCADE',
-    title: 'Cascading Legal Notices & Recovery Actions',
-    description: 'Issuing formal legal notices, chronic defaulter recovery filings, or statutory directives.',
-    categoryBadge: 'Legal & Statutory',
-    requiresApproval: true,
-    requiredApprovals: 3,
-    slaHours: 48
-  },
-  {
-    processType: 'EMERGENCY_REPAIR_CONTRACT',
-    title: 'Major Infrastructure & Repair Contracts',
-    description: 'Awarding civil waterproofing, elevator modernization, or CCTV/solar AMC contracts.',
-    categoryBadge: 'Infrastructure',
-    requiresApproval: true,
-    requiredApprovals: 2,
-    slaHours: 72
-  },
-  {
-    processType: 'BYLAW_RATE_REVISION',
-    title: 'Maintenance Rate & Society Bylaw Revision',
-    description: 'Revising per-sq.ft maintenance charges, late fee interest, or society governance rules.',
-    categoryBadge: 'Governance',
-    requiresApproval: false,
-    requiredApprovals: 3,
-    slaHours: 72
-  }
-];
-
-const DEFAULT_REQUESTS: GovernanceApprovalRequest[] = [
-  {
-    id: 'APR-2026-01',
-    processType: 'UNIT_OWNERSHIP_TRANSFER',
-    title: 'Flat A-201 Ownership Transfer & Share Certificate Endorsement',
-    summary:
-      'Assign Flat A-201 (Wing A, 3 BHK) ownership from Rajesh Kulkarni toFarhan Qureshi following registered sale deed verification and no-dues clearance.',
-    priority: 'High',
-    requestedBy: 'Rahul Sharma',
-    requestedByUnit: 'A-101',
-    requestedOn: '04 Nov 2026',
-    requiredApprovals: 2,
-    status: 'Pending',
-    metadata: {
-      unitNo: 'A-201',
-      previousOwner: 'Rajesh Kulkarni',
-      newOwner: 'Farhan Qureshi'
-    },
-    decisions: [
-      {
-        adminId: 'CA-01',
-        adminName: 'Rahul Sharma',
-        designation: 'Hon. Secretary',
-        unit: 'A-101',
-        decision: 'Approved',
-        remark: 'Sale deed Index-II and maintenance clearance verified.',
-        timestamp: '04 Nov 2026, 11:20 AM'
-      }
-    ]
-  },
-  {
-    id: 'APR-2026-02',
-    processType: 'EXPENSE_SANCTION',
-    title: 'Wing A & B Terrace Waterproofing & Sump Pump Overhaul',
-    summary:
-      'Sanction disbursement of ₹1,85,000 from the Sinking Fund to Apex Civil Contractors as per comparative quotation review.',
-    priority: 'High',
-    requestedBy: 'Suresh Patel',
-    requestedByUnit: 'B-202',
-    requestedOn: '04 Nov 2026',
-    requiredApprovals: 3,
-    status: 'Pending',
-    metadata: {
-      amount: 185000,
-      vendorName: 'Apex Civil Contractors Pvt. Ltd.'
-    },
-    decisions: [
-      {
-        adminId: 'CA-02',
-        adminName: 'Suresh Patel',
-        designation: 'Hon. Treasurer',
-        unit: 'B-202',
-        decision: 'Approved',
-        remark: 'Budget available under FY26 Sinking Fund head; 3 quotes attached.',
-        timestamp: '04 Nov 2026, 02:15 PM'
-      },
-      {
-        adminId: 'CA-03',
-        adminName: 'Ananya Deshmukh',
-        designation: 'Chairman',
-        unit: 'B-101',
-        decision: 'Approved',
-        remark: 'Inspected Wing A terrace seepage; work is urgent before monsoon.',
-        timestamp: '05 Nov 2026, 09:40 AM'
-      }
-    ]
-  },
-  {
-    id: 'APR-2026-03',
-    processType: 'SENSITIVE_DOC_SHARING',
-    title: 'Release FY 2025-26 Bank Reconciliation & Defaulter Ledger to Statutory Auditor',
-    summary:
-      'Authorize sharing sensitive society bank account statements (SBI A/c ****4821) and unit-wise arrears ledger with M/s Kulkarni & Associates (Statutory Auditors).',
-    priority: 'Normal',
-    requestedBy: 'Suresh Patel',
-    requestedByUnit: 'B-202',
-    requestedOn: '05 Nov 2026',
-    requiredApprovals: 2,
-    status: 'Pending',
-    metadata: {
-      documentTitle: 'FY 2025-26 Bank Statements & Arrears Ledger (Confidential)',
-      recipientScope: 'Statutory Auditor & Co-op Registrar'
-    },
-    decisions: [
-      {
-        adminId: 'CA-02',
-        adminName: 'Suresh Patel',
-        designation: 'Hon. Treasurer',
-        unit: 'B-202',
-        decision: 'Approved',
-        remark: 'Redacted personal KYC IDs; ready for statutory audit.',
-        timestamp: '05 Nov 2026, 10:05 AM'
-      }
-    ]
-  },
-  {
-    id: 'APR-2026-04',
-    processType: 'LEGAL_NOTICE_CASCADE',
-    title: 'Cascade MCS Act Section 101 Final Recovery Notice for Chronic Arrears',
-    summary:
-      'Approve cascading formal legal recovery notice to units exceeding 180 days of maintenance default and publish statutory compliance circular.',
-    priority: 'Critical',
-    requestedBy: 'Amitabh Sengupta',
-    requestedByUnit: 'D-101',
-    requestedOn: '05 Nov 2026',
-    requiredApprovals: 3,
-    status: 'Pending',
-    metadata: {
-      legalRef: 'LEGAL/MCS-101/2026/09'
-    },
-    decisions: [
-      {
-        adminId: 'CA-04',
-        adminName: 'Amitabh Sengupta',
-        designation: 'Vigilance & Legal Admin',
-        unit: 'D-101',
-        decision: 'Approved',
-        remark: 'Draft vetted by society legal counsel.',
-        timestamp: '05 Nov 2026, 01:30 PM'
-      },
-      {
-        adminId: 'CA-03',
-        adminName: 'Ananya Deshmukh',
-        designation: 'Chairman',
-        unit: 'B-101',
-        decision: 'Approved',
-        remark: 'Three prior reminders were already served.',
-        timestamp: '05 Nov 2026, 03:10 PM'
-      }
-    ]
-  },
-  {
-    id: 'APR-2026-00',
-    processType: 'EMERGENCY_REPAIR_CONTRACT',
-    title: 'Main Gate Boom Barrier & ANPR Camera Replacement',
-    summary: 'Approved ₹64,000 emergency replacement of Gate-1 RFID boom barrier controller.',
-    priority: 'High',
-    requestedBy: 'Rahul Sharma',
-    requestedByUnit: 'A-101',
-    requestedOn: '28 Oct 2026',
-    requiredApprovals: 2,
-    status: 'Approved',
-    executedOn: '29 Oct 2026',
-    metadata: {
-      amount: 64000,
-      vendorName: 'SecureGate Automation LLP'
-    },
-    decisions: [
-      {
-        adminId: 'CA-01',
-        adminName: 'Rahul Sharma',
-        designation: 'Hon. Secretary',
-        unit: 'A-101',
-        decision: 'Approved',
-        remark: 'Gate security priority.',
-        timestamp: '28 Oct 2026, 04:00 PM'
-      },
-      {
-        adminId: 'CA-03',
-        adminName: 'Ananya Deshmukh',
-        designation: 'Chairman',
-        unit: 'B-101',
-        decision: 'Approved',
-        remark: 'Approved for immediate execution.',
-        timestamp: '29 Oct 2026, 09:15 AM'
-      }
-    ]
-  }
-];
+const SEED_COMMITTEE_ADMINS = governanceSeed.committeeAdmins as CommitteeAdminMember[];
+const SEED_PROCESS_CONFIGS = governanceSeed.processConfigs as ApprovalProcessConfig[];
+const SEED_REQUESTS = governanceSeed.approvalRequests as GovernanceApprovalRequest[];
 
 @Injectable({ providedIn: 'root' })
 export class ApprovalWorkflowService {
   private readonly state = inject(SocietyStateService);
+  private readonly api = inject(SocietyApiService, { optional: true });
 
-  readonly committeeAdmins = signal<CommitteeAdminMember[]>(DEFAULT_COMMITTEE_ADMINS);
-  readonly processConfigs = signal<ApprovalProcessConfig[]>(DEFAULT_PROCESS_CONFIGS);
-  readonly requests = signal<GovernanceApprovalRequest[]>(DEFAULT_REQUESTS);
+  readonly committeeAdmins = signal<CommitteeAdminMember[]>(SEED_COMMITTEE_ADMINS);
+  readonly processConfigs = signal<ApprovalProcessConfig[]>(SEED_PROCESS_CONFIGS);
+  readonly requests = signal<GovernanceApprovalRequest[]>(SEED_REQUESTS);
 
   /** Which Committee Admin is currently acting in the Admin Portal (switchable to test multi-admin sign-off). */
-  readonly activeAdminId = signal<string>(DEFAULT_COMMITTEE_ADMINS[0].id);
+  readonly activeAdminId = signal<string>(SEED_COMMITTEE_ADMINS[0]?.id ?? 'CA-01');
 
   readonly activeCommitteeAdmin = computed<CommitteeAdminMember>(
     () => this.committeeAdmins().find(a => a.id === this.activeAdminId()) ?? this.committeeAdmins()[0]
@@ -288,15 +37,36 @@ export class ApprovalWorkflowService {
   );
 
   constructor() {
-    this.loadFromStorage();
+    const hasCache = this.loadFromStorage();
+    if (!hasCache) {
+      this.hydrateFromMockJson();
+    }
     effect(() => {
       this.saveToStorage();
     });
   }
 
+  /** Fetches committee admins, process policies, and approval requests from `governance.json` via `SocietyApiService`. */
+  hydrateFromMockJson(): void {
+    this.api?.getGovernanceData().subscribe({
+      next: data => {
+        if (data.committeeAdmins?.length) {
+          this.committeeAdmins.set(data.committeeAdmins);
+          this.activeAdminId.set(data.committeeAdmins[0].id);
+        }
+        if (data.processConfigs?.length) {
+          this.processConfigs.set(data.processConfigs);
+        }
+        if (data.approvalRequests?.length) {
+          this.requests.set(data.approvalRequests);
+        }
+      }
+    });
+  }
+
   getConfig(processType: ApprovalProcessType): ApprovalProcessConfig {
     return (
-      this.processConfigs().find(c => c.processType === processType) ?? DEFAULT_PROCESS_CONFIGS[0]
+      this.processConfigs().find(c => c.processType === processType) ?? SEED_PROCESS_CONFIGS[0]
     );
   }
 
@@ -549,16 +319,17 @@ export class ApprovalWorkflowService {
     }
   }
 
-  private loadFromStorage(): void {
+  private loadFromStorage(): boolean {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
+      if (!raw) return false;
       const parsed = JSON.parse(raw);
       if (parsed.committeeAdmins?.length) this.committeeAdmins.set(parsed.committeeAdmins);
       if (parsed.processConfigs?.length) this.processConfigs.set(parsed.processConfigs);
       if (parsed.requests?.length) this.requests.set(parsed.requests);
+      return true;
     } catch {
-      /* ignore */
+      return false;
     }
   }
 }

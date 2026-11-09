@@ -2738,3 +2738,44 @@ svg[width] { height: auto; }
 .family-meta { font-size: 0.8rem; color: var(--text-muted); display: grid; gap: 2px; word-break: break-word; }
 .family-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .family-tag { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: var(--bg-subtle); color: var(--text-muted); }
+
+/* Mobile & Desktop Responsive Enhancements for Access Control, Approvals, Tenants & Units */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+  .page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+  }
+  .page-actions > button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .access-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .access-bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+  .access-bulk-actions > button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-table.stack-mobile th[scope="row"] {
+    display: block;
+    width: 100%;
+    padding: 8px 14px 4px;
+    border-bottom: none;
+    text-align: left;
+  }
+}

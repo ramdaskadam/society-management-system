@@ -60,121 +60,9 @@ export interface GlobalSearchResultItem {
   targetView: string;
 }
 
-const DEFAULT_TENANTS: TenantRecord[] = [
-  {
-    id: 'TEN-ACT-01',
-    unitNo: 'A-101',
-    firstName: 'Rohan',
-    middleName: 'Anil',
-    lastName: 'Joshi',
-    dob: '1991-07-19',
-    gender: 'Male',
-    qualification: 'Post Graduate',
-    mobile: '9820778899',
-    email: 'rohan.joshi@example.com',
-    hasDisability: false,
-    disabilityDetails: '',
-    leaseStart: '2024-06-01',
-    leaseEnd: '2025-05-31',
-    monthlyRent: 28000,
-    policeVerified: true,
-    status: 'Active',
-    addedOn: '01 Jun 2024',
-    familyMembers: [
-      {
-        id: 'TFAM-ACT-01',
-        unitNo: 'A-101',
-        firstName: 'Priya',
-        middleName: '',
-        lastName: 'Joshi',
-        dob: '1993-03-12',
-        gender: 'Female',
-        relation: 'Spouse',
-        qualification: 'Graduate',
-        mobile: '9820778800',
-        email: 'priya.joshi@example.com',
-        hasDisability: false,
-        disabilityDetails: '',
-        addedOn: '01 Jun 2024'
-      },
-      {
-        id: 'TFAM-ACT-02',
-        unitNo: 'A-101',
-        firstName: 'Aarav',
-        middleName: 'Rohan',
-        lastName: 'Joshi',
-        dob: '2019-10-05',
-        gender: 'Male',
-        relation: 'Son',
-        qualification: 'Primary School',
-        mobile: '',
-        email: '',
-        hasDisability: false,
-        disabilityDetails: '',
-        addedOn: '01 Jun 2024'
-      }
-    ]
-  },
-  {
-    id: 'TEN-HIST-01',
-    unitNo: 'A-101',
-    firstName: 'Vikram',
-    middleName: 'Rajesh',
-    lastName: 'Deshmukh',
-    dob: '1988-04-14',
-    gender: 'Male',
-    qualification: 'Post Graduate',
-    mobile: '9820456123',
-    email: 'vikram.deshmukh@example.com',
-    hasDisability: false,
-    disabilityDetails: '',
-    leaseStart: '2022-06-01',
-    leaseEnd: '2023-05-31',
-    monthlyRent: 26000,
-    policeVerified: true,
-    status: 'Past',
-    addedOn: '01 Jun 2022',
-    familyMembers: [
-      {
-        id: 'TFAM-HIST-01',
-        unitNo: 'A-101',
-        firstName: 'Neha',
-        middleName: '',
-        lastName: 'Deshmukh',
-        dob: '1990-09-22',
-        gender: 'Female',
-        relation: 'Spouse',
-        qualification: 'Graduate',
-        mobile: '9820456124',
-        email: 'neha.deshmukh@example.com',
-        hasDisability: false,
-        disabilityDetails: '',
-        addedOn: '01 Jun 2022'
-      }
-    ]
-  },
-  {
-    id: 'TEN-HIST-02',
-    unitNo: 'A-101',
-    firstName: 'Siddharth',
-    middleName: '',
-    lastName: 'Kulkarni',
-    dob: '1992-11-08',
-    gender: 'Male',
-    qualification: 'Graduate',
-    mobile: '9819223344',
-    email: 'siddharth.k@example.com',
-    hasDisability: false,
-    disabilityDetails: '',
-    leaseStart: '2020-05-01',
-    leaseEnd: '2022-04-30',
-    monthlyRent: 23500,
-    policeVerified: true,
-    status: 'Past',
-    addedOn: '01 May 2020',
-    familyMembers: []
-  }
-];
+const SEED_TENANTS: TenantRecord[] = (membersUnitsSeed as { tenants?: TenantRecord[] }).tenants ?? [];
+const SEED_FAMILY_MEMBERS: FamilyMember[] =
+  (membersUnitsSeed as { familyMembers?: FamilyMember[] }).familyMembers ?? [];
 
 const STORAGE_KEY = 'green_meadows_sms_angular_v2';
 
@@ -231,11 +119,11 @@ export class SocietyStateService {
   readonly auditLogs = signal<AuditLogEntry[]>(operationsSeed.auditLogs as AuditLogEntry[]);
 
   /** Secondary members added by primary residents (all flats; filtered per flat below). */
-  readonly familyMembers = signal<FamilyMember[]>([]);
+  readonly familyMembers = signal<FamilyMember[]>(SEED_FAMILY_MEMBERS);
   /** Extra personal details of the primary resident (DOB, gender, photo...). Name/email/phone mirror `memberUser`. */
   readonly primaryExtras = signal<Partial<PersonDetails>>({});
   /** Tenants registered by flat owners (each tenant includes their own `familyMembers` list). */
-  readonly tenants = signal<TenantRecord[]>(DEFAULT_TENANTS);
+  readonly tenants = signal<TenantRecord[]>(SEED_TENANTS);
 
   // Ephemeral UI Toasts (delegated to ToastNotificationService; excluded from localStorage)
   readonly toasts = this.toastService.toasts;
@@ -634,6 +522,12 @@ export class SocietyStateService {
 
     this.members.set(bundle.directory.members);
     this.units.set(bundle.directory.units);
+    if (bundle.directory.familyMembers) {
+      this.familyMembers.set(bundle.directory.familyMembers);
+    }
+    if (bundle.directory.tenants) {
+      this.tenants.set(bundle.directory.tenants);
+    }
 
     this.invoices.set(bundle.billing.invoices);
     this.paymentHistory.set(bundle.billing.paymentHistory);
@@ -1448,9 +1342,9 @@ export class SocietyStateService {
     this.polls.set(operationsSeed.polls as SocietyPoll[]);
     this.parkingSlots.set(operationsSeed.parkingSlots as ParkingSlot[]);
     this.auditLogs.set(operationsSeed.auditLogs as AuditLogEntry[]);
-    this.familyMembers.set([]);
+    this.familyMembers.set(SEED_FAMILY_MEMBERS);
     this.primaryExtras.set({});
-    this.tenants.set(DEFAULT_TENANTS);
+    this.tenants.set(SEED_TENANTS);
     this.setView('dashboard');
     this.hydrateFromApi(true);
   }
@@ -1528,7 +1422,9 @@ export class SocietyStateService {
       if (data.primaryExtras) this.primaryExtras.set(data.primaryExtras);
       if (data.tenants && data.tenants.length) {
         const hasActiveSeed = data.tenants.some((t: TenantRecord) => t.id === 'TEN-ACT-01' || t.status === 'Active');
-        this.tenants.set(hasActiveSeed ? data.tenants : [DEFAULT_TENANTS[0], ...data.tenants]);
+        this.tenants.set(
+          hasActiveSeed || !SEED_TENANTS.length ? data.tenants : [SEED_TENANTS[0], ...data.tenants]
+        );
       }
       if (data.memberUser) this.memberUser.set(data.memberUser);
       this.dataSourceMode.set('local-storage-cache');

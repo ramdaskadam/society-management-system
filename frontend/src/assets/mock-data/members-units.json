@@ -214,5 +214,138 @@
       "ownerSince": "01 Jan 2020",
       "pastOwners": []
     }
+  ],
+  "familyMembers": [
+    {
+      "id": "FAM-101-01",
+      "unitNo": "A-101",
+      "firstName": "Sunita",
+      "middleName": "Rahul",
+      "lastName": "Sharma",
+      "dob": "1986-08-14",
+      "gender": "Female",
+      "relation": "Spouse",
+      "qualification": "Post Graduate",
+      "mobile": "9820144522",
+      "email": "sunita.sharma@example.com",
+      "hasDisability": false,
+      "disabilityDetails": "",
+      "addedOn": "15 Mar 2021"
+    }
+  ],
+  "tenants": [
+    {
+      "id": "TEN-ACT-01",
+      "unitNo": "A-101",
+      "firstName": "Rohan",
+      "middleName": "Anil",
+      "lastName": "Joshi",
+      "dob": "1991-07-19",
+      "gender": "Male",
+      "qualification": "Post Graduate",
+      "mobile": "9820778899",
+      "email": "rohan.joshi@example.com",
+      "hasDisability": false,
+      "disabilityDetails": "",
+      "leaseStart": "2024-06-01",
+      "leaseEnd": "2025-05-31",
+      "monthlyRent": 28000,
+      "policeVerified": true,
+      "status": "Active",
+      "addedOn": "01 Jun 2024",
+      "familyMembers": [
+        {
+          "id": "TFAM-ACT-01",
+          "unitNo": "A-101",
+          "firstName": "Priya",
+          "middleName": "",
+          "lastName": "Joshi",
+          "dob": "1993-03-12",
+          "gender": "Female",
+          "relation": "Spouse",
+          "qualification": "Graduate",
+          "mobile": "9820778800",
+          "email": "priya.joshi@example.com",
+          "hasDisability": false,
+          "disabilityDetails": "",
+          "addedOn": "01 Jun 2024"
+        },
+        {
+          "id": "TFAM-ACT-02",
+          "unitNo": "A-101",
+          "firstName": "Aarav",
+          "middleName": "Rohan",
+          "lastName": "Joshi",
+          "dob": "2019-10-05",
+          "gender": "Male",
+          "relation": "Son",
+          "qualification": "Primary School",
+          "mobile": "",
+          "email": "",
+          "hasDisability": false,
+          "disabilityDetails": "",
+          "addedOn": "01 Jun 2024"
+        }
+      ]
+    },
+    {
+      "id": "TEN-HIST-01",
+      "unitNo": "A-101",
+      "firstName": "Vikram",
+      "middleName": "Rajesh",
+      "lastName": "Deshmukh",
+      "dob": "1988-04-14",
+      "gender": "Male",
+      "qualification": "Post Graduate",
+      "mobile": "9820456123",
+      "email": "vikram.deshmukh@example.com",
+      "hasDisability": false,
+      "disabilityDetails": "",
+      "leaseStart": "2022-06-01",
+      "leaseEnd": "2023-05-31",
+      "monthlyRent": 26000,
+      "policeVerified": true,
+      "status": "Past",
+      "addedOn": "01 Jun 2022",
+      "familyMembers": [
+        {
+          "id": "TFAM-HIST-01",
+          "unitNo": "A-101",
+          "firstName": "Neha",
+          "middleName": "",
+          "lastName": "Deshmukh",
+          "dob": "1990-09-22",
+          "gender": "Female",
+          "relation": "Spouse",
+          "qualification": "Graduate",
+          "mobile": "9820456124",
+          "email": "neha.deshmukh@example.com",
+          "hasDisability": false,
+          "disabilityDetails": "",
+          "addedOn": "01 Jun 2022"
+        }
+      ]
+    },
+    {
+      "id": "TEN-HIST-02",
+      "unitNo": "A-101",
+      "firstName": "Siddharth",
+      "middleName": "",
+      "lastName": "Kulkarni",
+      "dob": "1992-11-08",
+      "gender": "Male",
+      "qualification": "Graduate",
+      "mobile": "9819223344",
+      "email": "siddharth.k@example.com",
+      "hasDisability": false,
+      "disabilityDetails": "",
+      "leaseStart": "2020-05-01",
+      "leaseEnd": "2022-04-30",
+      "monthlyRent": 23500,
+      "policeVerified": true,
+      "status": "Past",
+      "addedOn": "01 May 2020",
+      "familyMembers": []
+    }
   ]
 }

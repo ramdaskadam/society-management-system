@@ -34,8 +34,12 @@ export const API_ENDPOINTS = {
   operations: () =>
     environment.useMockApi
       ? `${environment.mockDataBaseUrl}/operations.json`
-      : `${environment.apiBaseUrl}/operations/bootstrap`
-  ,
+      : `${environment.apiBaseUrl}/operations/bootstrap`,
+
+  governance: () =>
+    environment.useMockApi
+      ? `${environment.mockDataBaseUrl}/governance.json`
+      : `${environment.apiBaseUrl}/governance/bootstrap`,
   /** REST mutation endpoints used when `environment.useMockApi === false` */
   mutations: {
     authLogin: () => `${environment.apiBaseUrl}/auth/login`,
