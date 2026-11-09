@@ -72,6 +72,24 @@
           }
         </div>
 
+        <!-- Required Documents Verification Checkbox -->
+        <div
+          class="form-group"
+          style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px 14px; margin-top: 8px;"
+        >
+          <label class="auth-radio" for="u-docs-verified" style="font-weight: 600;">
+            <input
+              id="u-docs-verified"
+              type="checkbox"
+              [(ngModel)]="documentsVerified"
+            />
+            <span>All required documents are verified *</span>
+          </label>
+          <p class="auth-help" style="margin: 4px 0 0 22px;">
+            Sale deed / Index-II, Share Certificate application, KYC ID proof, and Society NOC have been verified.
+          </p>
+        </div>
+
         <!-- Past Owner Details (Read-Only) if any exist for this unit -->
         @if (editUnit?.pastOwners?.length) {
           <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">

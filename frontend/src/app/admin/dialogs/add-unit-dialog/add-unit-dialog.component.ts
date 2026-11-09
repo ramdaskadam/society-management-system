@@ -12,6 +12,7 @@ export interface UnitFormSubmitPayload {
   area: number;
   owner: string;
   occupancy: string;
+  documentsVerified: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ export class AddUnitDialogComponent implements OnChanges {
   area = 1450;
   owner = '';
   occupancy = 'Owner Occupied';
+  documentsVerified = false;
 
   readonly error = signal('');
 
@@ -56,6 +58,7 @@ export class AddUnitDialogComponent implements OnChanges {
       this.area = this.editUnit.area;
       this.owner = this.editUnit.owner;
       this.occupancy = this.editUnit.occupancy || 'Owner Occupied';
+      this.documentsVerified = this.editUnit.documentsVerified ?? true;
     } else {
       this.unitNo = '';
       this.wing = 'A';
@@ -64,12 +67,17 @@ export class AddUnitDialogComponent implements OnChanges {
       this.area = 1450;
       this.owner = this.owners[0] ?? '';
       this.occupancy = 'Owner Occupied';
+      this.documentsVerified = false;
     }
   }
 
   submitUnit(): void {
     if (!this.unitNo.trim() || !this.owner.trim()) {
       this.error.set('Please provide a unit number and select an owner from the dropdown.');
+      return;
+    }
+    if (!this.documentsVerified) {
+      this.error.set('Please confirm that all required documents are verified before saving.');
       return;
     }
     this.submit.emit({
@@ -80,7 +88,8 @@ export class AddUnitDialogComponent implements OnChanges {
       type: this.type,
       area: Number(this.area) || 1200,
       owner: this.owner,
-      occupancy: this.occupancy
+      occupancy: this.occupancy,
+      documentsVerified: this.documentsVerified
     });
     this.close.emit();
   }

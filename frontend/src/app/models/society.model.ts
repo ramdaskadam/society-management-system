@@ -70,6 +70,11 @@ export interface Activity {
 export interface Member {
   id: string;
   name: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  gender?: 'Male' | 'Female' | 'Other' | '';
+  dob?: string;
   unit: string;
   wing: string;
   role: string;
@@ -100,6 +105,7 @@ export interface Unit {
   tenant?: string;
   occupancy: string;
   dues: number;
+  documentsVerified?: boolean;
   pastOwners?: PastOwnerRecord[];
 }
 

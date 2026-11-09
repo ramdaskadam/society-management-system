@@ -165,7 +165,13 @@
           <tr>
             <td style="font-family: var(--font-mono); font-weight: 600;" data-label="Member ID">{{ m.id }}</td>
             <td style="font-weight: 600;" data-label="Resident Name">{{ m.name }}</td>
-            <td data-label="Unit / Wing"><span class="badge badge-info">{{ m.unit }} (Wing {{ m.wing }})</span></td>
+            <td data-label="Unit / Wing">
+              @if (m.unit && m.unit !== 'Unassigned') {
+                <span class="badge badge-info">{{ m.unit }} (Wing {{ m.wing }})</span>
+              } @else {
+                <span class="badge badge-pending">Unassigned</span>
+              }
+            </td>
             <td data-label="Contact Phone">{{ m.phone }}</td>
             <td data-label="Email">{{ m.email }}</td>
             <td data-label="Role"><strong>{{ m.role }}</strong></td>

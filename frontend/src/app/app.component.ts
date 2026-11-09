@@ -22,7 +22,7 @@ import { ConfirmDialogComponent } from './shared/dialogs/confirm-dialog/confirm-
 import { NotificationsDialogComponent } from './shared/dialogs/notifications-dialog/notifications-dialog.component';
 
 // ── Admin Dialogs ─────────────────────────────────────────────────────────────
-import { AddMemberDialogComponent } from './admin/dialogs/add-member-dialog/add-member-dialog.component';
+import { AddMemberDialogComponent, AddMemberSubmitPayload } from './admin/dialogs/add-member-dialog/add-member-dialog.component';
 import { AddUnitDialogComponent, UnitFormSubmitPayload } from './admin/dialogs/add-unit-dialog/add-unit-dialog.component';
 import { CreateNoticeDialogComponent } from './admin/dialogs/create-notice-dialog/create-notice-dialog.component';
 import { BulkInvoiceDialogComponent } from './admin/dialogs/bulk-invoice-dialog/bulk-invoice-dialog.component';
@@ -169,7 +169,7 @@ export class AppComponent implements OnInit {
     this.state.bookAmenity(data);
   }
 
-  onAddMember(data: { name: string; unit: string; role: string; email: string; phone: string }): void {
+  onAddMember(data: AddMemberSubmitPayload): void {
     this.state.addMember(data);
   }
 

@@ -947,12 +947,30 @@ export class SocietyStateService {
   }
 
   // ── Directory & Bulk Operations ───────────────────────────────────────────────
-  addMember(data: { name: string; unit: string; role: string; email: string; phone: string }): void {
+  addMember(data: {
+    firstName?: string;
+    middleName?: string;
+    lastName?: string;
+    name: string;
+    gender?: 'Male' | 'Female' | 'Other' | '';
+    dob?: string;
+    unit?: string;
+    role: string;
+    email: string;
+    phone: string;
+  }): void {
+    const unitVal = data.unit?.trim() || 'Unassigned';
+    const wingVal = unitVal !== 'Unassigned' ? unitVal[0]?.toUpperCase() || 'A' : '-';
     const newMember: Member = {
       id: uid('M'),
       name: data.name,
-      unit: data.unit,
-      wing: data.unit.trim()[0]?.toUpperCase() || 'A',
+      firstName: data.firstName,
+      middleName: data.middleName,
+      lastName: data.lastName,
+      gender: data.gender,
+      dob: data.dob,
+      unit: unitVal,
+      wing: wingVal,
       role: data.role,
       email: data.email,
       phone: data.phone,
@@ -962,10 +980,18 @@ export class SocietyStateService {
 
     this.members.update(list => [...list, newMember]);
     this.metrics.update(m => ({ ...m, totalMembers: m.totalMembers + 1 }));
-    this.showToast('msg.memberAdded', 'success', { name: data.name, unit: data.unit });
+    this.showToast('msg.memberAdded', 'success', { name: data.name, unit: unitVal });
   }
 
-  addUnit(data: { unitNo: string; wing: string; type: string; area: number; owner: string; occupancy?: string }): void {
+  addUnit(data: {
+    unitNo: string;
+    wing: string;
+    type: string;
+    area: number;
+    owner: string;
+    occupancy?: string;
+    documentsVerified?: boolean;
+  }): void {
     if (this.units().some(u => u.unitNo.toLowerCase() === data.unitNo.trim().toLowerCase())) {
       this.showToast('msg.unitExists', 'danger', { unit: data.unitNo });
       return;
@@ -983,6 +1009,7 @@ export class SocietyStateService {
       ownerSince: todayLabel(),
       occupancy: data.occupancy || 'Owner Occupied',
       dues: 0,
+      documentsVerified: data.documentsVerified ?? true,
       pastOwners: []
     };
 
@@ -1002,7 +1029,16 @@ export class SocietyStateService {
    */
   updateUnit(
     id: string,
-    data: { unitNo: string; wing: string; floor?: number; type: string; area: number; owner: string; occupancy: string }
+    data: {
+      unitNo: string;
+      wing: string;
+      floor?: number;
+      type: string;
+      area: number;
+      owner: string;
+      occupancy: string;
+      documentsVerified?: boolean;
+    }
   ): void {
     const existing = this.units().find(u => u.id === id);
     if (!existing) return;
@@ -1045,6 +1081,7 @@ export class SocietyStateService {
               owner: data.owner,
               ownerSince,
               occupancy: data.occupancy,
+              documentsVerified: data.documentsVerified ?? u.documentsVerified ?? true,
               pastOwners
             }
           : u
